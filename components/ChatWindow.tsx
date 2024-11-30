@@ -9,7 +9,6 @@ import { useRef, useState, ReactElement } from "react";
 import type { FormEvent } from "react";
 
 import { ChatMessageBubble } from "@/components/ChatMessageBubble";
-import { UploadDocumentsForm } from "@/components/UploadDocumentsForm";
 import { IntermediateStep } from "./IntermediateStep";
 
 export function ChatWindow(props: {
@@ -27,7 +26,6 @@ export function ChatWindow(props: {
 
   const [showIntermediateSteps, setShowIntermediateSteps] = useState(false);
   const [intermediateStepsLoading, setIntermediateStepsLoading] = useState(false);
-  const ingestForm = showIngestForm && <UploadDocumentsForm></UploadDocumentsForm>;
   const intemediateStepsToggle = showIntermediateStepsToggle && (
     <div>
       <input type="checkbox" id="show_intermediate_steps" name="show_intermediate_steps" checked={showIntermediateSteps} onChange={(e) => setShowIntermediateSteps(e.target.checked)}></input>
@@ -148,8 +146,6 @@ export function ChatWindow(props: {
           ""
         )}
       </div>
-
-      {messages.length === 0 && ingestForm}
 
       <form onSubmit={sendMessage} className="flex w-full flex-col">
         <div className="flex">
