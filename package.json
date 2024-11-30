@@ -15,7 +15,7 @@
   "dependencies": {
     "@langchain/community": "^0.3.11",
     "@langchain/core": "^0.3.17",
-    "@langchain/langgraph": "^0.2.20",
+    "@langchain/langgraph": "^0.2.23",
     "@langchain/openai": "^0.3.11",
     "@next/bundle-analyzer": "^13.4.19",
     "@supabase/supabase-js": "^2.32.0",
@@ -24,6 +24,7 @@
     "@types/react-dom": "18.3.0",
     "ai": "^3.1.12",
     "autoprefixer": "10.4.14",
+    "dotenv": "^16.4.5",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "langchain": "^0.3.5",
@@ -38,7 +39,8 @@
     "zod-to-json-schema": "^3.21.4"
   },
   "devDependencies": {
-    "prettier": "3.0.0"
+    "prettier": "3.0.0",
+    "tsx": "^4.19.2"
   },
   "packageManager": "yarn@3.5.1"
 }

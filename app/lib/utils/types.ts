@@ -6,9 +6,9 @@ export interface Message {
 export interface State {
     messages: Message[];
     tickers?: string[];
-    financial_summary?: string;
-    summarized_docs?: string;
-    routing_decision?: string;
+    financialSummary?: string;
+    summarizedDocs?: string;
+    routingDecision?: string;
 }
 
 export interface SearchResult {

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { getModel } from "./models";
-import { State } from "./types";
+import { getModel } from "../../lib/models";
+import { State } from "../../lib/utils/types";
 
 // Data schema for ticker extraction
 const TickerExtractionSchema = z.object({

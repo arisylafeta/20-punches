@@ -1,7 +1,7 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
-import { getModel } from "./models";
-import { State } from "./types";
+import { getModel } from "../../lib/models";
+import { State } from "../../lib/utils/types";
 import { tools } from "./tools";
 
 // Create the prompt template for the financial analyst
@@ -67,22 +67,20 @@ export async function executeFinancialAnalysis(state: State): Promise<State> {
     if (tickers.length === 0) {
         return {
             ...state,
-            financial_summary: "No specific companies were identified for analysis. Please mention specific companies or their stock tickers."
+            financialSummary: "No specific companies were identified for analysis. Please mention specific companies or their stock tickers."
         };
     }
 
     // Create a new executor for each analysis
     const executor = await createFinancialAnalysisExecutor();
 
-    // For now, we'll analyze the first ticker in the list
-    // TODO: Add support for multiple tickers
     const result = await executor.invoke({
         input: lastMessage,
-        ticker: tickers[0]
+        ticker: tickers
     });
     
     return {
         ...state,
-        financial_summary: result.output
+        financialSummary: result.output
     };
 }

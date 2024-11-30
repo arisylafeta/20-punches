@@ -4,8 +4,8 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence, RunnablePassthrough } from "@langchain/core/runnables";
 import { formatDocs } from "./tools";
-import { State } from "./types";
-import { getModel } from "./models";
+import { State } from "../../lib/utils/types";
+import { getModel } from "../../lib/models";
 
 // Initialize models
 const llm = getModel('SMALL');
@@ -131,6 +131,6 @@ export async function retrieveDocs(state: State): Promise<State> {
 
     return {
         ...state,
-        summarized_docs: summary
+        summarizedDocs: summary
     };
 }
