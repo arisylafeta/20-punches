@@ -1,0 +1,120 @@
+import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { RunnableSequence } from "@langchain/core/runnables";
+import { formatDocs } from "./tools";
+import { State } from "@/utils/types";
+import { getModel } from "@/utils/models";
+import { AIMessage, MessageContent } from "@langchain/core/messages";
+
+// Initialize models
+const llm = getModel('SMALL');
+const deterministicLlm = getModel('SMALL', { temperature: 0 });
+const embeddings = getModel('EMBEDDINGS');
+
+// Initialize vector store
+const vectorStore = new SupabaseVectorStore(
+    embeddings,
+    {
+        client: createClient(cookies()),
+        tableName: "documents",
+        queryName: "match_documents"
+    }
+);
+
+// Create retriever with specific search parameters
+const retriever = vectorStore.asRetriever({ k: 7 });
+
+// Define HyDE prompt template
+const hydeTemplate = `You are Warren Buffet. Answer this question with a 100 word passage using your principles: {question}
+Passage:`;
+
+const promptHyde = ChatPromptTemplate.fromTemplate<{
+    question: string;
+}>(hydeTemplate);
+
+// Create string output parser
+const strOutputParser = new StringOutputParser();
+
+// Generate hypothetical document
+const generateHydePassage = RunnableSequence.from([
+    {
+        question: (input: string) => ({ question: input })
+    },
+    promptHyde,
+    deterministicLlm,
+    (message) => message.content,
+    strOutputParser
+]);
+
+// Create HyDE retriever chain
+const hydeRetriever = RunnableSequence.from([
+    generateHydePassage,
+    retriever
+]);
+
+function getMessageString(content: MessageContent): string {
+    return typeof content === 'string' ? content : content.map(c => c.type === 'text' ? c.text : '').join(' ');
+}
+
+// Function to retrieve and summarize documents
+export async function retrieveDocs(state: State): Promise<Pick<State, 'summarizedDocs'>> {
+    try {
+        const lastMessage = state.messages[state.messages.length - 1];
+        if (!lastMessage) {
+            return { summarizedDocs: "" };
+        }
+
+        // Retrieve documents using HyDE
+        const docs = await hydeRetriever.invoke(getMessageString(lastMessage.content));
+        const formattedDocs = formatDocs(docs);
+
+        // Create summarization prompt that includes analysis instructions
+        const summarizationTemplate = `Given the following information and the user's question, provide a comprehensive 300 word analysis that:
+1. Synthesizes the key points from the retrieved documents
+2. Applies Warren Buffett's investment principles
+3. Provides specific examples and references from the context
+4. Maintains a clear focus on answering the user's question
+
+User's question: {question}
+
+Retrieved Information:
+{docs}
+
+Analysis:`;
+
+        const summarizationPrompt = ChatPromptTemplate.fromTemplate<{
+            docs: string;
+            question: string;
+        }>(summarizationTemplate);
+
+        // Create summarization chain
+        const summarizationChain = RunnableSequence.from([
+            {
+                docs: (input: { docs: string; question: string }) => input.docs,
+                question: (input: { docs: string; question: string }) => input.question
+            },
+            summarizationPrompt,
+            llm,
+            (message) => message.content,
+            strOutputParser
+        ]);
+
+        // Generate summary
+        const summary = await summarizationChain.invoke({
+            docs: formattedDocs,
+            question: getMessageString(lastMessage.content)
+        });
+
+        return {
+            summarizedDocs: summary
+        };
+    } catch (error) {
+        console.error("Error in retrieveDocs:", error);
+        return {
+            summarizedDocs: "Error retrieving relevant documents."
+        };
+    }
+}

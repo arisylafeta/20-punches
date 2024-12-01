@@ -1,14 +1,15 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { State } from "../../lib/utils/types";
-import { getModel } from "../../lib/models";
+import { State } from "@/utils/types";
+import { getModel } from "@/utils/models";
 import { RunnableSequence } from "@langchain/core/runnables";
+import { AIMessage } from "@langchain/core/messages";
 
 /**
  * Buffet Agent Implementation
  * Embodies Warren Buffett's persona and investment philosophy to provide responses
  */
-export async function buffetAgent(state: State): Promise<State> {
+export async function buffetAgent(state: State): Promise<Pick<State, 'messages'>> {
     const messages = state.messages;
     const summarizedDocs = state.summarizedDocs;
     const financialSummary = state.financialSummary ?? '';
@@ -140,11 +141,8 @@ export async function buffetAgent(state: State): Promise<State> {
         summarizedDocs
     });
 
-    // Append the response to the state as a new message
-    state.messages.push({
-        role: 'assistant',
-        content: response
-    });
-
-    return state;
+    // Return only the messages array with the new message appended
+    return {
+        messages: [new AIMessage(response)]
+    };
 }

@@ -2,25 +2,30 @@
 
 import { createStreamableValue } from "ai/rsc";
 import { buffetGraph } from './agent/graph';
-import { State } from '../lib/utils/types';
 import { CallbackHandlerMethods } from "@langchain/core/callbacks/base";
+import { HumanMessage } from "@langchain/core/messages";
+
+
+const config = { 
+  configurable: { 
+    thread_id: "buffet-conversation" 
+  }
+};
 
 export async function runAgent(input: string) {
   const stream = createStreamableValue();
 
   (async () => {
     try {
-      // Initialize state with user input
-      const initialState: State = {
-        messages: [{ content: input, role: "user" }],
-        routingDecision: "",
-        tickers: [],
-        financialSummary: "",
-        summarizedDocs: ""
+      // Format input as HumanMessage and create initial state
+      const inputs = {
+        messages: [new HumanMessage(input)]
       };
 
-      // Execute the graph and get updates
-      const finalState = await buffetGraph.invoke(initialState, {
+      // Stream the graph execution
+      for await (const state of await buffetGraph.stream(inputs, {
+        ...config,
+        streamMode: "values",
         callbacks: [{
           handleLLMEnd: async (output: any) => {
             // Stream step updates
@@ -34,20 +39,32 @@ export async function runAgent(input: string) {
               event: "chain",
               data: output
             }, null, 2)));
+          },
+          handleToolEnd: async (output: any) => {
+            stream.update(JSON.parse(JSON.stringify({
+              event: "tool",
+              data: output
+            }, null, 2)));
           }
-        } as CallbackHandlerMethods]
-      });
-
-      // Stream final state
-      stream.update(JSON.parse(JSON.stringify({
-        event: "complete",
-        data: finalState
-      }, null, 2)));
+        } satisfies Partial<CallbackHandlerMethods>]
+      })) {
+        // Update stream with the latest message if available
+        const messages = state.messages;
+        if (messages && messages.length > 0) {
+          const lastMessage = messages[messages.length - 1];
+          if (lastMessage.content) {
+            stream.update(JSON.parse(JSON.stringify({
+              event: "message",
+              data: lastMessage
+            }, null, 2)));
+          }
+        }
+      }
     } catch (error) {
-      // Handle any errors
+      console.error("Error in runAgent:", error);
       stream.update(JSON.parse(JSON.stringify({
         event: "error",
-        data: error instanceof Error ? error.message : "An unknown error occurred"
+        data: { error: "An error occurred during processing" }
       }, null, 2)));
     } finally {
       stream.done();

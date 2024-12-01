@@ -1,7 +1,7 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
-import { getModel } from "../../lib/models";
-import { State } from "../../lib/utils/types";
+import { getModel } from "@/utils/models";
+import { State } from "@/utils/types";
 import { tools } from "./tools";
 
 // Create the prompt template for the financial analyst
@@ -13,7 +13,7 @@ You have access to the following tools:
 Use the following format:
 
 Question: The question you must provide relevant information on.
-Ticker: The company you should research
+Tickers: The companies you should research
 
 Thought: Reflect on what information you need to answer the question and which tool should provide you with the best information. 
 
@@ -24,13 +24,12 @@ Observation: The result of the action
 ... (this Thought/Action/Action Input/Observation can be repeated as necessary)
 
 Thought: I now have sufficient information to provide a comprehensive summary
-
-Final Answer: Provide a detailed summary of the relevant financial metrics/ratios and their significance in answering the question, incorporating Warren Buffett's investment principles where applicable.
+Final Answer: Provide a 200 word summary of the relevant financial metrics/ratios and their significance in answering the question, incorporating Warren Buffett's investment philosophy. Then, list all relevant financial metrics as bullet points.
 
 Begin your analysis:
 
 Question: {input}
-Ticker: {ticker}
+Tickers: {tickers}
 Thought:{agent_scratchpad}`;
 
 const prompt = ChatPromptTemplate.fromTemplate(ANALYST_TEMPLATE);
@@ -50,8 +49,7 @@ async function createFinancialAnalysisExecutor() {
 
     return AgentExecutor.fromAgentAndTools({
         agent,
-        tools,
-        verbose: true
+        tools
     });
 }
 
@@ -60,27 +58,29 @@ async function createFinancialAnalysisExecutor() {
  * @param state The current conversation state
  * @returns Updated state with financial analysis summary
  */
-export async function executeFinancialAnalysis(state: State): Promise<State> {
-    const lastMessage = state.messages[state.messages.length - 1].content;
-    const tickers = state.tickers || [];
-    
-    if (tickers.length === 0) {
+export async function executeFinancialAnalysis(state: State): Promise<Pick<State, 'financialSummary'>> {
+    try {
+        const lastMessage = state.messages[state.messages.length - 1];
+        if (!lastMessage || !state.tickers || state.tickers.length === 0) {
+            return { financialSummary: "" };
+        }
+
+        // Create the executor
+        const executor = await createFinancialAnalysisExecutor();
+
+        // Execute the analysis
+        const result = await executor.invoke({
+            input: lastMessage.content,
+            tickers: state.tickers.join(", ")
+        });
+
         return {
-            ...state,
-            financialSummary: "No specific companies were identified for analysis. Please mention specific companies or their stock tickers."
+            financialSummary: result.output
+        };
+    } catch (error) {
+        console.error("Error in financial analysis:", error);
+        return {
+            financialSummary: "Error performing financial analysis."
         };
     }
-
-    // Create a new executor for each analysis
-    const executor = await createFinancialAnalysisExecutor();
-
-    const result = await executor.invoke({
-        input: lastMessage,
-        ticker: tickers
-    });
-    
-    return {
-        ...state,
-        financialSummary: result.output
-    };
 }

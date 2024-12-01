@@ -2,13 +2,26 @@
 
 import { useState } from "react";
 import { runAgent } from "./action";
-import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { readStreamableValue } from "ai/rsc";
-import { Message } from "@/app/lib/utils/types";
+import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
+import { MessageContent, MessageContentText } from "@langchain/core/messages";
+
+function renderMessageContent(content: MessageContent): string {
+  if (typeof content === 'string') {
+    return content;
+  }
+  if (Array.isArray(content)) {
+    return content
+      .filter(item => item.type === 'text')
+      .map(item => (item as MessageContentText).text)
+      .join(' ');
+  }
+  return '';
+}
 
 export default function Page() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<BaseMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -16,7 +29,7 @@ export default function Page() {
     if (!input) return;
     
     setIsLoading(true);
-    const userMessage: Message = { content: input, role: "user" };
+    const userMessage = new HumanMessage({ content: input });
     setMessages(prev => [...prev, userMessage]);
     setInput("");
 
@@ -24,19 +37,17 @@ export default function Page() {
       const { streamData } = await runAgent(input);
       for await (const item of readStreamableValue(streamData)) {
         if (item.event === "llm") {
-          const assistantMessage: Message = {
-            content: JSON.stringify(item.data, null, 2),
-            role: "assistant"
-          };
+          const assistantMessage = new AIMessage({ 
+            content: JSON.stringify(item.data, null, 2)
+          });
           setMessages(prev => [...prev, assistantMessage]);
         }
       }
     } catch (error) {
       console.error("Error:", error);
-      const errorMessage: Message = {
-        content: "Sorry, an error occurred while processing your message.",
-        role: "assistant"
-      };
+      const errorMessage = new AIMessage({
+        content: "Sorry, an error occurred while processing your message."
+      });
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -45,39 +56,41 @@ export default function Page() {
 
   return (
     <div className="mx-auto w-full max-w-4xl py-12 flex flex-col gap-4">
-      <div className="flex flex-col gap-4 h-[600px] overflow-y-auto p-4 bg-gray-50 rounded-lg">
+      <div className="flex flex-col gap-4 h-[600px] overflow-y-auto p-4 bg-sky-50 rounded-lg">
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`p-4 rounded-lg ${
-              msg.role === "user" ? "bg-blue-100 ml-auto" : "bg-black"
-            } max-w-[80%]`}
+            className={`flex flex-col gap-2 ${
+              msg._getType() === "human" ? "items-end" : "items-start"
+            }`}
           >
-            <div className="font-semibold mb-1">
-              {msg.role === "user" ? "You" : "Assistant"}
-            </div>
-            <div className="whitespace-pre-wrap">
-              {msg.content}
+            <div
+              className={`rounded-lg p-4 max-w-[80%] ${
+                msg._getType() === "human"
+                  ? "bg-sky-600 text-white"
+                  : "bg-white text-black border border-sky-200"
+              }`}
+            >
+              {renderMessageContent(msg.content)}
             </div>
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-4">
         <input
-          type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Ask Warren Buffett anything..."
+          className="flex-1 rounded-lg border border-gray-200 p-4"
           disabled={isLoading}
         />
         <button
           type="submit"
-          disabled={isLoading}
-          className="px-4 py-2 bg-blue-500 text-black rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          className="rounded-lg bg-sky-600 px-8 text-white disabled:opacity-50"
+          disabled={isLoading || !input}
         >
-          {isLoading ? "Sending..." : "Send"}
+          Send
         </button>
       </form>
     </div>

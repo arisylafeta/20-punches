@@ -1,34 +1,59 @@
 import { StateGraph } from "@langchain/langgraph";
 import { Annotation } from "@langchain/langgraph";
-import { State } from '../../lib/utils/types';
+import { State } from '@/utils/types';
 import { router } from './routing';
-import { retrieveDocs } from './retriever';
+import { retrieveDocs } from './retrieve_docs';
 import { extractTickers } from './ticker_extractor';
 import { executeFinancialAnalysis } from './financial_analyst';
 import { buffetAgent } from './buffet';
+import { MemorySaver } from '@langchain/langgraph';
+
+// Initialize memory with a unique conversation ID
+const memory = new MemorySaver();
 
 // Define the graph state
 const StateAnnotation = Annotation.Root({
     messages: Annotation<State['messages']>({
-        reducer: (x, y) => x.concat(y),
+        reducer: (x, y) => {
+            if (!x) return y || [];
+            if (!y) return x;
+            return x.concat(y);
+        }
     }),
-    routingDecision: Annotation<string>(),
-    tickers: Annotation<string[]>(),
-    financialSummary: Annotation<string>(),
-    summarizedDocs: Annotation<string>()
+    routingDecision: Annotation<string>({
+        reducer: (x: string, y: string) => y || x || ""
+    }),
+    tickers: Annotation<string[]>({
+        reducer: (x, y) => {
+            const xArr = x || [];
+            const yArr = y || [];
+            return Array.from(new Set([...xArr, ...yArr]));
+        }
+    }),
+    financialSummary: Annotation<string>({
+        reducer: (x: string, y: string) => y || x || ""
+    }),
+    summarizedDocs: Annotation<string>({
+        reducer: (x: string, y: string) => y || x || ""
+    })
 });
 
-// Define routing function
-function shouldContinue(state: typeof StateAnnotation.State) {
+// Define routing function for parallel execution
+function getNextSteps(state: typeof StateAnnotation.State): string[] {
     const routingDecision = state.routingDecision;
     
-    if (routingDecision === "general_knowledge") {
-        return "DocRetriever";
+    if (routingDecision === "investment_knowledge") {
+        return ["DocRetriever"];
     }
     if (routingDecision === "company_specific") {
-        return "TickerExtractor";
+        // Return both nodes for parallel execution
+        return ["DocRetriever", "TickerExtractor"];
     }
-    return "__end__";
+    if (routingDecision === "conversational") {
+        // Skip research and analysis, go straight to Buffet
+        return ["BuffetAgent"];
+    }
+    return ["__end__"];
 }
 
 // Initialize the graph
@@ -38,12 +63,14 @@ const workflow = new StateGraph(StateAnnotation)
     .addNode("TickerExtractor", extractTickers)
     .addNode("FinancialAnalyst", executeFinancialAnalysis)
     .addNode("BuffetAgent", buffetAgent)
+
+    // Add edges
     .addEdge("__start__", "Router")
-    .addConditionalEdges("Router", shouldContinue)
+    .addConditionalEdges("Router", getNextSteps, ["DocRetriever", "TickerExtractor", "BuffetAgent"])
     .addEdge("DocRetriever", "BuffetAgent")
     .addEdge("TickerExtractor", "FinancialAnalyst")
-    .addEdge("FinancialAnalyst", "DocRetriever")
+    .addEdge("FinancialAnalyst", "BuffetAgent")
     .addEdge("BuffetAgent", "__end__");
 
 // Compile the graph
-export const buffetGraph = workflow.compile();
+export const buffetGraph = workflow.compile({checkpointer: memory});

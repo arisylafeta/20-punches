@@ -1,10 +1,7 @@
-export interface Message {
-    content: string;
-    role: string;
-}
+import { BaseMessage } from "@langchain/core/messages";
 
 export interface State {
-    messages: Message[];
+    messages: BaseMessage[];
     tickers?: string[];
     financialSummary?: string;
     summarizedDocs?: string;

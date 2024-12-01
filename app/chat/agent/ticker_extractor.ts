@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { getModel } from "../../lib/models";
-import { State } from "../../lib/utils/types";
+import { getModel } from "@/utils/models";
+import { State } from "@/utils/types";
 
 // Data schema for ticker extraction
 const TickerExtractionSchema = z.object({
@@ -22,7 +22,7 @@ Be concise and only return the tickers.`;
  * @param state The current conversation state
  * @returns Updated state with extracted tickers
  */
-export async function extractTickers(state: State): Promise<State> {
+export async function extractTickers(state: State): Promise<Pick<State, 'tickers'>> {
     const lastMessage = state.messages.length > 0 ? state.messages[state.messages.length - 1].content : "";
     
     // Create the chain components
@@ -43,7 +43,6 @@ export async function extractTickers(state: State): Promise<State> {
         .invoke({ question: lastMessage });
     
     return {
-        ...state,
         tickers: result.tickers
     };
 }
