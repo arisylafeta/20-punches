@@ -1,14 +1,16 @@
 import { BaseMessage } from "@langchain/core/messages";
 
-export interface State {
-    messages: BaseMessage[];
-    tickers?: string[];
-    financialSummary?: string;
-    summarizedDocs?: string;
-    routingDecision?: string;
+// Interface for financial analysis entries
+export interface FinancialEntry {
+    ticker: string;
+    relevantMetrics: string;
+    timestamp: string;
 }
 
-export interface SearchResult {
-    content: string;
-    metadata: Record<string, any>;
+export interface State {
+    messages: BaseMessage[];
+    tickers?: string[][];  // List of lists of tickers, each inner list represents tickers from one message
+    financialHistory?: FinancialEntry[];
+    summarizedDocs?: string;
+    routingDecision?: string;
 }

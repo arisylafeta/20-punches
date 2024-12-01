@@ -55,6 +55,20 @@ const hydeRetriever = RunnableSequence.from([
     retriever
 ]);
 
+const summarizationTemplate = `
+Given the following information and the user's question, provide a comprehensive 200 word analysis that:
+1. Synthesizes the key points from the retrieved documents
+2. Applies Warren Buffett's investment principles
+3. Provides specific examples and references from the context
+4. Maintains a clear focus on answering the user's question
+
+User's question: {question}
+
+Retrieved Information:
+{docs}
+
+Analysis:`;
+
 function getMessageString(content: MessageContent): string {
     return typeof content === 'string' ? content : content.map(c => c.type === 'text' ? c.text : '').join(' ');
 }
@@ -70,20 +84,6 @@ export async function retrieveDocs(state: State): Promise<Pick<State, 'summarize
         // Retrieve documents using HyDE
         const docs = await hydeRetriever.invoke(getMessageString(lastMessage.content));
         const formattedDocs = formatDocs(docs);
-
-        // Create summarization prompt that includes analysis instructions
-        const summarizationTemplate = `Given the following information and the user's question, provide a comprehensive 300 word analysis that:
-1. Synthesizes the key points from the retrieved documents
-2. Applies Warren Buffett's investment principles
-3. Provides specific examples and references from the context
-4. Maintains a clear focus on answering the user's question
-
-User's question: {question}
-
-Retrieved Information:
-{docs}
-
-Analysis:`;
 
         const summarizationPrompt = ChatPromptTemplate.fromTemplate<{
             docs: string;
