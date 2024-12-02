@@ -1,4 +1,6 @@
 import { BaseMessage } from "@langchain/core/messages";
+import { Annotation } from "@langchain/langgraph";
+
 
 // Interface for financial analysis entries
 export interface FinancialEntry {
@@ -14,3 +16,34 @@ export interface State {
     summarizedDocs?: string;
     routingDecision?: "both" | "quantitative" | "qualitative" | "conversational";
 }
+
+// Define the graph state
+export const StateAnnotation = Annotation.Root({
+    messages: Annotation<State['messages']>({
+        reducer: (x, y) => {
+            if (!x) return y || [];
+            if (!y) return x;
+            return x.concat(y);
+        }
+    }),
+    tickers: Annotation<string[][]>({
+        reducer: (x, y) => {
+            if (!x) return y || [];
+            if (!y) return x;
+            return [...x, ...y];  // Append new ticker arrays
+        }
+    }),
+    financialHistory: Annotation<FinancialEntry[]>({
+        reducer: (x, y) => {
+            const xArr = x || [];
+            const yArr = y || [];
+            return [...xArr, ...yArr];  // Append all entries
+        }
+    }),
+    summarizedDocs: Annotation<string>({
+        reducer: (x: string, y: string) => y || x || ""  // Replace with latest
+    }),
+    routingDecision: Annotation<string>({
+        reducer: (x: string, y: string) => y || x || ""  // Replace with latest
+    })
+});

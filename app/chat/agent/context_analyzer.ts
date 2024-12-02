@@ -24,6 +24,35 @@ const AnalyzerSchema = z.object({
     )
 });
 
+const template = `
+You are an expert at analyzing conversation context and determining what type of response is needed.
+
+Previous Human Message: {previousHuman}
+Previous AI Response: {previousAI}
+Current Message: {currentMessage}
+Previously Discussed Tickers: {previousTickers}
+
+Your task is to:
+1. Identify any new stock tickers mentioned in the current message
+   - Only include official stock exchange tickers (e.g., 'AAPL', 'MSFT', 'GOOGL')
+   - Do NOT include company names or informal abbreviations
+   - Exclude tickers that were previously discussed
+
+2. Determine how to route the conversation:
+   - "both": Questions requiring both financial analysis and investment philosophy
+   - "quantitative": Pure financial/metric analysis questions
+   - "qualitative": Questions about investment philosophy, strategy, or market concepts
+   - "conversational": General chat or clarification questions
+
+Consider:
+- Questions about specific companies' financials → quantitative
+- Questions about investment strategy or wisdom → qualitative
+- Questions combining company analysis with strategy → both
+- Simple follow-ups, clarifications, or general chat → conversational
+`;
+
+const prompt = ChatPromptTemplate.fromTemplate(template);
+
 const llm = getModel('SMALL', { temperature: 0 });
 const structuredLlm = llm.withStructuredOutput(AnalyzerSchema);
 
@@ -38,35 +67,6 @@ export async function contextAnalyzer(state: State): Promise<Pick<State, 'ticker
         (state.tickers || []).flat()
     );
 
-    const template = `
-    You are an expert at analyzing conversation context and determining what type of response is needed.
-    
-    Previous Human Message: {previousHuman}
-    Previous AI Response: {previousAI}
-    Current Message: {currentMessage}
-    Previously Discussed Tickers: {previousTickers}
-
-    Your task is to:
-    1. Identify any new stock tickers mentioned in the current message
-       - Only include official stock exchange tickers (e.g., 'AAPL', 'MSFT', 'GOOGL')
-       - Do NOT include company names or informal abbreviations
-       - Exclude tickers that were previously discussed
-    
-    2. Determine how to route the conversation:
-       - "both": Questions requiring both financial analysis and investment philosophy
-       - "quantitative": Pure financial/metric analysis questions
-       - "qualitative": Questions about investment philosophy, strategy, or market concepts
-       - "conversational": General chat or clarification questions
-
-    Consider:
-    - Questions about specific companies' financials → quantitative
-    - Questions about investment strategy or wisdom → qualitative
-    - Questions combining company analysis with strategy → both
-    - Simple follow-ups, clarifications, or general chat → conversational
-    `;
-
-    const prompt = ChatPromptTemplate.fromTemplate(template);
-    
     try {
         const result = await prompt.pipe(structuredLlm).invoke({
             previousHuman: previousHuman?.content || "No previous message",
@@ -83,11 +83,10 @@ export async function contextAnalyzer(state: State): Promise<Pick<State, 'ticker
         // Only update tickers if we have new ones
         if (newUniqueTickersArray.length > 0) {
             return {
-                tickers: [[], newUniqueTickersArray],
+                tickers: [...(state.tickers || []), newUniqueTickersArray],
                 routingDecision: result.routingDecision
             };
         }
-
         // If no new tickers, just return the routing decision
         return {
             routingDecision: result.routingDecision

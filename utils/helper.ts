@@ -1,11 +1,7 @@
 import { FinancialEntry } from './types';
+import { BaseMessage } from '@langchain/core/messages';
 
-/**
- * Formats financial history entries into a structured markdown string
- * @param entries Array of FinancialEntry objects to format
- * @param separator Optional separator between entries (defaults to '==================')
- * @returns Formatted markdown string
- */
+// Helper function to format financial history
 export function formatFinancialHistory(entries: FinancialEntry[], separator: string = '==================') {
     if (!entries || entries.length === 0) {
         return 'No financial history available.';
@@ -23,12 +19,8 @@ export function formatFinancialHistory(entries: FinancialEntry[], separator: str
     }).join(`\n${separator}\n\n`); // Added extra newline after separator for better readability
 }
 
-/**
- * Parses a formatted financial history string back into an array of FinancialEntry objects
- * @param formattedText The formatted text to parse (must start with separator)
- * @param separator Optional separator between entries (defaults to '==================')
- * @returns Array of FinancialEntry objects
- */
+
+// Helper function to parse financial history
 export function parseFinancialHistory(formattedText: string, separator: string = '=================='): FinancialEntry[] {
     // Split the text into sections using the separator
     const sections = formattedText.split(separator)
@@ -60,3 +52,10 @@ export function parseFinancialHistory(formattedText: string, separator: string =
         };
     });
 }
+
+
+// Helper
+export const formatMessageHistory = (messages: BaseMessage[]): string => {
+    const relevantHistory = messages.slice(-3);
+    return relevantHistory.slice(0, -1).map(m => m.content).join('\n');
+};

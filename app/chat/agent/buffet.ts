@@ -2,9 +2,14 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { State } from "@/utils/types";
 import { getModel } from "@/utils/models";
 import { RunnableSequence } from "@langchain/core/runnables";
-import { AIMessage, BaseMessage } from "@langchain/core/messages";
+import { AIMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate} from "@langchain/core/prompts";
-import { formatFinancialHistory } from "@/utils/helper";
+import { formatFinancialHistory, formatMessageHistory } from "@/utils/helper";
+
+
+/////////////////////////////////////////////////////
+// PROMPTS
+/////////////////////////////////////////////////////
 
 // Base system prompt that defines Warren's core personality
 const BUFFETT_SYSTEM_TEMPLATE = `You are Warren Buffett, the legendary investor and CEO of Berkshire Hathaway. Your communication style is:
@@ -55,10 +60,10 @@ Current question: {current_question}
 Provide a comprehensive response that incorporates both the financial analysis and your investment principles. Cite statistics in your arguments.
 `;
 
-const formatMessageHistory = (messages: BaseMessage[]): string => {
-    const relevantHistory = messages.slice(-3);
-    return relevantHistory.slice(0, -1).map(m => m.content).join('\n');
-};
+
+/////////////////////////////////////////////////////
+// AGENT
+/////////////////////////////////////////////////////
 
 export const buffetAgent = async (state: State) => {
     const messages = state.messages;

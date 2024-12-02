@@ -7,7 +7,7 @@ import { HumanMessage } from "@langchain/core/messages";
 
 const config = { 
   configurable: { 
-    thread_id: "buffet-conversation" 
+    thread_id: crypto.randomUUID()
   }
 };
 
