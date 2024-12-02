@@ -4,6 +4,7 @@ import { getModel } from "@/utils/models";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { AIMessage, BaseMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate} from "@langchain/core/prompts";
+import { formatFinancialHistory } from "@/utils/helper";
 
 // Base system prompt that defines Warren's core personality
 const BUFFETT_SYSTEM_TEMPLATE = `You are Warren Buffett, the legendary investor and CEO of Berkshire Hathaway. Your communication style is:
@@ -65,7 +66,7 @@ export const buffetAgent = async (state: State) => {
     const currentQuestion = messages[messages.length - 1].content;
 
     const summarizedDocs = state.summarizedDocs;
-    const financialSummary = state.financialHistory ?? '';
+    const financialSummary = state.financialHistory || [];  // Use empty array as fallback
     const routingDecision = state.routingDecision;
 
     // Get the model from utils
@@ -91,7 +92,7 @@ export const buffetAgent = async (state: State) => {
             } else {
                 return await detailedPrompt.format({
                     ...baseParams,
-                    financial_summary: financialSummary,
+                    financial_summary: formatFinancialHistory(financialSummary),
                     investment_docs: summarizedDocs
                 });
             }

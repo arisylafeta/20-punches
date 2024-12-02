@@ -5,11 +5,18 @@ import { buffetGraph } from './agent/graph';
 import { CallbackHandlerMethods } from "@langchain/core/callbacks/base";
 import { HumanMessage } from "@langchain/core/messages";
 
-
 const config = { 
   configurable: { 
     thread_id: "buffet-conversation" 
   }
+};
+
+// Helper function to strip quotes if they exist
+const stripQuotes = (str: string) => {
+  if (str.startsWith('"') && str.endsWith('"')) {
+    return str.slice(1, -1);
+  }
+  return str;
 };
 
 export async function runAgent(input: string) {
@@ -28,44 +35,49 @@ export async function runAgent(input: string) {
         streamMode: "values",
         callbacks: [{
           handleLLMEnd: async (output: any) => {
-            // Stream step updates
-            stream.update(JSON.parse(JSON.stringify({
-              event: "llm",
-              data: output
-            }, null, 2)));
+            if (output?.generations?.[0]?.[0]?.message?.content) {
+              stream.update({
+                event: "llm",
+                data: stripQuotes(output.generations[0][0].message.content)
+              });
+            }
           },
           handleChainEnd: async (output: any) => {
-            stream.update(JSON.parse(JSON.stringify({
-              event: "chain",
-              data: output
-            }, null, 2)));
+            if (output?.returnValues?.response) {
+              stream.update({
+                event: "chain",
+                data: stripQuotes(output.returnValues.response)
+              });
+            }
           },
           handleToolEnd: async (output: any) => {
-            stream.update(JSON.parse(JSON.stringify({
-              event: "tool",
-              data: output
-            }, null, 2)));
+            if (output?.output) {
+              stream.update({
+                event: "tool",
+                data: stripQuotes(output.output)
+              });
+            }
           }
         } satisfies Partial<CallbackHandlerMethods>]
       })) {
         // Update stream with the latest message if available
         const messages = state.messages;
-        if (messages && messages.length > 0) {
+        if (messages?.length > 0) {
           const lastMessage = messages[messages.length - 1];
           if (lastMessage.content) {
-            stream.update(JSON.parse(JSON.stringify({
+            stream.update({
               event: "message",
-              data: lastMessage
-            }, null, 2)));
+              data: stripQuotes(lastMessage.content)
+            });
           }
         }
       }
     } catch (error) {
       console.error("Error in runAgent:", error);
-      stream.update(JSON.parse(JSON.stringify({
+      stream.update({
         event: "error",
         data: { error: "An error occurred during processing" }
-      }, null, 2)));
+      });
     } finally {
       stream.done();
     }

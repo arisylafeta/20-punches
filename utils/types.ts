@@ -9,7 +9,7 @@ export interface FinancialEntry {
 
 export interface State {
     messages: BaseMessage[];
-    tickers?: string[][];  // List of lists of tickers, each inner list represents tickers from one message
+    tickers?: string[][];  // List of stock tickers in universal format (e.g., "AAPL", "MSFT")
     financialHistory?: FinancialEntry[];
     summarizedDocs?: string;
     routingDecision?: "both" | "quantitative" | "qualitative" | "conversational";
