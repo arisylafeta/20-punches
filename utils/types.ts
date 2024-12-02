@@ -12,5 +12,5 @@ export interface State {
     tickers?: string[][];  // List of lists of tickers, each inner list represents tickers from one message
     financialHistory?: FinancialEntry[];
     summarizedDocs?: string;
-    routingDecision?: string;
+    routingDecision?: "both" | "quantitative" | "qualitative" | "conversational";
 }

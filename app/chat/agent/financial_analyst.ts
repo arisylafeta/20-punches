@@ -3,31 +3,32 @@ import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { getModel } from "@/utils/models";
 import { State, FinancialEntry } from "@/utils/types";
 import { tools } from "./tools";
-import { z } from "zod";
-import { RunnableSequence } from "@langchain/core/runnables";
-
-// Schema for parsing financial metrics output
-const MetricsOutputSchema = z.array(z.object({
-    ticker: z.string(),
-    relevantMetrics: z.string().describe(
-        "Metrics as a newline-separated string of key-value pairs"
-    ),
-    timestamp: z.string().describe("Timestamp for the metrics")
-}));
+import { formatFinancialHistory, parseFinancialHistory } from "@/utils/helper";
 
 // Create the prompt template for the financial analyst
-const ANALYST_TEMPLATE = `You are a quantitative financial analyst. Your job is to gather ONLY the relevant financial metrics based on the question asked. Do not provide analysis, commentary, or explanations.
+const ANALYST_TEMPLATE = `You are a quantitative financial analyst. Your job is to gather ONLY the relevant financial metrics based on the question asked and analyze what additional metrics might be needed based on historical context. Do not provide analysis, commentary, or explanations.
 
 You have access to the following tools:
 
 {tools}
+
+Here is the financial history so far:
+{financialHistory}
+
+Review the financial history above and consider:
+1. Are there metrics from different time periods (e.g., 2023 vs 2024) that would help answer the question?
+2. Are there additional metrics needed from the same ticker and time period?
+3. Are there related metrics that weren't considered in previous queries?
 
 Use the following format:
 
 Question: The question you must gather metrics for
 Tickers: The companies to research
 
-Thought: What specific metrics are needed to answer this question?
+Thought: Consider what metrics are needed and what's missing from the financial history.
+1. What specific metrics are needed to answer this question?
+2. What additional historical or comparative metrics would be valuable?
+3. What metrics from the financial history are still relevant?
 
 Action: Choose one of [{tool_names}]
 Action Input: ONLY the ticker symbol (e.g., AAPL)
@@ -35,17 +36,24 @@ Action Input: ONLY the ticker symbol (e.g., AAPL)
 Observation: The result of the action
 ... (this Thought/Action/Action Input/Observation can be repeated as necessary)
 
-Thought: I now have the metrics needed
-Final Answer: ONLY list the relevant metrics in this format for each ticker:
+Thought: I now have all the needed metrics
+Final Answer: ONLY list the relevant metrics in this format for EACH ticker AND timestamp needed:
+
+==================
 TICKER (timestamp):
 - metric1: value1
 - metric2: value2
+==================
 
-Example output:
+ALWAYS INCLUDE THE SEPARATOR "=================="
+
+Example output: 
+==================
 AAPL (2024-01-01):
 - P/E Ratio: 28.5
 - Free Cash Flow: $98B
 - Debt/Equity: 2.5
+==================
 
 Begin gathering metrics:
 
@@ -53,45 +61,10 @@ Question: {input}
 Tickers: {tickers}
 Thought:{agent_scratchpad}`;
 
-// Template for metrics parser
-const METRICS_PARSER_TEMPLATE = ChatPromptTemplate.fromTemplate(`
-You are a financial data parser. Convert the following financial metrics output into a structured format.
-Each ticker should have its metrics as a simple string.
-
-Here's the input to parse:
-{input}
-
-Return an array of entries, where each entry has:
-- ticker: the stock symbol
-- relevantMetrics: a string with each metric on a new line (e.g., "P/E Ratio: 28.5\\nFree Cash Flow: $98B")
-- timestamp: the date from the input
-
-Example metrics format:
-P/E Ratio: 28.5
-Free Cash Flow: $98B
-Debt/Equity: 2.5
-`);
-
 const prompt = ChatPromptTemplate.fromTemplate(ANALYST_TEMPLATE);
-const metricsParserPrompt = METRICS_PARSER_TEMPLATE;
 
-// Create the agents with deterministic LLM
+// Create the agent with deterministic LLM
 const llm = getModel('SMALL', { temperature: 0 });
-const structuredLlm = llm.withStructuredOutput(MetricsOutputSchema);
-
-// Create the metrics parser sequence
-const metricsParser = RunnableSequence.from([
-    {
-        input: (output: string) => output
-    },
-    metricsParserPrompt,
-    structuredLlm
-]);
-
-// Parse metrics output
-async function parseMetricsOutput(output: string) {
-    return metricsParser.invoke(output);
-}
 
 /**
  * Creates an agent executor for financial analysis
@@ -112,7 +85,7 @@ async function createFinancialAnalysisExecutor() {
 /**
  * Executes financial analysis based on the user's question and identified tickers
  * @param state The current conversation state
- * @returns Updated state with financial entries
+ * @returns New financial entries
  */
 export async function executeFinancialAnalysis(state: State): Promise<Pick<State, 'financialHistory'>> {
     try {
@@ -121,38 +94,26 @@ export async function executeFinancialAnalysis(state: State): Promise<Pick<State
             return { financialHistory: [] };
         }
 
-        // Get existing tickers from history
-        const existingTickers = new Set(state.financialHistory?.map(entry => entry.ticker) || []);
-        
         // Get the latest group of tickers (last array in state.tickers)
         const latestTickers = state.tickers[state.tickers.length - 1];
         
-        // Filter out tickers we already have data for
-        const newTickers = latestTickers.filter(ticker => !existingTickers.has(ticker));
-        
-        if (newTickers.length === 0) {
-            return { financialHistory: [] }; // No new tickers to analyze
-        }
-
         // Create the executor
         const executor = await createFinancialAnalysisExecutor();
 
-        // Execute the analysis only for new tickers
+        // Format existing financial history using the helper
+        const formattedHistory = formatFinancialHistory(state.financialHistory || []);
+
+        // Execute the analysis with all tickers and history
         const result = await executor.invoke({
             input: lastMessage.content,
-            tickers: newTickers.join(", ")
+            tickers: latestTickers.join(", "),
+            financialHistory: formattedHistory
         });
 
-        // Parse the metrics into structured format
-        const parsedMetrics = await parseMetricsOutput(result.output);
+        // Parse the metrics directly from the output format
+        const entries = parseFinancialHistory(result.output);
 
-        // Create entries with timestamp
-        const entries: FinancialEntry[] = parsedMetrics.map(entry => ({
-            ticker: entry.ticker,
-            relevantMetrics: entry.relevantMetrics,
-            timestamp: entry.timestamp
-        }));
-
+        // Return only the new entries, let the graph reducer handle merging
         return {
             financialHistory: entries
         };

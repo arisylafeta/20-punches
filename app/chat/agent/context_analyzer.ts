@@ -15,8 +15,13 @@ const AnalyzerSchema = z.object({
     needsPhilosophyDocs: z.boolean().describe(
         "Whether we need Buffett's philosophy (true for investment principles, market concepts, or strategy questions)"
     ),
-    reason: z.string().describe(
-        "Explanation of why these decisions were made"
+    routingDecision: z.enum([
+        "both",
+        "quantitative",
+        "qualitative",
+        "conversational"
+    ]).describe(
+        "The decision on how to route the conversation"
     )
 });
 
@@ -73,13 +78,13 @@ export async function contextAnalyzer(state: State): Promise<Pick<State, 'ticker
         if (newUniqueTickersArray.length > 0) {
             return {
                 tickers: [...(state.tickers || []), newUniqueTickersArray],
-                routingDecision: result.reason
+                routingDecision: result.routingDecision
             };
         }
 
         // If no new tickers, just return the routing decision
         return {
-            routingDecision: result.reason
+            routingDecision: result.routingDecision
         };
     } catch (error) {
         console.error("Error in context analyzer:", error);
