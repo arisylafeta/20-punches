@@ -18,7 +18,7 @@ Here is the financial history so far:
 Review the financial history above and consider:
 1. Are there metrics from different time periods (e.g., 2023 vs 2024) that would help answer the question?
 2. Are there additional metrics needed from the same ticker and time period?
-3. Are there related metrics that weren't considered in previous queries?
+3. Are there related metrics that need to be considered from different tickers?
 
 Use the following format:
 
@@ -37,7 +37,7 @@ Observation: The result of the action
 ... (this Thought/Action/Action Input/Observation can be repeated as necessary)
 
 Thought: I now have all the needed metrics
-Final Answer: ONLY list the relevant metrics in this format for EACH ticker AND timestamp needed:
+Final Answer: ONLY list the ADDITIONAL relevant metrics in this format for EACH ticker AND timestamp needed:
 
 ==================
 TICKER (timestamp):
@@ -100,27 +100,26 @@ export async function executeFinancialAnalysis(state: State): Promise<Pick<State
         // Create the executor
         const executor = await createFinancialAnalysisExecutor();
 
-        // Format existing financial history using the helper
-        const formattedHistory = formatFinancialHistory(state.financialHistory || []);
-
-        // Execute the analysis with all tickers and history
+        // Execute the analysis with the latest tickers
         const result = await executor.invoke({
             input: lastMessage.content,
             tickers: latestTickers.join(", "),
-            financialHistory: formattedHistory
+            financialHistory: formatFinancialHistory(state.financialHistory || [])
         });
 
-        // Parse the metrics directly from the output format
-        const entries = parseFinancialHistory(result.output);
+        // Parse the result into financial entries
+        const newEntries = parseFinancialHistory(result.output);
 
-        // Return only the new entries, let the graph reducer handle merging
+        // Keep only the last 5 entries when combining with existing history
+        // This is done to limit the amount of historical data considered
+        const updatedHistory = [...(state.financialHistory || []), ...newEntries].slice(-5);
+
         return {
-            financialHistory: entries
+            financialHistory: updatedHistory
         };
     } catch (error) {
         console.error("Error in financial analysis:", error);
-        return {
-            financialHistory: []
-        };
+        return { financialHistory: [] };
     }
 }
+

@@ -5,7 +5,7 @@ import { HumanMessage, BaseMessage, AIMessage } from "@langchain/core/messages";
 
 const config = { 
   configurable: { 
-    thread_id: crypto.randomUUID()
+    thread_id: 111
   }
 };
 

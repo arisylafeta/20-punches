@@ -67,7 +67,9 @@ Provide a comprehensive response that incorporates both the financial analysis a
 
 export const buffetAgent = async (state: State) => {
     const messages = state.messages;
-    const messageHistory = formatMessageHistory(messages);
+    // Only use last 6 messages for the prompt context
+    const recentMessages = messages.slice(Math.max(0, messages.length - 6));
+    const messageHistory = formatMessageHistory(recentMessages);
     const currentQuestion = messages[messages.length - 1].content;
 
     const summarizedDocs = state.summarizedDocs;

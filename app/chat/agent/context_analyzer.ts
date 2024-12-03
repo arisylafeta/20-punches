@@ -62,10 +62,9 @@ export async function contextAnalyzer(state: State): Promise<Pick<State, 'ticker
     const previousHuman = messages.slice(-3, -2).find(m => m instanceof HumanMessage);
     const previousAI = messages.slice(-3, -2).find(m => m instanceof AIMessage);
     
-    // Get all previously mentioned tickers as a flat Set for deduplication
-    const allPreviousTickers = new Set(
-        (state.tickers || []).flat()
-    );
+    // Get last 5 tickers as a flat Set for deduplication
+    const recentTickers = (state.tickers || []).slice(-5).flat();
+    const allPreviousTickers = new Set(recentTickers);
 
     try {
         const result = await prompt.pipe(structuredLlm).invoke({
@@ -82,8 +81,10 @@ export async function contextAnalyzer(state: State): Promise<Pick<State, 'ticker
 
         // Only update tickers if we have new ones
         if (newUniqueTickersArray.length > 0) {
+            // Keep only the last 5 ticker arrays
+            const updatedTickers = [...(state.tickers || []), newUniqueTickersArray].slice(-5);
             return {
-                tickers: [...(state.tickers || []), newUniqueTickersArray],
+                tickers: updatedTickers,
                 routingDecision: result.routingDecision
             };
         }
