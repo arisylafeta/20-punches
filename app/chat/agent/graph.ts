@@ -6,7 +6,7 @@ import { buffetAgent } from './buffet';
 import { StateAnnotation } from "@/utils/types";
 import { checkpointer } from "@/lib/db/checkpoints";
 
-
+checkpointer.setup();
 
 // Define routing function for parallel execution
 function getNextSteps(state: typeof StateAnnotation.State): string[] {
