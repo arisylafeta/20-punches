@@ -1,7 +1,7 @@
 "use server";
-
 import { buffetGraph } from './agent/graph';
 import { HumanMessage, BaseMessage, AIMessage } from "@langchain/core/messages";
+import { createClient } from "@/utils/supabase/server";
 
 const config = { 
   configurable: { 

@@ -21,6 +21,7 @@
     "@next/bundle-analyzer": "^13.4.19",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@react-oauth/google": "^0.12.1",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.32.0",
     "@types/node": "20.12.12",

@@ -1,8 +1,8 @@
 'use server'
-
+import { Provider } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-
+import { getURL } from '@/utils/helper'
 import { createClient } from '@/utils/supabase/server'
 
 export async function emailLogin(formData: FormData) {
@@ -35,15 +35,46 @@ export async function signup(formData: FormData) {
     password: formData.get('password') as string,
   }
   
-  console.log('Attempting signup with email:', data.email);
-  const { error, data: signUpData } = await supabase.auth.signUp(data)
+  const { error } = await supabase.auth.signUp(data)
 
   if (error) {
-    console.error('Signup error:', error);
-    redirect('/login?message=' + encodeURIComponent(error.message))
+    redirect('/login?message=Could not create user')
   }
 
-  console.log('Signup successful:', signUpData);
   revalidatePath('/', 'layout')
   redirect('/login?message=Check your email for the confirmation link')
+}
+
+export async function signOut(){
+    const supabase = await createClient()
+    const { error } = await supabase.auth.signOut()
+    
+    if (error) {
+        console.error('Error signing out:', error)
+        return redirect('/login?message=' + encodeURIComponent(error.message))
+    }
+
+    revalidatePath('/', 'layout')
+    return redirect('/login')
+}
+
+export async function oAuthSignIn(provider: Provider) {
+    if (!provider) {
+        return redirect('/login?message=No provider selected')
+    }
+
+    const supabase = await createClient();
+    const redirectUrl = getURL("/auth/callback")
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+            redirectTo: redirectUrl,
+        }
+    })
+
+    if (error) {
+        redirect('/login?message=Could not authenticate user')
+    }
+
+    return redirect(data.url)
 }
