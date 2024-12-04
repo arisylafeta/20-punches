@@ -14,18 +14,8 @@ const llm = getModel('SMALL');
 const deterministicLlm = getModel('SMALL', { temperature: 0 });
 const embeddings = getModel('EMBEDDINGS');
 
-// Initialize vector store
-const vectorStore = new SupabaseVectorStore(
-    embeddings,
-    {
-        client: createClient(cookies()),
-        tableName: "documents",
-        queryName: "match_documents"
-    }
-);
-
 // Create retriever with specific search parameters
-const retriever = vectorStore.asRetriever({ k: 7 });
+const retriever = (vectorStore: SupabaseVectorStore) => vectorStore.asRetriever({ k: 7 });
 
 // Define HyDE prompt template
 const hydeTemplate = `You are Warren Buffet. Answer this question with a 100 word passage using your principles: {question}
@@ -47,12 +37,6 @@ const generateHydePassage = RunnableSequence.from([
     deterministicLlm,
     (message) => message.content,
     strOutputParser
-]);
-
-// Create HyDE retriever chain
-const hydeRetriever = RunnableSequence.from([
-    generateHydePassage,
-    retriever
 ]);
 
 const summarizationTemplate = `
@@ -80,6 +64,25 @@ export async function retrieveDocs(state: State): Promise<Pick<State, 'summarize
         if (!lastMessage) {
             return { summarizedDocs: "" };
         }
+
+        // Initialize vector store with async client
+        const vectorStore = new SupabaseVectorStore(
+            embeddings,
+            {
+                client: await createClient(),
+                tableName: "documents",
+                queryName: "match_documents"
+            }
+        );
+
+        // Create retriever instance
+        const currentRetriever = retriever(vectorStore);
+
+        // Create HyDE retriever chain
+        const hydeRetriever = RunnableSequence.from([
+            generateHydePassage,
+            currentRetriever
+        ]);
 
         // Retrieve documents using HyDE
         const docs = await hydeRetriever.invoke(getMessageString(lastMessage.content));
