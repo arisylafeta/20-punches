@@ -2,36 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  color: #f8f8f8;
-  background: #131318;
-}
-
-body input,
-body textarea {
-  color: black;
-}
-
-a {
-  color: #2d7bd4;
-}
-
-a:hover {
-  border-bottom: 1px solid;
-}
-
-p {
-  margin: 8px 0;
-}
-
-code {
-  color: #ffa500;
-}
-
-li {
-  padding: 4px;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -69,7 +39,7 @@ li {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 245 18% 8%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
