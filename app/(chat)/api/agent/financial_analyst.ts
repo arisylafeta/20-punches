@@ -1,7 +1,7 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { getModel } from "@/utils/models";
-import { State, FinancialEntry } from "@/utils/types";
+import { State } from "@/utils/types";
 import { tools } from "./tools";
 import { formatFinancialHistory, parseFinancialHistory } from "@/utils/helper";
 

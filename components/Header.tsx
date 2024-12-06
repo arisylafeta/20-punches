@@ -1,38 +1,43 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { createClient } from "@/utils/supabase/server";
-import { signOut } from "@/app/login/actions";
+'use client';
+import { useRouter } from 'next/navigation';
+import { useWindowSize } from 'usehooks-ts';
 
-export default async function Header() {
-    const supabase = await createClient();
+import { SidebarToggle } from '@/components/sidebar-toggle';
+import { Button } from '@/components/ui/button';
+import { BetterTooltip } from '@/components/ui/tooltip';
+import { PlusIcon } from './icons';
+import { useSidebar } from './ui/sidebar';
+import { usePathname } from 'next/navigation';
+import { ChatHistory } from './chat-history';
 
-    const { 
-        data: { user }
-    } = await supabase.auth.getUser();
+export function Header() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { open } = useSidebar();
+
+  const { width: windowWidth } = useWindowSize();
+
   return (
-    <header className="z-10 sticky top-0 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
-        <nav className="flex items-center space-x-4 lg:space-x-6">
-          <a className="mr-6 flex items-center space-x-2" href="/">
-            <span className="font-bold">20Punches</span>
-          </a>
-          <Link href="/">20Punches</Link>
-        </nav>
-        <div className="flex flex-1 items-center justify-end space-x-2">
-            {user !== null ? (
-                <form action={signOut} className="flex items-center gap-2">
-                    <p>{user.email}</p>
-                    <Button type="submit">
-                        Sign Out
-                    </Button>
-                </form>
-            ) : (
-                <Button asChild>
-                    <Link href="/login">Sign In</Link>
-                </Button>
-            )}
-        </div>
-      </div>
+    <header className="flex sticky top-0 bg-background p-4 items-center px-2 md:px-2 gap-2">
+      <SidebarToggle/>
+      { pathname.startsWith('/chat/') && (
+        <>
+          <BetterTooltip content="New Chat">
+          <Button
+            variant="outline"
+            className="p-4 ml-auto"
+            onClick={() => {
+              router.push('/');
+              router.refresh();
+            }}
+          >
+            <PlusIcon />
+            <span>New Chat</span>
+          </Button>
+        </BetterTooltip>
+        <ChatHistory/>
+        </>
+      )}
     </header>
   );
 }

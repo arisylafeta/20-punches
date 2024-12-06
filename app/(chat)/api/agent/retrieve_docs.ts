@@ -1,5 +1,4 @@
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
-import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";

@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/s
 import { getUser } from "@/lib/db/user";
 import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Header } from "@/components/header";
 
 
 export default async function RootLayout({
@@ -43,13 +44,13 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
         <SidebarProvider defaultOpen={defaultOpen}>
-          <AppSidebar />
-            <SidebarTrigger />
-            <SidebarInset>
-            <main>
-            {children}
-            </main>
-            </SidebarInset>
+            <AppSidebar />
+              <SidebarInset>
+                <Header />
+                <main className="flex-1 overflow-auto">
+                  {children}
+                </main>
+              </SidebarInset>
         </SidebarProvider>
         </ThemeProvider>
       </body>
