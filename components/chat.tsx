@@ -28,9 +28,6 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   } = useChat({
     body: { id },
     initialMessages,
-    onFinish: () => {
-      mutate('/api/history');
-    },
   });
 
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();

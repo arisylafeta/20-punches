@@ -13,7 +13,6 @@ import { BetterTooltip } from "./ui/tooltip"
 export function ChatHistory() {
 
   return (
-
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
       <BetterTooltip content="Previous Conversations">
