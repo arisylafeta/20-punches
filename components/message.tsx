@@ -5,11 +5,9 @@ import { SparklesIcon } from './icons';
 import { Markdown } from './markdown';
 
 export const PreviewMessage = ({
-  chatId,
   message,
   isLoading,
 }: {
-  chatId: string;
   message: Message;
   isLoading: boolean;
 }) => {
@@ -35,7 +33,6 @@ export const PreviewMessage = ({
           <Markdown>{message.content as string}</Markdown>
           {isLoading && (
             <div className="text-sm text-muted-foreground">
-              Thinking...
             </div>
           )}
         </div>

@@ -1,80 +1,64 @@
-import {
-    type Message,
-    StreamData,
-    convertToCoreMessages,
-    streamObject,
-    streamText,
-  } from 'ai';
-  import { z } from 'zod';
-  import {
-    generateUUID,
-    getMostRecentUserMessage,
-    sanitizeResponseMessages,
-  } from '@/lib/utils';
-  import { HumanMessage } from '@langchain/core/messages';
-  //import { generateTitleFromUserMessage } from '../../actions';
-  import { getUser } from '@/lib/db/user';
-  import { buffetGraph } from '../agent/graph';
-  import { LangChainAdapter } from 'ai';
-  import { convertLangChainMessageToVercelMessage, convertVercelMessageToLangChainMessage } from '@/utils/helper';
-  
-  export const maxDuration = 1000;
+import { type Message } from 'ai';
+import { HumanMessage } from '@langchain/core/messages';
+import { getUser } from '@/lib/db/user';
+import { buffetGraph } from '../agent/graph';
+import { LangChainAdapter } from 'ai';
 
-  
-  export async function POST(request: Request) {
-    const {
-      id,
-      messages,
-    }: { id: string; messages: Array<Message>; } =
-      await request.json();
-  
-    const user = await getUser();
-  
-    if (!user) {
-      return new Response('Unauthorized', { status: 401 });
-    }
-  
-    const coreMessages = convertToCoreMessages(messages);
-    const userMessage = getMostRecentUserMessage(coreMessages);
-  
-    if (!userMessage) {
-      return new Response('No user message found', { status: 400 });
-    }
-  
+export const maxDuration = 1000;
 
-    // TODO: Implement chat history retrieval from chat id. DON'T TOUCH THIS!
-    //const chat = await getChatById({ id });
-  
-    // if (!chat) {
-    //   const title = await generateTitleFromUserMessage({ message: userMessage });
-    //   await saveChat({ id, userId: session.user.id, title });
-  
-    const config = {
-      configurable: {
-        thread_id: id,
-      },
-      version: "v1" as const,  // Type assertion to make it a literal type
-      encoding: "text/event-stream" as const,  // Type assertion to make it a literal type
-    };
+export async function POST(request: Request) {
+  const {
+    id,
+    messages,
+  }: { id: string; messages: Array<Message>; } = await request.json();
 
-    const input = messages.findLast(message => message.role === "user")?.content || "";
-    const message = {messages: [new HumanMessage({ content: input })]};
-    
-    const stream = await buffetGraph.streamEvents(message, config);
+  const user = await getUser();
 
-    const transformStream = new ReadableStream({
-        async start(controller) {
-            for await (const { event, data, tags = [] } of stream) {
-                if (event === 'on_chat_model_stream') {
-                    if (!!data.chunk.content && tags.includes("llm_inference")) {
-                        const aiMessage = convertLangChainMessageToVercelMessage(data.chunk);
-                        controller.enqueue(aiMessage);
-                    }
-                }
-            }
-            controller.close();
-        }
-    });
-    return LangChainAdapter.toDataStreamResponse(transformStream);
+  if (!user) {
+    return new Response('Unauthorized', { status: 401 });
   }
-  
+
+  const input = messages.findLast(message => message.role === "user")?.content || "";
+  const message = { messages: [new HumanMessage({ content: input })] };
+
+  try {
+    const streamingEvents = await buffetGraph.streamEvents(
+      message,
+      {
+        version: "v2" as const,
+        configurable: {
+          thread_id: id,
+        }
+      }
+    );
+
+    // Create a transform stream that will process the events
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const event of streamingEvents) {
+            // Send raw events to see what we're getting
+           // console.log('Raw event:', JSON.stringify(event, null, 2));
+            
+            if (event.event === 'on_chat_model_stream') {
+              const chunk = event.data?.chunk;
+              if (chunk?.content) {
+                controller.enqueue(chunk);
+              }
+            }
+          }
+          controller.close();
+        } catch (error) {
+          console.error('Stream error:', error);
+          controller.error(error);
+        }
+      }
+    });
+
+    // Use LangChainAdapter without experimental_StreamData
+    return LangChainAdapter.toDataStreamResponse(stream);
+  } catch (error) {
+    console.error('Error in chat route:', error);
+    return new Response('Internal Server Error', { status: 500 });
+  }
+}

@@ -2,7 +2,7 @@
 
 import type { Message } from 'ai';
 import { useChat } from 'ai/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 import { PreviewMessage, ThinkingMessage } from '@/components/message';
 import { useScrollToBottom } from '@/components/use-scroll-to-bottom';
@@ -30,6 +30,12 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     initialMessages,
   });
 
+  useEffect(() => {
+    if (streamingData) {
+      console.log('Streaming data:', streamingData);
+    }
+  }, [streamingData]);
+
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
 
   return (
@@ -43,7 +49,6 @@ export default function Chat({ id, initialMessages }: ChatProps) {
         {messages.map((message, index) => (
           <PreviewMessage
             key={message.id}
-            chatId={id}
             message={message}
             isLoading={isLoading && messages.length - 1 === index}
           />
@@ -67,7 +72,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           <input
             className="flex-1 w-full p-2 border rounded-md"
             value={input}
-            placeholder="Type a message..."
+            placeholder="Ask Warren Anything..."
             onChange={(e) => setInput(e.target.value)}
           />
           <button 

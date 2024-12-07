@@ -3,7 +3,7 @@ import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { getModel } from "@/utils/models";
 import { State } from "@/utils/types";
 import { tools } from "./tools";
-import { formatFinancialHistory, parseFinancialHistory } from "@/utils/helper";
+import { formatFinancialHistory, parseFinancialHistory } from "@/utils/helpers";
 
 // Create the prompt template for the financial analyst
 const ANALYST_TEMPLATE = `You are a quantitative financial analyst. Your job is to gather ONLY the relevant financial metrics based on the question asked and analyze what additional metrics might be needed based on historical context. Do not provide analysis, commentary, or explanations.

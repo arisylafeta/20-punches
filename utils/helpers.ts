@@ -1,5 +1,5 @@
-import { FinancialEntry } from './types';import type { Message } from 'ai/svelte';
-import { AIMessage, BaseMessage, ChatMessage, HumanMessage } from '@langchain/core/messages';
+import { FinancialEntry } from './types';
+import { BaseMessage } from '@langchain/core/messages';
 
 // Helper function to format financial history
 export function formatFinancialHistory(entries: FinancialEntry[], separator: string = '==================') {
@@ -60,8 +60,6 @@ export const formatMessageHistory = (messages: BaseMessage[]): string => {
     return relevantHistory.slice(0, -1).map(m => m.content).join('\n');
 };
 
-
-
 export const getURL = (path: string = '') => {
     // Check if NEXT_PUBLIC_SITE_URL is set and non-empty. Set this to your site URL in production env.
     let url =
@@ -84,39 +82,4 @@ export const getURL = (path: string = '') => {
 
     // Concatenate the URL and the path.
     return path ? `${url}/${path}` : url;
-};
-/**
- * Converts a Vercel message to a LangChain message.
- * @param message - The message to convert.
- * @returns The converted LangChain message.
- */
-export const convertVercelMessageToLangChainMessage = (message: Message): BaseMessage => {
-  switch (message.role) {
-    case 'user':
-      return new HumanMessage({ content: message.content });
-    case 'assistant':
-      return new AIMessage({ content: message.content });
-    default:
-      return new ChatMessage({ content: message.content, role: message.role });
-  }
-};
-
-/**
- * Converts a LangChain message to a Vercel message.
- * @param message - The message to convert.
- * @returns The converted Vercel message.
- */
-export const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
-  switch (message.getType()) {
-    case 'human':
-      return { content: message.content, role: 'user' };
-    case 'ai':
-      return {
-        content: message.content,
-        role: 'assistant',
-        tool_calls: (message as AIMessage).tool_calls
-      };
-    default:
-      return { content: message.content, role: message._getType() };
-  }
 };

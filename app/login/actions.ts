@@ -2,7 +2,7 @@
 import { Provider } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getURL } from '@/utils/helper'
+import { getURL } from '@/utils/helpers'
 import { createClient } from '@/utils/supabase/server'
 
 export async function emailLogin(formData: FormData) {

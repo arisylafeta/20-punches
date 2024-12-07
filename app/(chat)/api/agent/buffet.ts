@@ -4,7 +4,7 @@ import { getModel } from "@/utils/models";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { AIMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate} from "@langchain/core/prompts";
-import { formatFinancialHistory, formatMessageHistory } from "@/utils/helper";
+import { formatFinancialHistory, formatMessageHistory } from "@/utils/helpers";
 
 
 /////////////////////////////////////////////////////
