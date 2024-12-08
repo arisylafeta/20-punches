@@ -1,14 +1,13 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { SidebarToggle } from '@/components/sidebar-toggle';
 import { Button } from '@/components/ui/button';
 import { BetterTooltip } from '@/components/ui/tooltip';
 import { PlusIcon } from './icons';
 import { usePathname } from 'next/navigation';
 import { ChatHistory } from './chat-history';
+import { createNewChat } from '@/lib/db/chats';
 
 export function Header() {
-  const router = useRouter();
   const pathname = usePathname();
 
   return (
@@ -21,9 +20,7 @@ export function Header() {
             variant="outline"
             className="p-4 ml-auto"
             onClick={() => {
-              //TODO: Implement create new chat.
-              //createNewChat()
-              router.refresh();
+              createNewChat()
             }}
           >
             <PlusIcon />

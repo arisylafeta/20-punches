@@ -1,6 +1,6 @@
 import { type Message } from 'ai';
 import { HumanMessage } from '@langchain/core/messages';
-import { getUser } from '@/lib/db/user';
+import { getUser } from '@/lib/db/users';
 import { buffetGraph } from '../agent/graph';
 import { LangChainAdapter } from 'ai';
 

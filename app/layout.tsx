@@ -1,7 +1,7 @@
 import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
-import { getUser } from "@/lib/db/user";
+import { getUser } from "@/lib/db/users";
 import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
