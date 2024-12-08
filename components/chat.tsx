@@ -2,7 +2,7 @@
 
 import type { Message } from 'ai';
 import { useChat } from 'ai/react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 import { PreviewMessage, ThinkingMessage } from '@/components/message';
 import { useScrollToBottom } from '@/components/use-scroll-to-bottom';
@@ -13,6 +13,8 @@ interface ChatProps {
   initialMessages: Array<Message>;
 }
 
+
+//TODO: Check the padding on mobile, why does the input box go up. 
 export default function Chat({ id, initialMessages }: ChatProps) {
   const { mutate } = useSWRConfig();
   const {

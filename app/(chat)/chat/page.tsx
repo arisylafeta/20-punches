@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { generateUUID } from '@/lib/utils';
 import { useEffect } from 'react';
 
+
+//Todo: Add logic to fetch latest chat and redirect to it.
 export default function ChatPage() {
   const router = useRouter();
   

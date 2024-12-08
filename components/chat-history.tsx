@@ -26,16 +26,15 @@ export function ChatHistory() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            <History className="h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Choose from Previous Conversations</span>
-          </Button>
+        <Button variant="outline">
+          <History className="h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Choose from Previous Conversations</span>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" style={{ maxHeight: '200px', overflowY: 'auto' }}>
         {chatHistory.map((chat) => (
           <DropdownMenuItem
             key={chat.conversation_id}
-            //TODO: CREATE FUNCTION TO PREPOPULATE CHAT WITH PREVIOUS CONVERSATION.
             onClick={() => router.push(`/chat/${chat.conversation_id}`)}
           >
             {chat.conversation_summary}
@@ -45,4 +44,3 @@ export function ChatHistory() {
     </DropdownMenu>
   );
 }
-

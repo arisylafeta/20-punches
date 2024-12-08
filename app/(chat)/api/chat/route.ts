@@ -5,6 +5,7 @@ import { buffetGraph } from '../agent/graph';
 import { LangChainAdapter } from 'ai';
 import { getChatById, saveChat } from '@/lib/db/chats';
 import { generateSummaryFromUserMessage } from '../../actions';
+import { getPreviousConversation } from '@/lib/db/checkpoints';
 
 export const maxDuration = 60;
 
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
     id,
     messages,
   }: { id: string; messages: Array<Message>; } = await request.json();
-  console.log("Conversation ID:", id);
+
   const user = await getUser();
 
   if (!user) {
@@ -24,7 +25,6 @@ export async function POST(request: Request) {
   const message = { messages: [new HumanMessage({ content: input })] };
 
   const chat = await getChatById({ id });
-
 
   //TODO: Check if sending new message updates `updated_at` field, if not implement it. 
   if (!chat) {
@@ -68,10 +68,37 @@ export async function POST(request: Request) {
       }
     });
 
-    // Use LangChainAdapter without experimental_StreamData
     return LangChainAdapter.toDataStreamResponse(stream);
   } catch (error) {
     console.error('Error in chat route:', error);
+    return new Response('Internal Server Error', { status: 500 });
+  }
+}
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+  
+  if (!id) {
+    return new Response('Missing conversation ID', { status: 400 });
+  }
+
+  const user = await getUser();
+  if (!user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  try {
+    const checkpoint = await getPreviousConversation(id);
+    if (!checkpoint) {
+      return new Response('Conversation not found', { status: 404 });
+    }
+
+    return new Response(JSON.stringify({ checkpoint }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Error fetching conversation:', error);
     return new Response('Internal Server Error', { status: 500 });
   }
 }
