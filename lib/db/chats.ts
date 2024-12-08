@@ -11,7 +11,7 @@ export const createNewChat = async () => {
     redirect(`/chat/${conversationId}`);
 }
 
-export const saveChat = async (id: string, conversationId: string, conversationSummary: string) => {
+export const saveChat = async (userId: string, conversationId: string, conversationSummary: string) => {
     const supabase = await createClient();
     
     // Insert new conversation entry
@@ -19,7 +19,7 @@ export const saveChat = async (id: string, conversationId: string, conversationS
         .from('conversation_history')
         .insert([
             {
-                user_id: id,
+                user_id: userId,
                 conversation_id: conversationId,
                 conversation_summary: conversationSummary 
             }
@@ -45,3 +45,25 @@ export async function getChatById({ id }: { id: string }) {
     throw error;
   }
 }
+
+export async function getChatHistory() {
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return [];
+      }
+  
+      const { data, error } = await supabase
+        .from('conversation_history')
+        .select('conversation_id, conversation_summary, updated_at')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+  
+      return data || [];
+    } catch (error) {
+      console.error('Failed to get all chats from database:', error);
+      throw error;
+    }
+  }

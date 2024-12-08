@@ -25,6 +25,8 @@ export async function POST(request: Request) {
 
   const chat = await getChatById({ id });
 
+
+  //TODO: Check if sending new message updates `updated_at` field, if not implement it. 
   if (!chat) {
     const summary= await generateSummaryFromUserMessage({ message: input });
     await saveChat(user.id, id, summary );

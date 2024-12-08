@@ -1,27 +1,47 @@
-import { History } from 'lucide-react'
+import { useEffect, useState } from 'react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { getChatHistory } from '@/lib/db/chats';
+import { Button } from '@/components/ui/button';
+import { History } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { BetterTooltip } from "./ui/tooltip"
-
+type ChatHistoryItem = {
+  conversation_id: string;
+  conversation_summary: string;
+  updated_at: string;
+};
 
 export function ChatHistory() {
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    async function fetchChatHistory() {
+      const data = await getChatHistory();
+      setChatHistory(data);
+    }
+    fetchChatHistory();
+  }, []);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-      <BetterTooltip content="Previous Conversations">
-        <Button variant="outline">
-          <History className="h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Choose from Previous Conversations</span>
-        </Button>
-      </BetterTooltip>
+          <Button variant="outline">
+            <History className="h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Choose from Previous Conversations</span>
+          </Button>
       </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+        {chatHistory.map((chat) => (
+          <DropdownMenuItem
+            key={chat.conversation_id}
+            onClick={() => router.push(`/chat/${chat.conversation_id}`)}
+          >
+            {chat.conversation_summary}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
+
