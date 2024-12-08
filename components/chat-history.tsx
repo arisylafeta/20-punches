@@ -35,6 +35,7 @@ export function ChatHistory() {
         {chatHistory.map((chat) => (
           <DropdownMenuItem
             key={chat.conversation_id}
+            //TODO: CREATE FUNCTION TO PREPOPULATE CHAT WITH PREVIOUS CONVERSATION.
             onClick={() => router.push(`/chat/${chat.conversation_id}`)}
           >
             {chat.conversation_summary}
