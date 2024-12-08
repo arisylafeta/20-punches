@@ -3,6 +3,8 @@ import { HumanMessage } from '@langchain/core/messages';
 import { getUser } from '@/lib/db/users';
 import { buffetGraph } from '../agent/graph';
 import { LangChainAdapter } from 'ai';
+import { getChatById, saveChat } from '@/lib/db/chats';
+import { generateSummaryFromUserMessage } from '../../actions';
 
 export const maxDuration = 60;
 
@@ -11,7 +13,7 @@ export async function POST(request: Request) {
     id,
     messages,
   }: { id: string; messages: Array<Message>; } = await request.json();
-
+  console.log("Conversation ID:", id);
   const user = await getUser();
 
   if (!user) {
@@ -20,6 +22,14 @@ export async function POST(request: Request) {
 
   const input = messages.findLast(message => message.role === "user")?.content || "";
   const message = { messages: [new HumanMessage({ content: input })] };
+
+  const chat = await getChatById({ id });
+
+  if (!chat) {
+    const summary= await generateSummaryFromUserMessage({ message: input });
+    await saveChat(user.id, id, summary );
+    console.log("saved chat")
+  }
 
   try {
     const streamingEvents = await buffetGraph.streamEvents(

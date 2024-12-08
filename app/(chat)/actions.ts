@@ -4,6 +4,7 @@ import { HumanMessage, BaseMessage, AIMessage } from "@langchain/core/messages";
 import { getModel } from "@/utils/models";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
+import { type CoreUserMessage } from 'ai';
 
 const config = { 
   configurable: { 
@@ -26,14 +27,10 @@ export async function runAgent(input: string) {
   };
 }
 
-'use server';
-
-import { type CoreUserMessage } from 'ai';
-
-export async function generateTitleFromUserMessage({
+export async function generateSummaryFromUserMessage({
   message,
 }: {
-  message: CoreUserMessage;
+  message: string;
 }) {
   const model = getModel('SMALL');
   const prompt = ChatPromptTemplate.fromMessages([
@@ -47,9 +44,9 @@ export async function generateTitleFromUserMessage({
   
   const chain = prompt.pipe(model).pipe(new StringOutputParser());
   
-  const title = await chain.invoke({
-    input: JSON.stringify(message),
+  const summary = await chain.invoke({
+    input: message,
   });
 
-  return title;
+  return summary;
 }
