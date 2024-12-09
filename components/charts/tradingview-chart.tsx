@@ -1,6 +1,8 @@
 // TradingViewWidget.jsx
 import React, { useEffect, useRef, memo } from 'react';
 
+
+//TODO: Make the chart configurable via props. 
 function TradingViewWidget() {
   const container = useRef<HTMLDivElement>(null);
 

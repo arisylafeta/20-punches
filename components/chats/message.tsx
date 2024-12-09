@@ -1,7 +1,7 @@
 import type { Message } from 'ai';
 import cx from 'classnames';
 import { motion } from 'framer-motion';
-import { SparklesIcon } from './icons';
+import { SparklesIcon } from '../icons';
 import { Markdown } from './markdown';
 
 export const PreviewMessage = ({

@@ -1,14 +1,5 @@
 'use server';
-
-import { redirect } from 'next/navigation';
-import { generateUUID } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
-
-export const createNewChat = async () => {
-    const conversationId = generateUUID();
-
-    redirect(`/chat/${conversationId}`);
-}
 
 export const saveChat = async (userId: string, conversationId: string, conversationSummary: string) => {
     const supabase = await createClient();

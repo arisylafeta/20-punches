@@ -1,4 +1,4 @@
-import Chat from '@/components/chat';
+import Chat from '@/components/chats/chat';
 import { getPreviousCheckpoint } from '@/lib/db/checkpoints';
 
 interface PageProps { 

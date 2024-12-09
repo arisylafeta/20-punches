@@ -22,11 +22,11 @@ const upper_items = [
         url: "/",
         icon: ChartLine,
     },
-    {
-        title: "Charts",
-        url: "/charts",
-        icon: ChartCandlestick,
-    },
+    // {
+    //     title: "Charts",
+    //     url: "/charts",
+    //     icon: ChartCandlestick,
+    // },
     {
         title: "News",
         url: "/news",

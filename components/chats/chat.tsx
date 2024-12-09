@@ -4,7 +4,7 @@ import type { Message } from 'ai';
 import { useChat } from 'ai/react';
 import { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
-import { PreviewMessage, ThinkingMessage } from '@/components/message';
+import { PreviewMessage, ThinkingMessage } from '@/components/chats/message';
 import { useScrollToBottom } from '@/components/use-scroll-to-bottom';
 import { Overview } from './overview';
 

@@ -1,7 +1,8 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { getChatHistory, createNewChat } from '@/lib/db/chats';
+import { getChatHistory } from '@/lib/db/chats';
+import { generateUUID } from '@/lib/utils';
 
 export default async function ChatPage() {
   const chatHistory = await getChatHistory(1);
@@ -11,6 +12,9 @@ export default async function ChatPage() {
     redirect(`/chat/${chatHistory[0].conversation_id}`);
   }
   
+  const id = generateUUID();
   // Otherwise create new chat
-  redirect(`/chat/${await createNewChat()}`);
+  redirect(`/chat/${id}`);
 }
+
+//Possible Improvement: If we create new chats on every sidebar click. We remove this page completely.
