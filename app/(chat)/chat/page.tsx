@@ -1,18 +1,16 @@
-'use client';
+'use server';
 
-import { useRouter } from 'next/navigation';
-import { generateUUID } from '@/lib/utils';
-import { useEffect } from 'react';
+import { redirect } from 'next/navigation';
+import { getChatHistory, createNewChat } from '@/lib/db/chats';
 
-
-//Todo: Add logic to fetch latest chat and redirect to it.
-export default function ChatPage() {
-  const router = useRouter();
+export default async function ChatPage() {
+  const chatHistory = await getChatHistory(1);
   
-  useEffect(() => {
-    const id = generateUUID();
-    router.replace(`/chat/${id}`);
-  }, [router]);
-
-  return null; // or a loading spinner if desired
+  // Immediately redirect to latest chat if exists
+  if (chatHistory?.[0]?.conversation_id) {
+    redirect(`/chat/${chatHistory[0].conversation_id}`);
+  }
+  
+  // Otherwise create new chat
+  redirect(`/chat/${await createNewChat()}`);
 }

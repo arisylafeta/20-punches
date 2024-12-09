@@ -1,6 +1,7 @@
 import pg from "pg";
 import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
 import type { Message } from 'ai';
+import { Checkpoint, CheckpointMessage } from '@/utils/types';
 
 const { Pool } = pg;
 const connectionString = process.env.POSTGRES_DB_URL;
@@ -15,36 +16,6 @@ const pool = new Pool({
 
 export const checkpointer = new PostgresSaver(pool);
 
-type CheckpointMessage = {
-  content: string;
-  additional_kwargs: Record<string, any>;
-  response_metadata: Record<string, any>;
-  tool_calls?: any[];
-  invalid_tool_calls?: any[];
-} & {
-  lc?: number;
-  type?: string;
-  id?: string[];
-  kwargs?: {
-    content: string;
-    additional_kwargs: Record<string, any>;
-    response_metadata: Record<string, any>;
-  };
-}
-
-type Checkpoint = {
-  v: number;
-  id: string;
-  ts: string;
-  pending_sends: any[];
-  versions_seen: Record<string, any>;
-  channel_versions: Record<string, number>;
-  channel_values: {
-    messages: CheckpointMessage[];
-    BuffetAgent?: string;
-    routingDecision?: string;
-  };
-}
 
 /**
  * Retrieves previous conversation messages from the checkpoint store.
@@ -53,7 +24,7 @@ type Checkpoint = {
  * @param conversationId - The ID of the conversation to retrieve
  * @returns An array of messages formatted for the chat UI, or null if not found
  */
-export async function getPreviousConversation(conversationId: string): Promise<Message[] | null> {
+export async function getPreviousCheckpoint(conversationId: string): Promise<Message[] | null> {
   const config = {
     configurable: {
       thread_id: conversationId

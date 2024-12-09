@@ -13,8 +13,6 @@ interface ChatProps {
   initialMessages: Array<Message>;
 }
 
-
-//TODO: Check the padding on mobile, why does the input box go up. 
 export default function Chat({ id, initialMessages }: ChatProps) {
   const { mutate } = useSWRConfig();
   const {
@@ -41,7 +39,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
 
   return (
-    <div className="flex flex-col min-w-0 h-dvh bg-background h-[calc(100vh-6rem)]">
+    <div className="flex flex-col min-w-0 bg-background h-[calc(100vh-4rem)] md:h-[calc(100vh-6rem)]">
       <div
         ref={messagesContainerRef}
         className="flex-1 overflow-y-auto px-4 py-4 space-y-6"

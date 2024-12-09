@@ -47,3 +47,39 @@ export const StateAnnotation = Annotation.Root({
         reducer: (x: string, y: string) => y || x || ""  // Replace with latest
     })
 });
+
+export type ChatHistoryItem = {
+    conversation_id: string;
+    conversation_summary: string;
+    updated_at: string;
+  };
+
+export type CheckpointMessage = {
+    content: string;
+    additional_kwargs: Record<string, any>;
+    response_metadata: Record<string, any>;
+    tool_calls?: any[];
+    invalid_tool_calls?: any[];
+  } & {
+    lc?: number;
+    type?: string;
+    id?: string[];
+    kwargs?: {
+      content: string;
+      additional_kwargs: Record<string, any>;
+      response_metadata: Record<string, any>;
+    };
+  }
+  
+ export type Checkpoint = {
+    v: number;
+    id: string;
+    ts: string;
+    pending_sends: any[];
+    versions_seen: Record<string, any>;
+    channel_versions: Record<string, number>;
+    channel_values: {
+      messages: CheckpointMessage[];
+      BuffetAgent?: string;
+    };
+  }

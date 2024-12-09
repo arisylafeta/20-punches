@@ -24,7 +24,7 @@ export const PreviewMessage = ({
         )}
       >
         {message.role === 'assistant' && (
-          <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
+          <div className="size-8 flex items-center rounded-full justify-center bg-muted/50 shrink-0">
             <SparklesIcon size={14} />
           </div>
         )}
@@ -48,7 +48,7 @@ export const ThinkingMessage = () => (
     animate={{ y: 0, opacity: 1 }}
   >
     <div className="flex gap-4 rounded-xl p-4 bg-muted">
-      <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
+      <div className="size-8 flex items-center rounded-full justify-center bg-muted/50 shrink-0">
         <SparklesIcon size={14} />
       </div>
       <div className="text-sm text-muted-foreground">

@@ -4,12 +4,7 @@ import { getChatHistory } from '@/lib/db/chats';
 import { Button } from '@/components/ui/button';
 import { History } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-type ChatHistoryItem = {
-  conversation_id: string;
-  conversation_summary: string;
-  updated_at: string;
-};
+import { ChatHistoryItem } from '@/utils/types';
 
 export function ChatHistory() {
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
@@ -27,7 +22,7 @@ export function ChatHistory() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
-          <History className="h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <History className="h-[1.2rem] w-[1.2rem]" />
           <span className="sr-only">Choose from Previous Conversations</span>
         </Button>
       </DropdownMenuTrigger>

@@ -6,38 +6,51 @@ import { buffetAgent } from './buffet';
 import { StateAnnotation } from "@/utils/types";
 import { checkpointer } from "@/lib/db/checkpoints";
 
-checkpointer.setup();
+// Singleton instance for the compiled graph
+let compiledGraph: ReturnType<typeof StateGraph.prototype.compile> | null = null;
 
-// Define routing function for parallel execution
-function getNextSteps(state: typeof StateAnnotation.State): string[] {
-    const routingDecision = state.routingDecision;
+// Initialize graph only once
+function initializeGraph() {
+    if (compiledGraph) return compiledGraph;
     
-    if (routingDecision === "both") {
-        return ["DocRetriever", "FinancialAnalyst"];
+    // Setup checkpointer only once
+    checkpointer.setup();
+
+    // Define routing function for parallel execution
+    function getNextSteps(state: typeof StateAnnotation.State): string[] {
+        const routingDecision = state.routingDecision;
+        
+        if (routingDecision === "both") {
+            return ["DocRetriever", "FinancialAnalyst"];
+        }
+        if (routingDecision === "quantitative") {
+            return ["FinancialAnalyst"];
+        }
+        if (routingDecision === "qualitative") {
+            return ["DocRetriever"];
+        }
+        // conversational or undefined
+        return ["BuffetAgent"];
     }
-    if (routingDecision === "quantitative") {
-        return ["FinancialAnalyst"];
-    }
-    if (routingDecision === "qualitative") {
-        return ["DocRetriever"];
-    }
-    // conversational or undefined
-    return ["BuffetAgent"];
+
+    // Initialize the graph
+    const workflow = new StateGraph(StateAnnotation)
+        .addNode("Analyzer", contextAnalyzer)
+        .addNode("DocRetriever", retrieveDocs)
+        .addNode("FinancialAnalyst", executeFinancialAnalysis)
+        .addNode("BuffetAgent", buffetAgent)
+
+        // Add edges
+        .addEdge("__start__", "Analyzer")
+        .addConditionalEdges("Analyzer", getNextSteps, ["DocRetriever", "FinancialAnalyst", "BuffetAgent"])
+        .addEdge("DocRetriever", "BuffetAgent")
+        .addEdge("FinancialAnalyst", "BuffetAgent")
+        .addEdge("BuffetAgent", "__end__");
+
+    // Compile the graph once
+    compiledGraph = workflow.compile({ checkpointer });
+    return compiledGraph;
 }
 
-// Initialize the graph
-const workflow = new StateGraph(StateAnnotation)
-    .addNode("Analyzer", contextAnalyzer)
-    .addNode("DocRetriever", retrieveDocs)
-    .addNode("FinancialAnalyst", executeFinancialAnalysis)
-    .addNode("BuffetAgent", buffetAgent)
-
-    // Add edges
-    .addEdge("__start__", "Analyzer")
-    .addConditionalEdges("Analyzer", getNextSteps, ["DocRetriever", "FinancialAnalyst", "BuffetAgent"])
-    .addEdge("DocRetriever", "BuffetAgent")
-    .addEdge("FinancialAnalyst", "BuffetAgent")
-    .addEdge("BuffetAgent", "__end__");
-
-// Compile the graph
-export const buffetGraph = workflow.compile({ checkpointer });
+// Export the singleton instance
+export const buffetGraph = initializeGraph();
