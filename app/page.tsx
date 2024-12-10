@@ -13,11 +13,15 @@ import { RadialChartComponent } from "@/components/charts/radial-chart"
 import { HalfRadialChartComponent } from "@/components/charts/half-radial-chart"
 import { StackedBarChartComponent } from "@/components/charts/stacked-bar-chart"
 import { RadarChartComponent } from "@/components/charts/radar-chart"
+import { TickerCarousel } from "@/components/ticker-carousel"
 
 
 const Home = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 gap-4">
+      <div className="w-full max-w-7xl">
+        <TickerCarousel />
+      </div>
       {/* Grid layout */}
       <div className="w-full max-w-7xl grid grid-cols-2 gap-2">
         <BarChartComponent/>

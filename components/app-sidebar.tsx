@@ -27,11 +27,11 @@ const upper_items = [
     //     url: "/charts",
     //     icon: ChartCandlestick,
     // },
-    {
-        title: "News",
-        url: "/news",
-        icon: Newspaper,
-    },
+    // {
+    //     title: "News",
+    //     url: "/news",
+    //     icon: Newspaper,
+    // },
     {
         title: "BuffetBot",
         url: "/chat",
@@ -50,11 +50,11 @@ const lower_items = [
         url: "/pricing",
         icon: CircleDollarSign,
     },
-    {
-        title: "Settings",
-        url: "/settings",
-        icon: Settings,
-    },
+    // {
+    //     title: "Settings",
+    //     url: "/settings",
+    //     icon: Settings,
+    // },
 ]
 
 export function AppSidebar() {
