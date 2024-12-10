@@ -16,12 +16,29 @@ import { RadarChartComponent } from "@/components/charts/radar-chart"
 import { TickerCarousel } from "@/components/ticker-carousel"
 
 
-const Home = () => {
+const DashboardPage = () => {
   return (
     <>
-      Homepage
+    cica
+      {/* Place these in some grid layout with text and shit */}
+      <BarChartComponent/>
+      <PieChartComponent/>
+
+      <LineChartComponent/>
+
+      <RadialChartComponent/>
+      <HalfRadialChartComponent/>
+      <StackedBarChartComponent/>
+      <RadarChartComponent/>
+
+      {/* Chart container */}
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel>
+          <TradingviewChart/>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </>
   )
 }
 
-export default Home
+export default DashboardPage

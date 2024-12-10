@@ -19,7 +19,7 @@ import { ModeToggle } from "./theme-provider"
 const upper_items = [
     {
         title: "Dashboard",
-        url: "/",
+        url: "/dashboard",
         icon: ChartLine,
     },
     // {

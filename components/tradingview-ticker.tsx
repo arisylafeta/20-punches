@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from "react"
+import { useRouter } from 'next/navigation'
 
 interface TradingViewTickerProps {
   symbol?: string
@@ -13,6 +14,7 @@ export function TradingViewTicker({
   width = "100%",
   colorTheme = "dark"
 }: TradingViewTickerProps) {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,8 +32,7 @@ export function TradingViewTicker({
       width,
       isTransparent: false,
       colorTheme,
-      locale: "en",
-      largeChartUrl: `https://20-punches.vercel.app/${symbol}`
+      locale: "en"
     });
 
     widgetContainer.appendChild(script);
@@ -44,8 +45,17 @@ export function TradingViewTicker({
   }, [symbol, width, colorTheme]);
 
   return (
-    <div ref={containerRef} className="tradingview-widget-container">
-      <div className="tradingview-widget-container__widget"></div>
+    <div className="relative">
+      <div 
+        className="absolute inset-0 z-10 cursor-pointer" 
+        onClick={() => router.push(`/dashboard/${encodeURIComponent(symbol)}?theme=${colorTheme}`)}
+      />
+      <div 
+        ref={containerRef} 
+        className="tradingview-widget-container"
+      >
+        <div className="tradingview-widget-container__widget"></div>
+      </div>
     </div>
   )
 }
