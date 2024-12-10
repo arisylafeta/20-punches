@@ -4,30 +4,28 @@ import { Card } from "@/components/ui/card"
 import { TradingViewTicker } from "./tradingview-ticker"
 
 const tickers = [
-  { symbol: "FX:EURUSD", name: "EUR/USD" },
-  { symbol: "FX:GBPUSD", name: "GBP/USD" },
-  { symbol: "NASDAQ:AAPL", name: "Apple" },
-  { symbol: "NASDAQ:GOOGL", name: "Google" },
-  { symbol: "NASDAQ:MSFT", name: "Microsoft" },
-  { symbol: "NASDAQ:AMZN", name: "Amazon" },
-  { symbol: "CRYPTO:BTCUSD", name: "Bitcoin" },
-  { symbol: "CRYPTO:ETHUSD", name: "Ethereum" }
+  { symbol: "BINANCE:BTCUSDT" },
+  { symbol: "BINANCE:ETHUSDT" },
+  { symbol: "BINANCE:SOLUSDT" },
+  { symbol: "BINANCE:AVAXUSDT" },
+  { symbol: "BINANCE:DOGEUSDT" },
+  { symbol: "BINANCE:MATICUSDT" },
+  { symbol: "BINANCE:LINKUSDT" },
+  { symbol: "BINANCE:UNIUSDT" },
+  { symbol: "BINANCE:AAVEUSDT" },
+  { symbol: "BINANCE:SUSHIUSDT" },
 ]
 
 export function TickerCarousel() {
   return (
-    <div className="relative w-full">
-      <div className="overflow-x-auto scrollbar-hide">
-        <div className="inline-flex gap-4 p-4 w-max">
-          {tickers.map((ticker) => (
-            <Card key={ticker.symbol} className="flex-none w-[300px] rounded-xl overflow-hidden">
-              <div className="-m-1">
-                <TradingViewTicker symbol={ticker.symbol} />
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+    <div className="flex overflow-x-auto scrollbar-hide">
+      {tickers.map((ticker) => (
+        <Card key={ticker.symbol} className="flex-none  rounded-xl overflow-hidden mx-2 first:ml-0 last:mr-0 mb-3 mt-3">
+          <div className="-m-1">
+            <TradingViewTicker symbol={ticker.symbol} />
+          </div>
+        </Card>
+      ))}
     </div>
   )
 }

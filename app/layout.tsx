@@ -47,7 +47,7 @@ export default async function RootLayout({
             <AppSidebar />
               <SidebarInset>
                 <Header />
-                <main className="flex-1 overflow-auto">
+                <main className="flex-1">
                   {children}
                 </main>
               </SidebarInset>
