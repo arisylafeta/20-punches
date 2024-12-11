@@ -18,7 +18,7 @@ export function Header() {
   };
 
   return (
-    <header className="flex sticky top-0 bg-background p-4 items-center px-2 md:px-2 gap-2 border-b border-gray-200 dark:border-white/20">
+    <header className="flex sticky top-0 bg-background p-4 items-center px-2 md:px-2 gap-2 border-b border-gray-200 dark:border-white/20 z-50">
       <SidebarToggle/>
       { pathname.startsWith('/chat/') && (
         <>

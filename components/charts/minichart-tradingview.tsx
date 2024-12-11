@@ -28,38 +28,46 @@ export function MiniChart({
     const widgetContainer = containerRef.current.querySelector('.tradingview-widget-container__widget');
     if (!widgetContainer) return;
 
-    const script = document.createElement('script');
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
-    script.type = 'text/javascript';
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-      symbol,
-      width,
-      height,
-      locale: "en",
-      dateRange,
-      colorTheme,
-      isTransparent: false,
-      autosize: true,
-      largeChartUrl: ""
-    });
+    // Clear all content of the widget container
+    widgetContainer.innerHTML = '';
 
-    widgetContainer.appendChild(script);
+    // Small delay to ensure cleanup is complete
+    const timeoutId = setTimeout(() => {
+      const script = document.createElement('script');
+      script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
+      script.type = 'text/javascript';
+      script.async = true;
+      script.innerHTML = JSON.stringify({
+        symbol,
+        width,
+        height,
+        locale: "en",
+        dateRange,
+        colorTheme,
+        isTransparent: false,
+        autosize: true,
+        largeChartUrl: ""
+      });
+
+      widgetContainer.appendChild(script);
+    }, 100);
 
     return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
+      clearTimeout(timeoutId);
+      if (widgetContainer) {
+        widgetContainer.innerHTML = '';
       }
     };
   }, [symbol, width, height, colorTheme, dateRange]);
 
+  // Use theme in key to force remount on theme change
   return (
-    <div className="relative group" ref={containerRef}>
+    <div className="relative group" ref={containerRef} key={colorTheme}>
       <div 
         className="absolute inset-0 z-10 cursor-pointer transition-colors hover:bg-muted/20" 
         onClick={() => router.push(`/dashboard/${encodeURIComponent(symbol)}?theme=${colorTheme}`)}
       />
-      <div className="tradingview-widget-container">
+      <div className="tradingview-widget-container z-0">
         <div className="tradingview-widget-container__widget"></div>
       </div>
     </div>
