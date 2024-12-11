@@ -1,8 +1,8 @@
 'use client'
 
 import { Card } from "@/components/ui/card"
-import { TradingViewTicker } from "./tradingview-ticker"
-import { TickerAdd } from "./ticker-add"
+import { TradingViewTicker } from "./ticker-tradingview"
+import { TickerAdd } from "./trade-add"
 import { useState } from "react"
 
 interface Ticker {

@@ -2,20 +2,25 @@
 
 import { useEffect, useRef } from "react"
 import { useRouter } from 'next/navigation'
+import { useTheme } from "next-themes"
 
-interface TradingViewTickerProps {
+interface MiniChartProps {
   symbol?: string
   width?: string
-  colorTheme?: 'light' | 'dark'
+  height?: string
+  dateRange?: string
 }
 
-export function TradingViewTicker({
+export function MiniChart({
   symbol = "FX:EURUSD",
   width = "100%",
-  colorTheme = "dark"
-}: TradingViewTickerProps) {
+  height = "100%",
+  dateRange = "12M"
+}: MiniChartProps) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme()
+  const colorTheme = theme === 'dark' ? 'dark' : 'light'
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -24,15 +29,19 @@ export function TradingViewTicker({
     if (!widgetContainer) return;
 
     const script = document.createElement('script');
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js";
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
     script.type = 'text/javascript';
     script.async = true;
     script.innerHTML = JSON.stringify({
       symbol,
       width,
-      isTransparent: false,
+      height,
+      locale: "en",
+      dateRange,
       colorTheme,
-      locale: "en"
+      isTransparent: false,
+      autosize: true,
+      largeChartUrl: ""
     });
 
     widgetContainer.appendChild(script);
@@ -42,20 +51,17 @@ export function TradingViewTicker({
         script.parentNode.removeChild(script);
       }
     };
-  }, [symbol, width, colorTheme]);
+  }, [symbol, width, height, colorTheme, dateRange]);
 
   return (
-    <div className="relative">
+    <div className="relative group" ref={containerRef}>
       <div 
-        className="absolute inset-0 z-10 cursor-pointer" 
+        className="absolute inset-0 z-10 cursor-pointer transition-colors hover:bg-muted/20" 
         onClick={() => router.push(`/dashboard/${encodeURIComponent(symbol)}?theme=${colorTheme}`)}
       />
-      <div 
-        ref={containerRef} 
-        className="tradingview-widget-container"
-      >
+      <div className="tradingview-widget-container">
         <div className="tradingview-widget-container__widget"></div>
       </div>
     </div>
-  )
+  );
 }

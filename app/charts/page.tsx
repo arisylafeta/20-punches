@@ -4,7 +4,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
-import TradingviewChart from '@/components/charts/tradingview-chart'
+import TradingviewChart from '@/components/charts/chart-tradingview'
 
 
 const ChartsPage = () => {

@@ -4,7 +4,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
-import TradingviewChart from '@/components/charts/tradingview-chart'
+import TradingviewChart from '@/components/charts/chart-tradingview'
 import { Card } from "@/components/ui/card"
 import { BarChartComponent } from "@/components/charts/bar-chart"
 import { PieChartComponent } from "@/components/charts/pie-chart"
