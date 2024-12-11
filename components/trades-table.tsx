@@ -35,48 +35,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { getUserTrades } from "@/lib/db/trades"
 
-const data: Payment[] = [
-  {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@yahoo.com",
-  },
-  {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@gmail.com",
-  },
-  {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@gmail.com",
-  },
-  {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@gmail.com",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@hotmail.com",
-  },
-]
-
-export type Payment = {
+interface Trade {
   id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
+  symbol: string
+  type: 'buy' | 'sell'
+  shares: number
+  price_per_share: number
+  transaction_date: string
+  created_at: string
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Trade>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -100,34 +71,43 @@ export const columns: ColumnDef<Payment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
-    ),
-  },
-  {
-    accessorKey: "email",
+    accessorKey: "symbol",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Email
-          <ArrowUpDown />
+          Symbol
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => <div className="uppercase font-medium">{row.getValue("symbol")}</div>,
   },
   {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => (
+      <div className={`capitalize font-medium ${
+        row.getValue("type") === "buy" ? "text-green-600" : "text-red-600"
+      }`}>
+        {row.getValue("type")}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "shares",
+    header: () => <div className="text-right">Shares</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"))
-
-      // Format the amount as a dollar amount
+      return <div className="text-right font-medium">{row.getValue("shares")}</div>
+    },
+  },
+  {
+    accessorKey: "price_per_share",
+    header: () => <div className="text-right">Price</div>,
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("price_per_share"))
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
@@ -137,29 +117,46 @@ export const columns: ColumnDef<Payment>[] = [
     },
   },
   {
+    accessorKey: "transaction_date",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Date
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("transaction_date"))
+      return <div className="font-medium">{date.toLocaleDateString()}</div>
+    },
+  },
+  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const payment = row.original
+      const trade = row.original
 
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() => navigator.clipboard.writeText(trade.id)}
             >
-              Copy payment ID
+              Copy trade ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem>View trade details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -168,16 +165,30 @@ export const columns: ColumnDef<Payment>[] = [
 ]
 
 export function DataTableDemo() {
+  const [trades, setTrades] = React.useState<Trade[]>([])
+  const [loading, setLoading] = React.useState(true)
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  React.useEffect(() => {
+    async function fetchTrades() {
+      try {
+        const data = await getUserTrades()
+        setTrades(data)
+      } catch (error) {
+        console.error('Error fetching trades:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTrades()
+  }, [])
+
   const table = useReactTable({
-    data,
+    data: trades,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -195,21 +206,25 @@ export function DataTableDemo() {
     },
   })
 
+  if (loading) {
+    return <div>Loading trades...</div>
+  }
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter by symbol..."
+          value={(table.getColumn("symbol")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("symbol")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
+              Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -276,7 +291,7 @@ export function DataTableDemo() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No trades found.
                 </TableCell>
               </TableRow>
             )}

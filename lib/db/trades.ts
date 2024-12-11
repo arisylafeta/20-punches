@@ -68,29 +68,3 @@ export async function getTradeErrors() {
   if (error) throw error
   return data
 }
-
-// Helper function to get a user's position for a specific symbol
-export async function getUserPositionBySymbol(symbol: string) {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('positions')
-    .select('*')
-    .eq('symbol', symbol)
-    .single()
-
-  if (error && error.code !== 'PGRST116') throw error // PGRST116 is "no rows returned"
-  return data
-}
-
-// Get trade history for a specific symbol
-export async function getSymbolTradeHistory(symbol: string) {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('trades')
-    .select('*')
-    .eq('symbol', symbol)
-    .order('transaction_date', { ascending: false })
-
-  if (error) throw error
-  return data
-}
