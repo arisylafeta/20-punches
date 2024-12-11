@@ -5,7 +5,7 @@ import { getUser } from "@/lib/db/users";
 import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
-
+import { Toaster } from "@/components/ui/toaster";
 
 export default async function RootLayout({
   children,
@@ -27,6 +27,7 @@ export default async function RootLayout({
           <div className="flex flex-col p-4 md:p-12 h-[100vh]">
             {children}
           </div>
+          <Toaster />
         </body>
       </html>
     );
@@ -52,7 +53,8 @@ export default async function RootLayout({
                 </main>
               </SidebarInset>
         </SidebarProvider>
-        </ThemeProvider>
+        <Toaster />
+      </ThemeProvider>
       </body>
     </html>
   );

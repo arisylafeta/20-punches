@@ -2,9 +2,6 @@ export const stockList = [
     "AAPL",  // Apple
     "MSFT",  // Microsoft
     "GOOGL", // Alphabet
-    "AMZN",  // Amazon
-    "NVDA",  // NVIDIA
-    "META",  // Meta Platforms
     "TSLA",  // Tesla
     "JPM",   // JPMorgan Chase
     "V",     // Visa

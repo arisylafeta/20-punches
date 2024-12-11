@@ -1,6 +1,6 @@
 import { BaseMessage } from "@langchain/core/messages";
 import { Annotation } from "@langchain/langgraph";
-
+import { z } from "zod"
 
 // Interface for financial analysis entries
 export interface FinancialEntry {
@@ -83,3 +83,25 @@ export type CheckpointMessage = {
       BuffetAgent?: string;
     };
   }
+
+export type TradeType = 'buy' | 'sell'
+
+export const tradeFormSchema = z.object({
+  symbol: z.string().min(1, "Symbol is required"),
+  type: z.enum(['buy', 'sell'], {
+    required_error: "Trade type is required",
+  }),
+  shares: z.string()
+    .min(1, "Number of shares is required")
+    .transform((val) => Number(val))
+    .refine((val) => !isNaN(val) && val > 0, "Number of shares must be positive"),
+  pricePerShare: z.string()
+    .min(1, "Price per share is required")
+    .transform((val) => Number(val))
+    .refine((val) => !isNaN(val) && val > 0, "Price per share must be positive"),
+  transactionDate: z.date({
+    required_error: "Transaction date is required",
+  }),
+})
+
+export type TradeFormValues = z.infer<typeof tradeFormSchema>

@@ -14,6 +14,7 @@ interface MiniChartProps {
 export function MiniChart({
   symbol = "FX:EURUSD",
   width = "100%",
+  //If height becomes an issue then adjust this to 150px
   height = "100%",
   dateRange = "12M"
 }: MiniChartProps) {
@@ -45,7 +46,7 @@ export function MiniChart({
         dateRange,
         colorTheme,
         isTransparent: false,
-        autosize: true,
+        autosize: false,
         largeChartUrl: ""
       });
 
@@ -67,7 +68,7 @@ export function MiniChart({
         className="absolute inset-0 z-10 cursor-pointer transition-colors hover:bg-muted/20" 
         onClick={() => router.push(`/dashboard/${encodeURIComponent(symbol)}?theme=${colorTheme}`)}
       />
-      <div className="tradingview-widget-container z-0">
+      <div className="tradingview-widget-container z-0" style={{ height: "150px" }}>
         <div className="tradingview-widget-container__widget"></div>
       </div>
     </div>

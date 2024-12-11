@@ -1,4 +1,3 @@
-1. Fix the double render bug when user changes the theme on the tradingview widgets.
 2. Create the schema in the database for the trades.
 3. Create the form for trade modifications. 
 4. Complete the CRUD operations for adding, removing and updating trades, linked with db. 

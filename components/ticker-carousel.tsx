@@ -2,27 +2,72 @@
 
 import { Card } from "@/components/ui/card"
 import { TradingViewTicker } from "./ticker-tradingview"
-import { TickerAdd } from "./trade-add"
-import { useState } from "react"
+import { NewPunchBox } from "./new-punch-box"
+import { useState, useEffect } from "react"
+import { type TradeFormValues } from "@/utils/types"
+import { createTrade, getUserPositions } from "@/lib/db/trades"
 
 interface Ticker {
   symbol: string
 }
 
-const defaultTickers: Ticker[] = [
-  { symbol: "BINANCE:ETHUSDT" },
-]
-
 export function TickerCarousel() {
-  const [tickers, setTickers] = useState<Ticker[]>(defaultTickers)
+  const [tickers, setTickers] = useState<Ticker[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleAddTicker = (symbol: string) => {
-    setTickers([{ symbol }, ...tickers])
+  useEffect(() => {
+    async function fetchPositions() {
+      try {
+        const positions = await getUserPositions()
+        // Sort by updated_at and get unique symbols
+        const uniqueSymbols = positions
+          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+          .reduce<string[]>((acc, pos) => {
+            if (!acc.includes(pos.symbol)) {
+              acc.push(pos.symbol)
+            }
+            return acc
+          }, [])
+        setTickers(uniqueSymbols.map(symbol => ({ symbol })))
+      } catch (error) {
+        console.error('Error fetching positions:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPositions()
+  }, [])
+
+  const handleAddTicker = async (values: TradeFormValues) => {
+    console.log('TickerCarousel received values:', values)
+    const trade = await createTrade(values)
+    // Refresh positions after adding a trade
+    const positions = await getUserPositions()
+    const uniqueSymbols = positions
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      .reduce<string[]>((acc, pos) => {
+        if (!acc.includes(pos.symbol)) {
+          acc.push(pos.symbol)
+        }
+        return acc
+      }, [])
+    setTickers(uniqueSymbols.map(symbol => ({ symbol })))
+    return trade
+  }
+
+  if (isLoading) {
+    return <div>Loading tickers...</div>
   }
 
   return (
     <div className="flex overflow-x-auto scrollbar-hide">
-      <TickerAdd onAddTicker={handleAddTicker} />
+      <NewPunchBox
+        onAddPunch={handleAddTicker}
+        width="284px"
+        height="72px"
+        buttonClassName="flex-none w-[284px] mx-2 first:ml-0 last:mr-0 mb-3 mt-3"
+      />
       {tickers.map((ticker) => (
         <Card key={ticker.symbol} className="flex-none rounded-xl overflow-hidden mx-2 first:ml-0 last:mr-0 mb-3 mt-3">
           <div className="-m-1">
