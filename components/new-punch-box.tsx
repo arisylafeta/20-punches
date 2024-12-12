@@ -100,25 +100,54 @@ export function NewPunchBox({
     pricePerShare: string;
   }) {
     try {
-      setError(null)
-      console.log('Form values being submitted:', values)
+      // Validate the trade price first
+      const validateResponse = await fetch('/dashboard/api/validate-trade', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symbol: values.symbol.toUpperCase(),
+          price: Number(values.pricePerShare),
+          date: values.transactionDate.toISOString()
+        }),
+      })
+
+      const validation = await validateResponse.json()
       
-      // Transform string values to numbers before calling onAddPunch
-      await onAddPunch({
+      if (!validation.valid) {
+        const { dayData } = validation
+        toast({
+          title: "Invalid Trade Price",
+          description: `Price must be between $${dayData.low.toFixed(2)} and $${dayData.high.toFixed(2)} for this date.`,
+          variant: "destructive"
+        })
+        return
+      }
+
+      // If price is valid, proceed with trade creation
+      const trade = {
         ...values,
+        symbol: values.symbol.toUpperCase(),
         shares: Number(values.shares),
         pricePerShare: Number(values.pricePerShare)
-      })
-      
-      setOpen(false)
+      }
+
+      await onAddPunch(trade)
       form.reset()
+      setOpen(false)
       toast({
-        title: "Trade Added",
-        description: `Successfully added ${values.type} trade for ${values.shares} shares of ${values.symbol}`,
+        title: "Success",
+        description: "Trade added successfully.",
       })
     } catch (error) {
-      console.error('Form submission error:', error)
-      setError(error instanceof Error ? error.message : 'Failed to add trade')
+      console.error('Error submitting trade:', error)
+      toast({
+        title: "Something went wrong",
+        description: error instanceof Error ? error.message : "Failed to submit trade. Please try again.",
+        variant: "destructive"
+      })
+      throw error
     }
   }
 
