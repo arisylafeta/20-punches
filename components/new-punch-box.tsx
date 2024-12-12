@@ -17,7 +17,6 @@ import * as z from "zod"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -42,6 +41,7 @@ import {
 import { CalendarIcon } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { checkPortfolioLimit } from "@/lib/db/trades"
 
 const formSchema = z.object({
   symbol: z.string().min(1, "Symbol is required"),
@@ -100,6 +100,19 @@ export function NewPunchBox({
     pricePerShare: string;
   }) {
     try {
+      // For buy orders, check portfolio limit
+      if (values.type === 'buy') {
+        const { allowed, currentCount, hasPosition } = await checkPortfolioLimit(values.symbol)
+        if (!allowed) {
+          toast({
+            title: "Portfolio Limit Reached",
+            description: `You can only have up to 20 different assets (currently: ${currentCount}). Please sell some positions before adding new ones.`,
+            variant: "destructive"
+          })
+          return
+        }
+      }
+
       // Validate the trade price first
       const validateResponse = await fetch('/dashboard/api/validate-trade', {
         method: 'POST',

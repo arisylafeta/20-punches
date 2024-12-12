@@ -261,3 +261,37 @@ export async function calculatePortfolioHistory(
     }
   })
 }
+
+export async function checkPortfolioLimit(symbol: string): Promise<{
+  allowed: boolean;
+  currentCount: number;
+  hasPosition: boolean;
+}> {
+  const supabase = createClient()
+  
+  // Check if we already have a position in this symbol
+  const { data: existingPosition } = await supabase
+    .from('positions')
+    .select('symbol')
+    .eq('symbol', symbol.toUpperCase())
+    .gt('shares', 0)
+    .single()
+
+  // If we have a position, we're allowed to trade it
+  if (existingPosition) {
+    return { allowed: true, currentCount: 0, hasPosition: true }
+  }
+
+  // Count unique assets with positive shares
+  const { count } = await supabase
+    .from('positions')
+    .select('symbol', { count: 'exact' })
+    .gt('shares', 0)
+
+  const currentCount = count || 0
+  return {
+    allowed: currentCount < 20,
+    currentCount,
+    hasPosition: false
+  }
+}
