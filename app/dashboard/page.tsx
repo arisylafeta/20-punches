@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react'
 import { calculatePortfolioHistory } from '@/lib/db/trades'
 import { BarChartComponent } from "@/components/charts/bar-chart"
 import { PieChartComponent } from "@/components/charts/pie-chart"
+import { PortfolioOverviewComponent } from "@/components/charts/portfolio-overview"
 import { LineChartComponent } from "@/components/charts/line-chart"
-import { ChartDataPoint, PortfolioChartData, PositionDataPoint } from '@/utils/types'
+import { PortfolioSummaryComponent } from "@/components/charts/portfolio-summary"
+import { ChartDataPoint, PortfolioChartData } from '@/utils/types'
 import { usePortfolio } from '@/contexts/portfolio-context'
 
 export default function DashboardPage() {
@@ -19,40 +21,38 @@ export default function DashboardPage() {
       try {
         setLoading(true)
         setError(null)
-
-        console.log('Fetching portfolio history...')
-        const history = await calculatePortfolioHistory()
-        console.log('Raw portfolio history:', JSON.stringify(history, null, 2))
+        const history = await calculatePortfolioHistory(undefined, new Date(), 1)
         
         if (!history || history.length === 0) {
-          console.warn('No portfolio history data available')
           setError('No portfolio data available')
           return
         }
 
-        // Log available symbols
-        const symbols = new Set<string>()
-        history.forEach(day => {
-          Object.keys(day.positions).forEach(symbol => symbols.add(symbol))
-        })
-        console.log('Available symbols:', Array.from(symbols))
-
         // Prepare data for line chart (total portfolio value over time)
-        const lineData: ChartDataPoint[] = history.map(day => ({
-          timestamp: day.timestamp,
-          value: day.totalValue
-        }))
-        console.log('Line chart data:', JSON.stringify(lineData, null, 2))
+        const lineData: ChartDataPoint[] = history.map((day, index) => {
+          const previousDay = index > 0 ? history[index - 1] : null;
+          const deposit = previousDay 
+            ? Object.entries(day.positions).reduce((sum, [symbol, position]) => {
+                const prevPosition = previousDay.positions[symbol];
+                if (!prevPosition) return sum + position.value; // New position, count as deposit
+                const shareChange = position.shares - prevPosition.shares;
+                return sum + (shareChange > 0 ? shareChange * position.avgPrice : 0); // Only count buys as deposits
+              }, 0)
+            : 0;
+
+          return {
+            timestamp: day.timestamp,
+            value: day.totalValue,
+            deposit: deposit
+          };
+        });
 
         // Prepare data for pie chart (latest day's position allocation)
         const latestDay = history[history.length - 1]
-        console.log('Latest day data:', JSON.stringify(latestDay, null, 2))
-        
-        const pieData: PositionDataPoint[] = Object.entries(latestDay.positions).map(([symbol, position]) => ({
+        const pieData = Object.entries(latestDay.positions).map(([symbol, position]) => ({
           symbol,
           value: position.value
         }))
-        console.log('Pie chart data:', JSON.stringify(pieData, null, 2))
 
         // Prepare data for bar chart (position values over time)
         const barData = history.map(day => {
@@ -64,9 +64,6 @@ export default function DashboardPage() {
           })
           return dataPoint
         })
-        console.log('Bar chart data structure:', JSON.stringify(barData, null, 2))
-        console.log('Bar chart first data point:', JSON.stringify(barData[0], null, 2))
-        console.log('Bar chart last data point:', JSON.stringify(barData[barData.length - 1], null, 2))
 
         setPortfolioData({
           lineChartData: lineData,
@@ -92,11 +89,31 @@ export default function DashboardPage() {
     return <div>{error}</div>
   }
 
+  const currentValue = portfolioData?.lineChartData[portfolioData.lineChartData.length - 1]?.value || 0
+  const previousValue = portfolioData?.lineChartData[portfolioData.lineChartData.length - 2]?.value || currentValue
+  const dayChange = currentValue - previousValue
+  const dayChangePercent = (dayChange / previousValue) * 100
+
   return (
-    <div>
-      <LineChartComponent data={portfolioData?.lineChartData || []} />
-      <PieChartComponent data={portfolioData?.pieChartData || []} />
-      <BarChartComponent data={portfolioData?.barChartData || []} />
+    <div className="space-y-8">
+      <PortfolioOverviewComponent 
+        data={portfolioData?.lineChartData}
+        topLeftComponent={
+          <PortfolioSummaryComponent
+            data={portfolioData?.lineChartData || []}
+            marketData={[]} // TODO: Add market data (e.g., S&P 500)
+          />
+        }
+        topRightComponent={
+          <LineChartComponent data={portfolioData?.lineChartData || []} />
+        }
+        bottomLeftComponent={
+          <BarChartComponent data={portfolioData?.barChartData || []} />
+        }
+        bottomRightComponent={
+          <PieChartComponent data={portfolioData?.pieChartData || []} />
+        }
+      />
     </div>
   )
 }

@@ -108,8 +108,9 @@ export type TradeFormValues = z.infer<typeof tradeFormSchema>
 
 // Chart Data Types
 export interface ChartDataPoint {
-  timestamp: string
-  value: number
+  timestamp: string;
+  value: number;
+  deposit?: number; // Positive for deposits, negative for withdrawals
 }
 
 export interface PositionDataPoint {
