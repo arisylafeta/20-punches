@@ -185,7 +185,8 @@ export function getUniqueSymbols(portfolioTimeSeries: PortfolioTimepoint[]): str
 
 export async function calculatePortfolioHistory(
   startDate?: Date,
-  endDate: Date = new Date()
+  endDate: Date = new Date(),
+  nYears: 0 | 1 | 3 | 5 = 1
 ): Promise<PortfolioValueTimepoint[]> {
   // Get portfolio positions over time
   const portfolioTimeSeries = await getPortfolioTimeSeries()
@@ -195,9 +196,14 @@ export async function calculatePortfolioHistory(
   const symbols = getUniqueSymbols(portfolioTimeSeries)
   if (symbols.length === 0) return []
 
-  // If no start date provided, use the first trade date
+  // Calculate the January 1st date based on nYears
+  const today = new Date()
+  const januaryFirst = new Date(today.getFullYear() - nYears, 0, 1)
+  
+  // If no start date provided, use the minimum between first trade date and January 1st
   const firstTradeDate = new Date(portfolioTimeSeries[0].timestamp)
-  const effectiveStartDate = startDate || firstTradeDate
+  const effectiveStartDate = startDate || 
+    (nYears === 0 ? firstTradeDate : new Date(Math.max(firstTradeDate.getTime(), januaryFirst.getTime())))
 
   // Fetch historical data through the API route
   const response = await fetch('/dashboard/api/yfinance', {
@@ -218,48 +224,79 @@ export async function calculatePortfolioHistory(
 
   const { data: historicalDataBySymbol } = await response.json() as { data: HistoricalDataResponse }
 
-  // Calculate portfolio value at each timepoint
-  return portfolioTimeSeries.map(timepoint => {
+  // Get all unique dates from historical data
+  const allDates = new Set<string>()
+  Object.values(historicalDataBySymbol).forEach(symbolData => {
+    if (!symbolData?.data) return
+    symbolData.data.forEach((d: YFinanceHistoricalData) => {
+      allDates.add(new Date(d.date).toISOString().split('T')[0])
+    })
+  })
+
+  // Sort dates chronologically
+  const sortedDates = Array.from(allDates).sort()
+
+  // For each date, calculate portfolio value
+  return sortedDates.map(date => {
     const positions: PortfolioValueTimepoint['positions'] = {}
     let totalValue = 0
 
-    // Calculate value for each position
-    Object.entries(timepoint.positions).forEach(([symbol, position]) => {
+    // For each symbol, find shares held on this date and multiply by price
+    symbols.forEach(symbol => {
+      // Find number of shares held on this date
+      const relevantTimepoint = findSharesAtDate(portfolioTimeSeries, date, symbol)
+      const shares = relevantTimepoint?.positions[symbol]?.shares || 0
+      const avgPrice = relevantTimepoint?.positions[symbol]?.avgPrice || 0
+
+      // Find price data for this date
       const historicalData = historicalDataBySymbol[symbol]?.data
       if (!historicalData || historicalData.length === 0) return
 
-      // Find the closest historical price data point
-      const timepointDate = new Date(timepoint.timestamp)
       const priceData = historicalData.find((d: YFinanceHistoricalData) => 
-        new Date(d.date).getTime() === timepointDate.getTime()
-      ) || historicalData.find((d: YFinanceHistoricalData) => 
-        new Date(d.date).getTime() < timepointDate.getTime()
-      ) // fallback to the nearest available date
+        new Date(d.date).toISOString().split('T')[0] === date
+      )
 
       if (!priceData) return
 
       const currentPrice = priceData.close
-      const value = position.shares * currentPrice
-      const profitLoss = value - (position.shares * position.avgPrice)
-      const profitLossPct = ((currentPrice - position.avgPrice) / position.avgPrice) * 100
+      const value = shares * currentPrice
+      const profitLoss = value - (shares * avgPrice)
+      const profitLossPct = shares > 0 ? ((currentPrice - avgPrice) / avgPrice) * 100 : 0
 
-      positions[symbol] = {
-        ...position,
-        currentPrice,
-        value,
-        profitLoss,
-        profitLossPct
+      if (shares > 0) {
+        positions[symbol] = {
+          shares,
+          avgPrice,
+          currentPrice,
+          value,
+          profitLoss,
+          profitLossPct
+        }
+        totalValue += value
       }
-
-      totalValue += value
     })
 
     return {
-      timestamp: timepoint.timestamp,
+      timestamp: date,
       totalValue,
       positions
     }
   })
+}
+
+// Helper function to find shares held at a specific date
+function findSharesAtDate(
+  timeSeries: PortfolioTimepoint[], 
+  targetDate: string, 
+  symbol: string
+): PortfolioTimepoint | undefined {
+  // Convert all dates to YYYY-MM-DD format for comparison
+  const target = new Date(targetDate)
+  
+  // Find the last timepoint before or equal to the target date
+  return timeSeries
+    .filter(tp => new Date(tp.timestamp) <= target)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
 }
 
 export async function checkPortfolioLimit(symbol: string): Promise<{
