@@ -6,6 +6,7 @@ import { NewPunchBox } from "./new-punch-box"
 import { useState, useEffect } from "react"
 import { type TradeFormValues } from "@/utils/types"
 import { createTrade, getUserPositions } from "@/lib/db/trades"
+import { usePortfolio } from "@/contexts/portfolio-context"
 
 interface Ticker {
   symbol: string
@@ -14,6 +15,7 @@ interface Ticker {
 export function TickerCarousel() {
   const [tickers, setTickers] = useState<Ticker[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { triggerRefresh } = usePortfolio()
 
   useEffect(() => {
     async function fetchPositions() {
@@ -53,6 +55,8 @@ export function TickerCarousel() {
         return acc
       }, [])
     setTickers(uniqueSymbols.map(symbol => ({ symbol })))
+    // Trigger portfolio refresh
+    triggerRefresh()
     return trade
   }
 
@@ -71,7 +75,7 @@ export function TickerCarousel() {
       {tickers.map((ticker) => (
         <Card key={ticker.symbol} className="flex-none rounded-xl overflow-hidden mx-2 first:ml-0 last:mr-0 mb-3 mt-3">
           <div className="-m-1">
-            <TradingViewTicker symbol={ticker.symbol} />
+          <TradingViewTicker symbol={ticker.symbol} />
           </div>
         </Card>
       ))}

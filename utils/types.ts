@@ -105,3 +105,23 @@ export const tradeFormSchema = z.object({
 })
 
 export type TradeFormValues = z.infer<typeof tradeFormSchema>
+
+// Chart Data Types
+export interface ChartDataPoint {
+  timestamp: string
+  value: number
+}
+
+export interface PositionDataPoint {
+  symbol: string
+  value: number
+}
+
+export interface PortfolioChartData {
+  lineChartData: ChartDataPoint[]
+  pieChartData: PositionDataPoint[]
+  barChartData: Array<{
+    timestamp: string
+    [key: string]: number | string
+  }>
+}
