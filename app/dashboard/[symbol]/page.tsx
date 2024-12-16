@@ -3,6 +3,7 @@ import { TAWidget } from '@/components/charts/ta-widget'
 import SymbolChart from '@/components/charts/symbol-chart'
 import SymbolFinancials from '@/components/charts/symbol-financials'
 import SymbolProfile from '@/components/charts/symbol-profile'
+import { NewsFeed } from '@/components/news-feed'
 
 interface PageProps {
   params: {
@@ -17,7 +18,7 @@ export default function SymbolPage({ params, searchParams }: PageProps) {
   const decodedSymbol = decodeURIComponent(params.symbol)
   
   return (
-    <div className="container mx-auto p-4 space-y-4">
+    <div className="space-y-8 p-4">
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2">
           <SymbolChart 
@@ -46,6 +47,11 @@ export default function SymbolPage({ params, searchParams }: PageProps) {
           />
         </div>
       </div>
+
+      <NewsFeed 
+        tickers={decodedSymbol}
+        className="max-w-4xl mx-auto"
+      />
     </div>
   )
 }

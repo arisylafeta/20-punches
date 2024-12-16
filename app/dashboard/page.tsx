@@ -95,7 +95,7 @@ export default function DashboardPage() {
   const dayChangePercent = (dayChange / previousValue) * 100
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-4">
       <PortfolioOverviewComponent 
         data={portfolioData?.lineChartData}
         topLeftComponent={

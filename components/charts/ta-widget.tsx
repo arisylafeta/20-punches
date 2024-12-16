@@ -17,18 +17,29 @@ export function TAWidget({
   showIntervalTabs = true,
   displayMode = "single"
 }: TAWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const container = useRef<HTMLDivElement>(null);
   const { theme } = useTheme()
   const colorTheme = theme === 'dark' ? 'dark' : 'light'
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const widgetContainer = containerRef.current.querySelector('.tradingview-widget-container__widget');
+    if (!container.current) return;
+    
+    const widgetContainer = container.current.querySelector('.tradingview-widget-container__widget');
     if (!widgetContainer) return;
 
+    // Clear any existing content
     widgetContainer.innerHTML = '';
 
+    // Create a new container for the widget
+    const scriptContainer = document.createElement('div');
+    scriptContainer.className = 'tradingview-widget-container';
+    
+    // Create the widget container
+    const widget = document.createElement('div');
+    widget.className = 'tradingview-widget-container__widget';
+    scriptContainer.appendChild(widget);
+
+    // Create and append the script
     const script = document.createElement('script');
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js";
     script.type = 'text/javascript';
@@ -45,7 +56,9 @@ export function TAWidget({
       colorTheme
     });
 
-    widgetContainer.appendChild(script);
+    // Replace the existing content with the new container
+    widgetContainer.appendChild(scriptContainer);
+    scriptContainer.appendChild(script);
 
     return () => {
       if (widgetContainer) {
@@ -57,7 +70,7 @@ export function TAWidget({
   return (
     <Card className="rounded-xl overflow-hidden">
       <div className="-m-1 h-[500px]">
-        <div ref={containerRef} className="h-full">
+        <div ref={container} className="h-full">
           <div className="tradingview-widget-container__widget h-full"></div>
         </div>
       </div>

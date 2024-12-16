@@ -19,24 +19,37 @@ function SymbolFinancials({ symbol = "AAPL" }: SymbolFinancialsProps) {
     const widgetContainer = container.current.querySelector('.tradingview-widget-container__widget');
     if (!widgetContainer) return;
 
+    // Clear any existing content
     widgetContainer.innerHTML = '';
 
-    const script = document.createElement("script");
+    // Create a new container for the widget
+    const scriptContainer = document.createElement('div');
+    scriptContainer.className = 'tradingview-widget-container';
+    
+    // Create the widget container
+    const widget = document.createElement('div');
+    widget.className = 'tradingview-widget-container__widget';
+    scriptContainer.appendChild(widget);
+
+    // Create and append the script
+    const script = document.createElement('script');
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-financials.js";
-    script.type = "text/javascript";
+    script.type = 'text/javascript';
     script.async = true;
     script.innerHTML = JSON.stringify({
+      "symbol": symbol,
+      "colorTheme": colorTheme,
       "isTransparent": false,
       "largeChartUrl": "",
       "displayMode": "regular",
       "width": "100%",
       "height": "100%",
-      "colorTheme": colorTheme,
-      "symbol": symbol,
       "locale": "en"
     });
 
-    widgetContainer.appendChild(script);
+    // Replace the existing content with the new container
+    widgetContainer.appendChild(scriptContainer);
+    scriptContainer.appendChild(script);
 
     return () => {
       if (widgetContainer) {
@@ -48,7 +61,7 @@ function SymbolFinancials({ symbol = "AAPL" }: SymbolFinancialsProps) {
   return (
     <Card className="rounded-xl overflow-hidden">
       <div className="-m-1 h-[500px]">
-        <div ref={container} className="tradingview-widget-container h-full">
+        <div ref={container} className="h-full">
           <div className="tradingview-widget-container__widget h-full"></div>
         </div>
       </div>
