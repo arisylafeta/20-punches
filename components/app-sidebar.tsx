@@ -42,11 +42,11 @@ const upper_items = [
         url: "/chat",
         icon: BotMessageSquare,
     },
-    {
-        title: "Buffet Nuggets",
-        url: "/buffet-nuggets",
-        icon: Lightbulb,
-    }
+    // {
+    //     title: "Buffet Nuggets",
+    //     url: "/buffet-nuggets",
+    //     icon: Lightbulb,
+    // }
 ]
 
 const lower_items = [

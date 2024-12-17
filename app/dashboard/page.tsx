@@ -7,31 +7,39 @@ import { PieChartComponent } from "@/components/charts/pie-chart"
 import { PortfolioOverviewComponent } from "@/components/charts/portfolio-overview"
 import { LineChartComponent } from "@/components/charts/line-chart"
 import { PortfolioSummaryComponent } from "@/components/charts/portfolio-summary"
-import { ChartDataPoint, PortfolioChartData } from '@/utils/types'
+import { PositionDataPoint, ChartDataPoint } from '@/utils/types'
 import { usePortfolio } from '@/contexts/portfolio-context'
 import { NewsFeed } from "@/components/news-feed"
 import TradingViewWidget from "@/components/charts/chart-tradingview"
 
 export default function DashboardPage() {
-  const [portfolioData, setPortfolioData] = useState<PortfolioChartData | null>(null)
+  const [pieData, setPieData] = useState<PositionDataPoint[]>([])
+  const [overviewData, setOverviewData] = useState<ChartDataPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { lastUpdate } = usePortfolio()
 
   useEffect(() => {
-    const fetchPortfolioData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
-        const history = await calculatePortfolioHistory(undefined, new Date(), 1)
+        const history = await calculatePortfolioHistory(undefined, new Date())
         
         if (!history || history.length === 0) {
           setError('No portfolio data available')
           return
         }
 
-        // Prepare data for line chart (total portfolio value over time)
-        const lineData: ChartDataPoint[] = history.map((day, index) => {
+        // Prepare data for pie chart (latest day's position allocation)
+        const latestDay = history[history.length - 1]
+        const pieData = Object.entries(latestDay.positions).map(([symbol, position]) => ({
+          symbol,
+          value: position.value
+        }))
+
+        // Prepare data for overview (total portfolio value over time)
+        const overviewData = history.map((day, index) => {
           const previousDay = index > 0 ? history[index - 1] : null;
           const deposit = previousDay 
             ? Object.entries(day.positions).reduce((sum, [symbol, position]) => {
@@ -49,29 +57,8 @@ export default function DashboardPage() {
           };
         });
 
-        // Prepare data for pie chart (latest day's position allocation)
-        const latestDay = history[history.length - 1]
-        const pieData = Object.entries(latestDay.positions).map(([symbol, position]) => ({
-          symbol,
-          value: position.value
-        }))
-
-        // Prepare data for bar chart (position values over time)
-        const barData = history.map(day => {
-          const dataPoint: { timestamp: string; [key: string]: number | string } = {
-            timestamp: day.timestamp
-          }
-          Object.entries(day.positions).forEach(([symbol, position]) => {
-            dataPoint[symbol] = position.value
-          })
-          return dataPoint
-        })
-
-        setPortfolioData({
-          lineChartData: lineData,
-          pieChartData: pieData,
-          barChartData: barData
-        })
+        setPieData(pieData)
+        setOverviewData(overviewData)
       } catch (err) {
         console.error('Error fetching portfolio data:', err)
         setError('Failed to load portfolio data')
@@ -80,7 +67,7 @@ export default function DashboardPage() {
       }
     }
 
-    fetchPortfolioData()
+    fetchData()
   }, [lastUpdate])
 
   if (loading) {
@@ -91,35 +78,30 @@ export default function DashboardPage() {
     return <div>{error}</div>
   }
 
-  const currentValue = portfolioData?.lineChartData[portfolioData.lineChartData.length - 1]?.value || 0
-  const previousValue = portfolioData?.lineChartData[portfolioData.lineChartData.length - 2]?.value || currentValue
-  const dayChange = currentValue - previousValue
-  const dayChangePercent = (dayChange / previousValue) * 100
-
-  const tickers = portfolioData?.pieChartData.map(item => item.symbol)
+  // Get tickers for TradingView widget
+  const tickers = pieData.map(item => item.symbol)
 
   return (
     <div className="space-y-8 p-4">
       <PortfolioOverviewComponent 
-        data={portfolioData?.lineChartData}
         topLeftComponent={
           <PortfolioSummaryComponent
-            data={portfolioData?.lineChartData || []}
+            data={overviewData}
             marketData={[]} // TODO: Add market data (e.g., S&P 500)
           />
         }
         topRightComponent={
-          <LineChartComponent data={portfolioData?.lineChartData || []} />
+          <LineChartComponent />
         }
         bottomLeftComponent={
-          <BarChartComponent data={portfolioData?.barChartData || []} />
+          <BarChartComponent />
         }
         bottomRightComponent={
-          <PieChartComponent data={portfolioData?.pieChartData || []} />
+          <PieChartComponent data={pieData} />
         }
       />
       
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-3 space-y-4">
           <NewsFeed 
             type="market"

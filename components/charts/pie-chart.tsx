@@ -152,17 +152,22 @@ export function PieChartComponent({
           })}
         </div>
         <div className="text-xs text-muted-foreground mt-2">
-          {monthChange >= 0 ? (
-            <div className="flex items-center gap-1">
-              <TrendingUp className="h-3 w-3 text-green-500" />
-              <span>Up {monthChange}% this month</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1">
-              <TrendingDown className="h-3 w-3 text-red-500" />
-              <span>Down {Math.abs(monthChange)}% this month</span>
-            </div>
-          )}
+          {(() => {
+            const highestStock = chartData.reduce((max, current) => {
+              const currentPercentage = (current.value / totalValue) * 100
+              const maxPercentage = (max.value / totalValue) * 100
+              return currentPercentage > maxPercentage ? current : max
+            }, chartData[0])
+            
+            const highestPercentage = ((highestStock.value / totalValue) * 100).toFixed(1)
+            
+            return (
+              <div className="flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 text-green-500" />
+                <span>{highestStock.symbol} has the highest allocation at {highestPercentage}%</span>
+              </div>
+            )
+          })()}
         </div>
       </CardFooter>
     </Card>

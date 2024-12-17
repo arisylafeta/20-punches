@@ -47,28 +47,7 @@ export async function getUserTrades() {
   return data
 }
 
-export async function getUserPositions() {
-  const supabase = createClient()
-  
-  // Get the current user's ID
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
 
-  console.log('Fetching positions for user:', user.id)
-  const { data, error } = await supabase
-    .from('positions')
-    .select('*')
-    .eq('user_id', user.id)  // Only get positions for current user
-    .order('symbol')
-
-  if (error) {
-    console.error('Error fetching positions:', error)
-    throw error
-  }
-  
-  console.log('Positions from database:', data)
-  return data
-}
 
 export async function getTradeErrors() {
   const supabase = createClient()
@@ -198,7 +177,7 @@ export function getUniqueSymbols(portfolioTimeSeries: PortfolioTimepoint[]): str
 export async function calculatePortfolioHistory(
   startDate?: Date,
   endDate: Date = new Date(),
-  nYears: 0 | 1 | 3 | 5 = 1
+  timeRange: "1M" | "6M" | "1Y" = "1M"
 ): Promise<PortfolioValueTimepoint[]> {
   // Get portfolio positions over time
   const portfolioTimeSeries = await getPortfolioTimeSeries()
@@ -208,14 +187,27 @@ export async function calculatePortfolioHistory(
   const symbols = getUniqueSymbols(portfolioTimeSeries)
   if (symbols.length === 0) return []
 
-  // Calculate the January 1st date based on nYears
+  // Calculate start date based on timeRange if not provided
   const today = new Date()
-  const januaryFirst = new Date(today.getFullYear() - nYears, 0, 1)
+  let effectiveStartDate = startDate || new Date(today.getFullYear(), today.getMonth() - 1, today.getDate())
   
-  // If no start date provided, use the minimum between first trade date and January 1st
+  if (!startDate) {
+    switch (timeRange) {
+      case "1M":
+        effectiveStartDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate())
+        break
+      case "6M":
+        effectiveStartDate = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate())
+        break
+      case "1Y":
+        effectiveStartDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
+        break
+    }
+  }
+
+  // If calculated start date is before first trade, use first trade date
   const firstTradeDate = new Date(portfolioTimeSeries[0].timestamp)
-  const effectiveStartDate = startDate || 
-    (nYears === 0 ? firstTradeDate : new Date(Math.max(firstTradeDate.getTime(), januaryFirst.getTime())))
+  effectiveStartDate = new Date(Math.max(firstTradeDate.getTime(), effectiveStartDate.getTime()))
 
   // Fetch historical data through the API route
   const response = await fetch('/dashboard/api/yfinance', {

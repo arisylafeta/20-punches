@@ -8,7 +8,6 @@ interface PortfolioOverviewProps {
   topRightComponent: ReactNode
   bottomLeftComponent: ReactNode
   bottomRightComponent: ReactNode
-  data: any // Keep this for the summary calculations
 }
 
 export function PortfolioOverviewComponent({ 
@@ -16,14 +15,7 @@ export function PortfolioOverviewComponent({
   topRightComponent,
   bottomLeftComponent,
   bottomRightComponent,
-  data 
 }: PortfolioOverviewProps) {
-  // Calculate summary data
-  const currentValue = data[data.length - 1]?.value || 0
-  const previousValue = data[data.length - 2]?.value || currentValue
-  const dayChange = currentValue - previousValue
-  const dayChangePercent = (dayChange / previousValue) * 100
-
   return (
     <Card className="bg-background border-none">
       <CardContent className="p-6 space-y-6">
