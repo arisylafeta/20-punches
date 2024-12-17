@@ -5,9 +5,15 @@ interface TradingViewWidgetProps {
   watchlist?: string[];
   symbol?: string;
   showWatchlist?: boolean;
+  height?: number;
 }
 
-function TradingViewWidget({ watchlist = [], symbol, showWatchlist = true }: TradingViewWidgetProps) {
+function TradingViewWidget({ 
+  watchlist = [], 
+  symbol, 
+  showWatchlist = true,
+  height = 600
+}: TradingViewWidgetProps) {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(
@@ -46,8 +52,8 @@ function TradingViewWidget({ watchlist = [], symbol, showWatchlist = true }: Tra
   );
 
   return (
-    <div className="tradingview-widget-container min-h-[700px]" ref={container} style={{ width: "100%" }}>
-      <div className="tradingview-widget-container__widget" style={{ height: "600px", width: "100%" }}></div>
+    <div className="tradingview-widget-container" ref={container} style={{ width: "100%", minHeight: height }}>
+      <div className="tradingview-widget-container__widget" style={{ height: height, width: "100%" }}></div>
       <div className="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span className="blue-text">Track all markets on TradingView</span></a></div>
     </div>
   );

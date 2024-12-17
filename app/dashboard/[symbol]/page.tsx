@@ -56,6 +56,7 @@ export default function SymbolPage({ params, searchParams }: PageProps) {
           />
           <TradingViewWidget 
             symbol={decodedSymbol}
+            height={700}
           />
         </div>
       </div>
