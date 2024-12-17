@@ -5,7 +5,7 @@ import { TradingViewTicker } from "./ticker-tradingview"
 import { NewPunchBox } from "./new-punch-box"
 import { useState, useEffect } from "react"
 import { type TradeFormValues } from "@/utils/types"
-import { createTrade, getUserPositions } from "@/lib/db/trades"
+import { createTrade, getUniqueTradeSymbols } from "@/lib/db/trades"
 import { usePortfolio } from "@/contexts/portfolio-context"
 
 interface Ticker {
@@ -15,46 +15,31 @@ interface Ticker {
 export function TickerCarousel() {
   const [tickers, setTickers] = useState<Ticker[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const { triggerRefresh } = usePortfolio()
+  const { triggerRefresh, lastUpdate } = usePortfolio()
 
   useEffect(() => {
-    async function fetchPositions() {
+    async function fetchSymbols() {
       try {
-        const positions = await getUserPositions()
-        // Sort by updated_at and get unique symbols
-        const uniqueSymbols = positions
-          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-          .reduce<string[]>((acc, pos) => {
-            if (!acc.includes(pos.symbol)) {
-              acc.push(pos.symbol)
-            }
-            return acc
-          }, [])
-        setTickers(uniqueSymbols.map(symbol => ({ symbol })))
+        const symbols = await getUniqueTradeSymbols()
+        console.log('Unique symbols from trades:', symbols)
+        setTickers(symbols.map(symbol => ({ symbol })))
       } catch (error) {
-        console.error('Error fetching positions:', error)
+        console.error('Error fetching symbols:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchPositions()
-  }, [])
+    console.log('Fetching symbols, lastUpdate:', lastUpdate)
+    fetchSymbols()
+  }, [lastUpdate])
 
   const handleAddTicker = async (values: TradeFormValues) => {
     console.log('TickerCarousel received values:', values)
     const trade = await createTrade(values)
-    // Refresh positions after adding a trade
-    const positions = await getUserPositions()
-    const uniqueSymbols = positions
-      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-      .reduce<string[]>((acc, pos) => {
-        if (!acc.includes(pos.symbol)) {
-          acc.push(pos.symbol)
-        }
-        return acc
-      }, [])
-    setTickers(uniqueSymbols.map(symbol => ({ symbol })))
+    // Refresh symbols after adding a trade
+    const symbols = await getUniqueTradeSymbols()
+    setTickers(symbols.map(symbol => ({ symbol })))
     // Trigger portfolio refresh
     triggerRefresh()
     return trade

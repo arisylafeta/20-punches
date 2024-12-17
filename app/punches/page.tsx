@@ -7,12 +7,14 @@ import { DataTableDemo } from '@/components/trades-table'
 import { NewPunchBox } from '@/components/new-punch-box'
 import { type TradeFormValues } from "@/utils/types"
 import { createTrade, getUserPositions } from "@/lib/db/trades"
+import { usePortfolio } from '@/contexts/portfolio-context'
 
 const TOTAL_SLOTS = 20;
 
 export default function PunchesPage() {
   const [positions, setPositions] = useState<{ symbol: string }[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { triggerRefresh } = usePortfolio()
 
   useEffect(() => {
     async function fetchPositions() {
@@ -51,6 +53,7 @@ export default function PunchesPage() {
         return acc
       }, [])
     setPositions(uniqueSymbols.map(symbol => ({ symbol })))
+    triggerRefresh() // Trigger portfolio data refresh
     return trade
   };
 

@@ -49,12 +49,24 @@ export async function getUserTrades() {
 
 export async function getUserPositions() {
   const supabase = createClient()
+  
+  // Get the current user's ID
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  console.log('Fetching positions for user:', user.id)
   const { data, error } = await supabase
     .from('positions')
     .select('*')
+    .eq('user_id', user.id)  // Only get positions for current user
     .order('symbol')
 
-  if (error) throw error
+  if (error) {
+    console.error('Error fetching positions:', error)
+    throw error
+  }
+  
+  console.log('Positions from database:', data)
   return data
 }
 
@@ -297,6 +309,12 @@ function findSharesAtDate(
   return timeSeries
     .filter(tp => new Date(tp.timestamp) <= target)
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
+}
+
+export async function getUniqueTradeSymbols() {
+  const trades = await getUserTrades()
+  const uniqueSymbols = Array.from(new Set(trades.map(trade => trade.symbol)))
+  return uniqueSymbols.sort()
 }
 
 export async function checkPortfolioLimit(symbol: string): Promise<{
