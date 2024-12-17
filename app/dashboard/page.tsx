@@ -9,6 +9,7 @@ import { LineChartComponent } from "@/components/charts/line-chart"
 import { PortfolioSummaryComponent } from "@/components/charts/portfolio-summary"
 import { ChartDataPoint, PortfolioChartData } from '@/utils/types'
 import { usePortfolio } from '@/contexts/portfolio-context'
+import { NewsFeed } from "@/components/news-feed"; // Added import statement
 
 export default function DashboardPage() {
   const [portfolioData, setPortfolioData] = useState<PortfolioChartData | null>(null)
@@ -114,6 +115,10 @@ export default function DashboardPage() {
           <PieChartComponent data={portfolioData?.pieChartData || []} />
         }
       />
+      
+      <div className="grid grid-cols-1 gap-4">
+        <NewsFeed type="market" />
+      </div>
     </div>
   )
 }

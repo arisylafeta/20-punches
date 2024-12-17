@@ -22,7 +22,7 @@ export function PortfolioSummaryComponent({ data = [], marketData = [] }: Portfo
   const metrics = calculateMetrics(data, marketData)
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Portfolio Summary</CardTitle>
         <CardDescription>Portfolio overview</CardDescription>

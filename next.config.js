@@ -5,16 +5,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      'media.zenfs.com',
-      'img.etimg.com',
-      'static.finnhub.io',
-      'image.cnbcfm.com',
-      'cdn.snapi.dev',
-      's.yimg.com',
-      'images.mktw.net',
-      'cdn.benzinga.com',
-      'www.benzinga.com'
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      }
     ],
   },
   experimental: {
@@ -24,10 +19,11 @@ const nextConfig = {
     // Suppress the warning
     config.ignoreWarnings = [
       { module: /node_modules\/node-fetch\/lib\/index\.js/ },
-      { module: /node_modules\/punycode\/punycode\.js/ },
-    ];
-    return config;
-  },
-};
+      { module: /node_modules\/yaml\/browser\/dist\/index\.js/ },
+      { module: /node_modules\/next\/dist\/compiled\/webpack\/bundle5\.js/ },
+    ]
+    return config
+  }
+}
 
 module.exports = withBundleAnalyzer(nextConfig)

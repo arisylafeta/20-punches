@@ -19,26 +19,26 @@ export default function SymbolPage({ params, searchParams }: PageProps) {
   
   return (
     <div className="space-y-8 p-4">
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
           <SymbolChart 
             symbol={decodedSymbol}
           />
         </div>
-        <div className="col-span-1">
+        <div className="lg:col-span-1">
           <SymbolProfile 
             symbol={decodedSymbol}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
           <SymbolFinancials 
             symbol={decodedSymbol}
           />
         </div>
-        <div className="col-span-1">
+        <div className="lg:col-span-1">
           <TAWidget 
             symbol={decodedSymbol}
             interval="1D"
@@ -48,10 +48,13 @@ export default function SymbolPage({ params, searchParams }: PageProps) {
         </div>
       </div>
 
-      <NewsFeed 
-        tickers={decodedSymbol}
-        className="max-w-4xl mx-auto"
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-3">
+          <NewsFeed 
+            tickers={decodedSymbol}
+          />
+        </div>
+      </div>
     </div>
   )
 }
