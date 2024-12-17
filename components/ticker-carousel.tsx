@@ -37,10 +37,6 @@ export function TickerCarousel() {
   const handleAddTicker = async (values: TradeFormValues) => {
     console.log('TickerCarousel received values:', values)
     const trade = await createTrade(values)
-    // Refresh symbols after adding a trade
-    const symbols = await getUniqueTradeSymbols()
-    setTickers(symbols.map(symbol => ({ symbol })))
-    // Trigger portfolio refresh
     triggerRefresh()
     return trade
   }

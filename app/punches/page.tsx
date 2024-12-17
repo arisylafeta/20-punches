@@ -14,7 +14,7 @@ const TOTAL_SLOTS = 20;
 export default function PunchesPage() {
   const [positions, setPositions] = useState<{ symbol: string }[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const { triggerRefresh } = usePortfolio()
+  const { triggerRefresh, lastUpdate } = usePortfolio()
 
   useEffect(() => {
     async function fetchPositions() {
@@ -38,22 +38,11 @@ export default function PunchesPage() {
     }
 
     fetchPositions()
-  }, [])
+  }, [lastUpdate])
 
   const handleAddPunch = async (values: TradeFormValues) => {
     const trade = await createTrade(values)
-    // Refresh positions after adding a trade
-    const userPositions = await getUserPositions()
-    const uniqueSymbols = userPositions
-      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-      .reduce<string[]>((acc, pos) => {
-        if (!acc.includes(pos.symbol)) {
-          acc.push(pos.symbol)
-        }
-        return acc
-      }, [])
-    setPositions(uniqueSymbols.map(symbol => ({ symbol })))
-    triggerRefresh() // Trigger portfolio data refresh
+    triggerRefresh() // This will cause all components using usePortfolio to update
     return trade
   };
 

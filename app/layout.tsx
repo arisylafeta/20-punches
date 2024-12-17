@@ -25,12 +25,19 @@ export default async function RootLayout({
           <title>20Punches</title>
         </head>
         <body>
-          <PortfolioProvider>
-            <div className="flex flex-col p-4 md:p-12 h-[100vh]">
-              {children}
-            </div>
-            <Toaster />
-          </PortfolioProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <PortfolioProvider>
+              <div className="flex flex-col p-4 md:p-12 h-[100vh]">
+                {children}
+              </div>
+              <Toaster />
+            </PortfolioProvider>
+          </ThemeProvider>
         </body>
       </html>
     );
@@ -41,25 +48,25 @@ export default async function RootLayout({
         <title>20Punches</title>
       </head>
       <body>
-      <PortfolioProvider>
         <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-          <SidebarProvider defaultOpen={defaultOpen}>
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <PortfolioProvider>
+            <SidebarProvider defaultOpen={defaultOpen}>
               <AppSidebar />
-                <SidebarInset>
-                  <Header />
-                  <main className="flex-1">
-                    {children}
-                  </main>
-                </SidebarInset>
-          </SidebarProvider>
-          <Toaster />
+              <SidebarInset>
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+              </SidebarInset>
+            </SidebarProvider>
+            <Toaster />
+          </PortfolioProvider>
         </ThemeProvider>
-      </PortfolioProvider>
       </body>
     </html>
   );
