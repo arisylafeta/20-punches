@@ -9,7 +9,8 @@ import { LineChartComponent } from "@/components/charts/line-chart"
 import { PortfolioSummaryComponent } from "@/components/charts/portfolio-summary"
 import { ChartDataPoint, PortfolioChartData } from '@/utils/types'
 import { usePortfolio } from '@/contexts/portfolio-context'
-import { NewsFeed } from "@/components/news-feed"; // Added import statement
+import { NewsFeed } from "@/components/news-feed"
+import TradingViewWidget from "@/components/charts/chart-tradingview"
 
 export default function DashboardPage() {
   const [portfolioData, setPortfolioData] = useState<PortfolioChartData | null>(null)
@@ -95,6 +96,8 @@ export default function DashboardPage() {
   const dayChange = currentValue - previousValue
   const dayChangePercent = (dayChange / previousValue) * 100
 
+  const tickers = portfolioData?.pieChartData.map(item => item.symbol)
+
   return (
     <div className="space-y-8 p-4">
       <PortfolioOverviewComponent 
@@ -118,6 +121,7 @@ export default function DashboardPage() {
       
       <div className="grid grid-cols-1 gap-4">
         <NewsFeed type="market" />
+        <TradingViewWidget watchlist={tickers} />
       </div>
     </div>
   )

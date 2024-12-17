@@ -1,46 +1,53 @@
 // TradingViewWidget.jsx
 import React, { useEffect, useRef, memo } from 'react';
 
+interface TradingViewWidgetProps {
+  watchlist?: string[];
+  symbol?: string;
+  showWatchlist?: boolean;
+}
 
-//TODO: Make the chart configurable via props. 
-function TradingViewWidget() {
+function TradingViewWidget({ watchlist = [], symbol, showWatchlist = true }: TradingViewWidgetProps) {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(
     () => {
+      const currentContainer = container.current;
       const script = document.createElement("script");
       script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
       script.type = "text/javascript";
       script.async = true;
-      script.innerHTML = `
-        {
-          "autosize": true,
-          "symbol": "NASDAQ:AAPL",
-          "interval": "D",
-          "timezone": "Etc/UTC",
-          "theme": "dark",
-          "style": "1",
-          "locale": "en",
-          "withdateranges": true,
-          "allow_symbol_change": true,
-          "watchlist": [
-            "NASDAQ:ASML"
-          ],
-          "calendar": false,
-          "support_host": "https://www.tradingview.com"
-        }`;
+      script.innerHTML = JSON.stringify({
+        autosize: true,
+        symbol: symbol || watchlist[0] || "SPY",
+        interval: "D",
+        timezone: "Etc/UTC",
+        theme: "dark",
+        style: "1",
+        locale: "en",
+        withdateranges: true,
+        allow_symbol_change: true,
+        ...(showWatchlist && { watchlist }),
+        calendar: false,
+        support_host: "https://www.tradingview.com"
+      });
       
-      // Add null check before appending
-      if (container.current) {
-        container.current.appendChild(script);
+      if (currentContainer) {
+        currentContainer.appendChild(script);
       }
+
+      return () => {
+        if (currentContainer) {
+          currentContainer.innerHTML = '';
+        }
+      };
     },
-    []
+    [watchlist, symbol, showWatchlist]
   );
 
   return (
-    <div className="tradingview-widget-container" ref={container} style={{ height: "100%", width: "100%" }}>
-      <div className="tradingview-widget-container__widget" style={{ height: "calc(100% - 32px)", width: "100%" }}></div>
+    <div className="tradingview-widget-container min-h-[700px]" ref={container} style={{ width: "100%" }}>
+      <div className="tradingview-widget-container__widget" style={{ height: "600px", width: "100%" }}></div>
       <div className="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span className="blue-text">Track all markets on TradingView</span></a></div>
     </div>
   );
