@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { DataTableDemo } from '@/components/trades-table'
 import { NewPunchBox } from '@/components/new-punch-box'
 import { type TradeFormValues } from "@/utils/types"
-import { createTrade, getUserPositions } from "@/lib/db/trades"
+import { createTrade, getUniqueSymbols, getPortfolioTimeSeries } from "@/lib/db/trades"
 import { usePortfolio } from '@/contexts/portfolio-context'
 
 const TOTAL_SLOTS = 20;
@@ -19,16 +19,8 @@ export default function PunchesPage() {
   useEffect(() => {
     async function fetchPositions() {
       try {
-        const userPositions = await getUserPositions()
-        // Sort by updated_at and get unique symbols
-        const uniqueSymbols = userPositions
-          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-          .reduce<string[]>((acc, pos) => {
-            if (!acc.includes(pos.symbol)) {
-              acc.push(pos.symbol)
-            }
-            return acc
-          }, [])
+        const portfolioTimeSeries = await getPortfolioTimeSeries()
+        const uniqueSymbols = getUniqueSymbols(portfolioTimeSeries)
         setPositions(uniqueSymbols.map(symbol => ({ symbol })))
       } catch (error) {
         console.error('Error fetching positions:', error)
