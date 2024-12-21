@@ -7,13 +7,20 @@ import {
   PaymentElement,
 } from "@stripe/react-stripe-js";
 import convertToSubcurrency from "@/utils/convertToSubcurrency";
+import { usePathname } from "next/navigation";
 
-const CheckoutPage = ({ amount }: { amount: number }) => {
+interface CheckoutPageProps {
+  amount: number;
+  priceId: string;
+}
+
+const CheckoutPage = ({ amount, priceId }: CheckoutPageProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [clientSecret, setClientSecret] = useState("");
   const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     fetch("/pricing/api/create-payment-intent", {
@@ -21,11 +28,19 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ amount: convertToSubcurrency(amount) }),
+      body: JSON.stringify({ 
+        amount: convertToSubcurrency(amount),
+        priceId: priceId 
+      }),
     })
       .then((res) => res.json())
-      .then((data) => setClientSecret(data.clientSecret));
-  }, [amount]);
+      .then((data) => {
+        setClientSecret(data.clientSecret);
+      })
+      .catch(() => {
+        setErrorMessage("Failed to create subscription");
+      });
+  }, [amount, priceId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -47,20 +62,13 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       elements,
       clientSecret,
       confirmParams: {
-        /* Todo: change this to 20-punches.vercel.app */
-        return_url: `http://www.localhost:3000/pricing/payment-success?amount=${amount}`,
+        return_url: `${window.location.origin}${pathname}`,
       },
     });
 
     if (error) {
-      // This point is only reached if there's an immediate error when
-      // confirming the payment. Show the error to your customer (for example, payment details incomplete)
       setErrorMessage(error.message);
-    } else {
-      // The payment UI automatically closes with a success animation.
-      // Your customer is redirected to your `return_url`.
     }
-
     setLoading(false);
   };
 
