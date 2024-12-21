@@ -279,12 +279,12 @@ export async function calculatePortfolioHistory(
         totalValue += value
       }
     })
-
-    return {
+    let data = {
       timestamp: date,
       totalValue,
       positions
     }
+    return data
   })
 }
 
@@ -303,42 +303,9 @@ function findSharesAtDate(
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
 }
 
+//Get unique trade symbols 
 export async function getUniqueTradeSymbols() {
   const trades = await getUserTrades()
   const uniqueSymbols = Array.from(new Set(trades.map(trade => trade.symbol)))
   return uniqueSymbols.sort()
-}
-
-export async function checkPortfolioLimit(symbol: string): Promise<{
-  allowed: boolean;
-  currentCount: number;
-  hasPosition: boolean;
-}> {
-  const supabase = createClient()
-  
-  // Check if we already have a position in this symbol
-  const { data: existingPosition } = await supabase
-    .from('positions')
-    .select('symbol')
-    .eq('symbol', symbol.toUpperCase())
-    .gt('shares', 0)
-    .single()
-
-  // If we have a position, we're allowed to trade it
-  if (existingPosition) {
-    return { allowed: true, currentCount: 0, hasPosition: true }
-  }
-
-  // Count unique assets with positive shares
-  const { count } = await supabase
-    .from('positions')
-    .select('symbol', { count: 'exact' })
-    .gt('shares', 0)
-
-  const currentCount = count || 0
-  return {
-    allowed: currentCount < 20,
-    currentCount,
-    hasPosition: false
-  }
 }

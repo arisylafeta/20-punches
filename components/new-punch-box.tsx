@@ -41,7 +41,7 @@ import {
 import { CalendarIcon } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
-import { checkPortfolioLimit } from "@/lib/db/trades"
+import { getUniqueTradeSymbols } from "@/lib/db/trades"
 
 const formSchema = z.object({
   symbol: z.string().min(1, "Symbol is required"),
@@ -102,7 +102,9 @@ export function NewPunchBox({
     try {
       // For buy orders, check portfolio limit
       if (values.type === 'buy') {
-        const { allowed, currentCount, hasPosition } = await checkPortfolioLimit(values.symbol)
+        const currentCount = (await getUniqueTradeSymbols()).length
+        const allowed = currentCount < 20
+        
         if (!allowed) {
           toast({
             title: "Portfolio Limit Reached",
@@ -129,7 +131,16 @@ export function NewPunchBox({
       const validation = await validateResponse.json()
       
       if (!validation.valid) {
-        const { dayData } = validation
+        const { dayData, error } = validation
+        if (!dayData) {
+          toast({
+            title: "Trade Validation Error",
+            description: error || "Could not validate trade for this date",
+            variant: "destructive"
+          })
+          return
+        }
+        
         toast({
           title: "Invalid Trade Price",
           description: `Price must be between $${dayData.low.toFixed(2)} and $${dayData.high.toFixed(2)} for this date.`,

@@ -29,10 +29,11 @@ export async function POST(req: Request) {
     
     const data = await yahooFinance.historical(symbol, queryOptions)
     
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
       return NextResponse.json({
         valid: false,
-        error: 'No trading data available for this date'
+        error: 'No trading data available for this date',
+        dayData: null
       })
     }
 
