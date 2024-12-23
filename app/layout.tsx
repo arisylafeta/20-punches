@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { PortfolioProvider } from '@/contexts/portfolio-context';
+import { createClient } from '@/utils/supabase/server';
 
 export default async function RootLayout({
   children,
@@ -16,7 +17,8 @@ export default async function RootLayout({
   const cookieStore = await cookies()
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
 
-  const user = await getUser();
+  const supabase = await createClient();
+  const user = await getUser(supabase);
 
   if (!user) {
     return (
