@@ -2,11 +2,13 @@
 
 import type { Message } from 'ai';
 import { useChat } from 'ai/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { PreviewMessage, ThinkingMessage } from '@/components/chats/message';
 import { useScrollToBottom } from '@/components/use-scroll-to-bottom';
 import { Overview } from './overview';
+import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 interface ChatProps {
   id: string;
@@ -14,6 +16,7 @@ interface ChatProps {
 }
 
 export default function Chat({ id, initialMessages }: ChatProps) {
+  const { toast } = useToast();
   const { mutate } = useSWRConfig();
   const {
     messages,
@@ -25,9 +28,35 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     isLoading,
     stop,
     data: streamingData,
+    error,
   } = useChat({
     body: { id },
     initialMessages,
+    onError: (error) => {
+      if (error.message.includes('Daily message limit reached')) {
+        toast({
+          title: "Message Limit Reached",
+          description: (
+            <div className="flex flex-col space-y-2">
+              <p>You have reached your daily limit of 10 messages.</p>
+              <Link 
+                href="/pricing" 
+                className="text-primary hover:underline"
+              >
+                Upgrade to Premium for unlimited messages →
+              </Link>
+            </div>
+          ),
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred while sending your message. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
   });
 
   useEffect(() => {

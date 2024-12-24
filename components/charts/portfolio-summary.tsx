@@ -9,9 +9,10 @@ import { ChartDataPoint } from "@/utils/types"
 interface PortfolioSummaryProps {
   data?: ChartDataPoint[]
   marketData?: ChartDataPoint[]
+  isPremium: boolean
 }
 
-export function PortfolioSummaryComponent({ data = [], marketData = [] }: PortfolioSummaryProps) {
+export function PortfolioSummaryComponent({ data = [], marketData = [], isPremium }: PortfolioSummaryProps) {
   const currentDate = new Date().toLocaleDateString()
   const currentValue = data[data.length - 1]?.value || 0
   const previousValue = data.length > 1 ? data[data.length - 2]?.value : currentValue
@@ -58,61 +59,69 @@ export function PortfolioSummaryComponent({ data = [], marketData = [] }: Portfo
           </div>
 
           {/* Risk metrics */}
-          <div className="grid grid-cols-3 gap-6 flex-1 lg:mt-8 lg:w-11/12">
-            {/* Volatility */}
-            <div className="flex flex-col justify-between h-28">
-              <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <p className="text-base font-medium truncate">Volatility</p>
+          {isPremium ? (
+            <div className="grid grid-cols-3 gap-6 flex-1 lg:mt-8 lg:w-11/12">
+              {/* Volatility */}
+              <div className="flex flex-col justify-between h-28">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <p className="text-base font-medium truncate">Volatility</p>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-sm flex justify-between">
+                    <span className="text-muted-foreground">1D:</span>
+                    <span className="font-medium">{metrics.volatility.daily.toFixed(1)}%</span>
+                  </p>
+                  <p className="text-sm flex justify-between">
+                    <span className="text-muted-foreground">1W:</span>
+                    <span className="font-medium">{metrics.volatility.weekly.toFixed(1)}%</span>
+                  </p>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <p className="text-sm flex justify-between">
-                  <span className="text-muted-foreground">1D:</span>
-                  <span className="font-medium">{metrics.volatility.daily.toFixed(1)}%</span>
-                </p>
-                <p className="text-sm flex justify-between">
-                  <span className="text-muted-foreground">1W:</span>
-                  <span className="font-medium">{metrics.volatility.weekly.toFixed(1)}%</span>
-                </p>
-              </div>
-            </div>
 
-            {/* Sharpe Ratio */}
-            <div className="flex flex-col justify-between h-28">
-              <div className="flex items-center gap-2">
-                <LineChart className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <p className="text-base font-medium truncate">Sharpe Ratio</p>
+              {/* Sharpe Ratio */}
+              <div className="flex flex-col justify-between h-28">
+                <div className="flex items-center gap-2">
+                  <LineChart className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <p className="text-base font-medium truncate">Sharpe Ratio</p>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-sm flex justify-between">
+                    <span className="text-muted-foreground">3M:</span>
+                    <span className="font-medium">{metrics.sharpeRatio.threeMonth.toFixed(1)}</span>
+                  </p>
+                  <p className="text-sm flex justify-between">
+                    <span className="text-muted-foreground">6M:</span>
+                    <span className="font-medium">{metrics.sharpeRatio.sixMonth.toFixed(1)}</span>
+                  </p>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <p className="text-sm flex justify-between">
-                  <span className="text-muted-foreground">3M:</span>
-                  <span className="font-medium">{metrics.sharpeRatio.threeMonth.toFixed(1)}</span>
-                </p>
-                <p className="text-sm flex justify-between">
-                  <span className="text-muted-foreground">6M:</span>
-                  <span className="font-medium">{metrics.sharpeRatio.sixMonth.toFixed(1)}</span>
-                </p>
-              </div>
-            </div>
 
-            {/* Treynor Ratio */}
-            <div className="flex flex-col justify-between h-28">
-              <div className="flex items-center gap-2">
-                <Sigma className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <p className="text-base font-medium truncate">Treynor Ratio</p>
-              </div>
-              <div className="space-y-1.5">
-                <p className="text-sm flex justify-between">
-                  <span className="text-muted-foreground">3M:</span>
-                  <span className="font-medium">{metrics.treynorRatio.threeMonth.toFixed(1)}</span>
-                </p>
-                <p className="text-sm flex justify-between">
-                  <span className="text-muted-foreground">6M:</span>
-                  <span className="font-medium">{metrics.treynorRatio.sixMonth.toFixed(1)}</span>
-                </p>
+              {/* Treynor Ratio */}
+              <div className="flex flex-col justify-between h-28">
+                <div className="flex items-center gap-2">
+                  <Sigma className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <p className="text-base font-medium truncate">Treynor Ratio</p>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-sm flex justify-between">
+                    <span className="text-muted-foreground">3M:</span>
+                    <span className="font-medium">{metrics.treynorRatio.threeMonth.toFixed(1)}</span>
+                  </p>
+                  <p className="text-sm flex justify-between">
+                    <span className="text-muted-foreground">6M:</span>
+                    <span className="font-medium">{metrics.treynorRatio.sixMonth.toFixed(1)}</span>
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-center h-28 bg-muted/50 rounded-lg lg:mt-8 lg:w-11/12">
+              <p className="text-muted-foreground text-center px-4">
+                Upgrade to Premium to access advanced risk metrics including Volatility, Sharpe and Treynor ratios
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
