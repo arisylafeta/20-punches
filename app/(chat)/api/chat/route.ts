@@ -5,6 +5,7 @@ import { buffetGraph } from '../agent/graph';
 import { LangChainAdapter } from 'ai';
 import { getChatById, saveChat, updateChatTimestamp } from '@/lib/db/chats';
 import { generateSummaryFromUserMessage } from '../../actions';
+import { createClient } from '@/utils/supabase/server';
 
 export const maxDuration = 60;
 
@@ -14,7 +15,8 @@ export async function POST(request: Request) {
     messages,
   }: { id: string; messages: Array<Message>; } = await request.json();
 
-  const user = await getUser();
+  const supabase = await createClient();
+  const user = await getUser(supabase);
 
   if (!user) {
     return new Response('Unauthorized', { status: 401 });
