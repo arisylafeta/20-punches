@@ -11,12 +11,15 @@ import { PositionDataPoint, ChartDataPoint } from '@/utils/types'
 import { usePortfolio } from '@/contexts/portfolio-context'
 import { NewsFeed } from "@/components/news-feed"
 import TradingViewWidget from "@/components/charts/chart-tradingview"
+import { createClient } from '@/utils/supabase/client'
+import { getSubscription } from '@/lib/db/users'
 
 export default function DashboardPage() {
   const [pieData, setPieData] = useState<PositionDataPoint[]>([])
   const [overviewData, setOverviewData] = useState<ChartDataPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isPremium, setIsPremium] = useState(false)
   const { lastUpdate } = usePortfolio()
 
   useEffect(() => {
@@ -24,6 +27,13 @@ export default function DashboardPage() {
       try {
         setLoading(true)
         setError(null)
+        const supabase = createClient()
+
+        // Check subscription status
+        const subscription = await getSubscription(supabase)
+        const premium = subscription?.prices?.products?.name?.toLowerCase().includes('premium') ?? false
+        setIsPremium(premium)
+
         const history = await calculatePortfolioHistory(undefined, new Date())
         
         if (!history || history.length === 0) {
@@ -88,6 +98,7 @@ export default function DashboardPage() {
           <PortfolioSummaryComponent
             data={overviewData}
             marketData={[]} // TODO: Add market data (e.g., S&P 500)
+            isPremium={isPremium}
           />
         }
         topRightComponent={
