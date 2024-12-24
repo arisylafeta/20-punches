@@ -15,15 +15,22 @@ const nextConfig = {
   experimental: {
     serverActions: true
   },
+  async rewrites() {
+    return [
+      {
+        source: '/pricing/api/webhooks',
+        destination: '/api/webhooks',
+      },
+    ]
+  },
   webpack: (config, { isServer }) => {
     // Suppress the warning
     config.ignoreWarnings = [
       { module: /node_modules\/node-fetch\/lib\/index\.js/ },
-      { module: /node_modules\/yaml\/browser\/dist\/index\.js/ },
-      { module: /node_modules\/next\/dist\/compiled\/webpack\/bundle5\.js/ },
+      { module: /node_modules\/jose\/dist\/node\/cjs\/runtime\/fetch\.js/ },
     ]
     return config
-  }
+  },
 }
 
 module.exports = withBundleAnalyzer(nextConfig)

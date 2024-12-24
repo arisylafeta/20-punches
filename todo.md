@@ -3,4 +3,4 @@
 8. Deploy.  
 
 2. Synchronize the data between the charts and the chat. 
-3. 
+3. Fix subscriptions not being webhooked

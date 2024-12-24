@@ -3,7 +3,7 @@
 import {Button} from '@/components/ui/button';
 import type { Tables } from '@/types_db';
 import { getStripe } from '@/utils/stripe/client';
-import { checkoutWithStripe } from '@/utils/stripe/server';
+import { checkoutWithStripe, createStripePortal } from '@/utils/stripe/server';
 import { getErrorRedirect } from '@/utils/helpers';
 import { User } from '@supabase/supabase-js';
 import cn from 'classnames';
@@ -76,8 +76,23 @@ export default function Pricing({ user, products, subscription }: Props) {
 
     const stripe = await getStripe();
     stripe?.redirectToCheckout({ sessionId });
-
     setPriceIdLoading(undefined);
+  };
+
+  const handleCustomerPortal = async () => {
+    try {
+      const { url } = await createStripePortal(currentPath);
+      if (url) window.location.href = url;
+    } catch (error) {
+      console.error(error);
+      router.push(
+        getErrorRedirect(
+          currentPath,
+          'Error',
+          'Unable to access customer portal. Please try again later.'
+        )
+      );
+    }
   };
 
   if (!products.length) {
@@ -113,16 +128,16 @@ export default function Pricing({ user, products, subscription }: Props) {
           <p className="max-w-2xl m-auto mt-5 text-xl text-muted-foreground sm:text-center sm:text-2xl">
             Choose the perfect plan for your trading journey
           </p>
-          <div className="relative self-center mt-6 bg-zinc-900 rounded-lg p-0.5 flex sm:mt-8 border border-zinc-800">
+          <div className="relative self-center mt-6 bg-muted rounded-lg p-0.5 flex sm:mt-8 border border-border">
             {intervals.includes('month') && (
               <button
                 onClick={() => setBillingInterval('month')}
                 type="button"
                 className={`${
                   billingInterval === 'month'
-                    ? 'relative w-1/2 bg-zinc-700 border-zinc-800 shadow-sm text-white'
-                    : 'ml-0.5 relative w-1/2 border border-transparent text-zinc-400'
-                } rounded-md m-1 py-2 text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 focus:z-10 sm:w-auto sm:px-8`}
+                    ? 'relative w-1/2 bg-background border-border shadow-sm text-foreground'
+                    : 'ml-0.5 relative w-1/2 border border-transparent text-muted-foreground hover:text-foreground transition-colors'
+                } rounded-md m-1 py-2 text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:z-10 sm:w-auto sm:px-8`}
               >
                 Monthly billing
               </button>
@@ -133,9 +148,9 @@ export default function Pricing({ user, products, subscription }: Props) {
                 type="button"
                 className={`${
                   billingInterval === 'year'
-                    ? 'relative w-1/2 bg-zinc-700 border-zinc-800 shadow-sm text-white'
-                    : 'ml-0.5 relative w-1/2 border border-transparent text-zinc-400'
-                } rounded-md m-1 py-2 text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 focus:z-10 sm:w-auto sm:px-8`}
+                    ? 'relative w-1/2 bg-background border-border shadow-sm text-foreground'
+                    : 'ml-0.5 relative w-1/2 border border-transparent text-muted-foreground hover:text-foreground transition-colors'
+                } rounded-md m-1 py-2 text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:z-10 sm:w-auto sm:px-8`}
               >
                 Yearly billing
               </button>
@@ -143,7 +158,7 @@ export default function Pricing({ user, products, subscription }: Props) {
           </div>
         </div>
         <div className="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0">
-          {[...products].reverse().map((product) => {
+          {[...products].map((product) => {
             const price = product?.prices?.find(
               (price) => price.interval === billingInterval
             );
@@ -154,12 +169,24 @@ export default function Pricing({ user, products, subscription }: Props) {
               minimumFractionDigits: 0
             }).format((price?.unit_amount || 0) / 100);
 
-            let planDescription = "";
-            if (product.name?.toLowerCase().includes('hobby')) {
-              planDescription = "Perfect for beginners. Track your trades, analyze your performance, and learn from your history.";
-            } else if (product.name?.toLowerCase().includes('premium')) {
-              planDescription = "For serious traders. Advanced analytics, unlimited trade history, priority support, and exclusive features.";
-            }
+            const isHobby = product.name?.toLowerCase().includes('hobby');
+            const planDescription = isHobby
+              ? "Perfect for beginners. Track your trades, analyze your performance, and learn from your history."
+              : "For serious traders. Advanced analytics, unlimited trade history, priority support, and exclusive features.";
+
+            const features = isHobby ? [
+              "Add and track your investments",
+              "Basic Portfolio Management",
+              "10 messages per day",
+              "Real time News",
+              "Advanced Charts"
+            ] : [
+              "Everything in Hobby",
+              "Advanced Portfolio Management",
+              "Unlimited messages everyday",
+              "Access to GPT 4, Claude 3.5",
+              "Real time financial metrics",
+            ];
 
             return (
               <div
@@ -169,7 +196,7 @@ export default function Pricing({ user, products, subscription }: Props) {
                   {
                     'border border-primary': subscription
                       ? product.id === subscription?.prices?.products?.id
-                      : product.name === 'Hobby'
+                      : product.name === 'Premium'
                   }
                 )}
               >
@@ -182,19 +209,45 @@ export default function Pricing({ user, products, subscription }: Props) {
                     <span className="text-5xl font-extrabold text-foreground">
                       {priceString}
                     </span>
-                    <span className="text-base font-medium text-muted-foreground">
-                      /{billingInterval}
-                    </span>
+                    {!isHobby && (
+                      <span className="text-base font-medium text-muted-foreground">
+                        /{billingInterval}
+                      </span>
+                    )}
                   </p>
-                  <Button
-                    variant={product.name === 'Premium' ? 'default' : 'outline'}
-                    size="lg"
-                    className="mt-8 w-full"
-                    disabled={!user}
-                    onClick={() => handleStripeCheckout(price)}
-                  >
-                    {subscription ? 'Manage' : 'Subscribe'}
-                  </Button>
+                  <ul className="mt-8 space-y-4">
+                    {features.map((feature, index) => (
+                      <li key={index} className="flex items-center">
+                        <svg
+                          className={`w-5 h-5 ${!isHobby && feature.startsWith('+') ? 'text-primary' : 'text-muted-foreground'}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className={`ml-3 ${!isHobby && feature.startsWith('+') ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                          {!isHobby && feature.startsWith('+') ? feature.substring(1) : feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {!isHobby && (
+                    <Button
+                      variant={product.name === 'Premium' ? 'default' : 'outline'}
+                      size="lg"
+                      className="mt-8 w-full"
+                      disabled={!user}
+                      onClick={() => subscription ? handleCustomerPortal() : handleStripeCheckout(price)}
+                    >
+                      {subscription ? 'Manage' : 'Subscribe'}
+                    </Button>
+                  )}
                 </div>
               </div>
             );
