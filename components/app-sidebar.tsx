@@ -55,11 +55,11 @@ const lower_items = [
         url: "/pricing",
         icon: CircleDollarSign,
     },
-    // {
-    //     title: "Settings",
-    //     url: "/settings",
-    //     icon: Settings,
-    // },
+    {
+        title: "Settings",
+        url: "/settings",
+        icon: Settings,
+    },
 ]
 
 export function AppSidebar() {

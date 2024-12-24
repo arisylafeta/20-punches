@@ -33,7 +33,6 @@ export const getProducts = cache(async (supabase: SupabaseClient) => {
     return null;
   }
 
-  console.log('Products from Supabase:', products);
   return products;
 });
 

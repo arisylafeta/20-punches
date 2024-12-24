@@ -18,10 +18,6 @@ export default async function PricingPage() {
     getSubscription(supabase)
   ]);
 
-  console.log('Debug - User:', user?.id);
-  console.log('Debug - Products:', products);
-  console.log('Debug - Subscription:', subscription);
-
   return (
     <Pricing
       user={user}

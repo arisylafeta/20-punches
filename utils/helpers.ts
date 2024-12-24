@@ -139,8 +139,24 @@ export const calculateTrialEndUnixTimestamp = (
   
     return redirectPath;
   };
-
-export const getErrorRedirect = (
+  
+  export const getStatusRedirect = (
+    path: string,
+    statusName: string,
+    statusDescription: string = '',
+    disableButton: boolean = false,
+    arbitraryParams: string = ''
+  ) =>
+    getToastRedirect(
+      path,
+      'status',
+      statusName,
+      statusDescription,
+      disableButton,
+      arbitraryParams
+    );
+  
+  export const getErrorRedirect = (
     path: string,
     errorName: string,
     errorDescription: string = '',
@@ -155,3 +171,4 @@ export const getErrorRedirect = (
       disableButton,
       arbitraryParams
     );
+  
