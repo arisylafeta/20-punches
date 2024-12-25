@@ -5,7 +5,6 @@ import { executeFinancialAnalysis } from './financial_analyst';
 import { buffetAgent } from './buffet';
 import { StateAnnotation } from "@/utils/types";
 import { checkpointer } from "@/lib/db/checkpoints";
-import { ModelId } from "@/utils/models";
 
 // Singleton instance for the compiled graph
 let compiledGraph: ReturnType<typeof StateGraph.prototype.compile> | null = null;
@@ -55,14 +54,3 @@ function initializeGraph() {
 
 // Export the singleton instance
 export const buffetGraph = initializeGraph();
-
-// Function to initialize the state with the selected model
-export function initializeState(messages: any[], modelId: ModelId = 'base') {
-    return {
-        messages,
-        selectedModel: modelId,
-        configurable: {
-            model: modelId
-        }
-    };
-}

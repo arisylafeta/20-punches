@@ -8,8 +8,26 @@ import { NewPunchBox } from '@/components/new-punch-box'
 import { type TradeFormValues } from "@/utils/types"
 import { createTrade, getUniqueSymbols, getPortfolioTimeSeries } from "@/lib/db/trades"
 import { usePortfolio } from '@/contexts/portfolio-context'
+import { Skeleton } from "@/components/ui/skeleton"
 
 const TOTAL_SLOTS = 20;
+
+const PunchCardSkeleton = () => (
+  <div className="container mx-auto p-4">
+    <div className="grid grid-cols-4 gap-4">
+      {[...Array(20)].map((_, i) => (
+        <Card key={i} className="p-4 space-y-2 mb-1 mt-1">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-24 w-full" />
+          <div className="flex justify-between">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-1/4" />
+          </div>
+        </Card>
+      ))}
+    </div>
+  </div>
+)
 
 export default function PunchesPage() {
   const [positions, setPositions] = useState<{ symbol: string }[]>([])
@@ -39,7 +57,7 @@ export default function PunchesPage() {
   };
 
   if (isLoading) {
-    return <div className="container mx-auto p-4">Loading positions...</div>
+    return <PunchCardSkeleton />
   }
 
   const emptySlots = Math.max(0, TOTAL_SLOTS - positions.length);
@@ -49,7 +67,7 @@ export default function PunchesPage() {
     <div className="container mx-auto p-4">
       <div className="grid grid-cols-4 gap-4">
         {positions.map(({ symbol }) => (
-          <Card key={symbol} className="rounded-xl overflow-hidden mb-3 mt-3">
+          <Card key={symbol} className="rounded-xl overflow-hidden mb-1 mt-1">
             <div className="-m-1">
               <MiniChart
                 symbol={symbol}
@@ -61,7 +79,7 @@ export default function PunchesPage() {
         {emptyCards.map((_, index) => (
           <Card 
             key={`empty-${index}`} 
-            className="rounded-xl overflow-hidden mb-3 mt-3"
+            className="rounded-xl overflow-hidden mb-1 mt-1"
           >
             <NewPunchBox
               onAddPunch={handleAddPunch}

@@ -204,3 +204,21 @@ export function BarChartComponent({
     </Card>
   )
 }
+
+export function AsyncBarChart(props: BarChartProps) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsLoading(false);
+    };
+    load();
+  }, []);
+
+  if (isLoading) {
+    throw new Promise(resolve => setTimeout(resolve, 2000));
+  }
+
+  return <BarChartComponent {...props} />;
+}

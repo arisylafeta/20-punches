@@ -7,10 +7,26 @@ import { useState, useEffect } from "react"
 import { type TradeFormValues } from "@/utils/types"
 import { createTrade, getUniqueTradeSymbols } from "@/lib/db/trades"
 import { usePortfolio } from "@/contexts/portfolio-context"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface Ticker {
   symbol: string
 }
+
+const TickerSkeleton = () => (
+  <div className="flex overflow-x-auto scrollbar-hide gap-4 p-4">
+    {/* New Punch Box Skeleton */}
+    {[...Array(4)].map((_, i) => (
+    <Card  key={i} className="w-[300px] h-[120px] flex items-center justify-center p-6">
+      <div className="space-y-4 w-full">
+        <Skeleton className="h-4 w-1/2 mx-auto" />
+        <Skeleton className="h-4 w-2/3 mx-auto" />
+        <Skeleton className="h-4 w-full" />
+      </div>
+    </Card>
+    ))}
+  </div>
+)
 
 export function TickerCarousel() {
   const [tickers, setTickers] = useState<Ticker[]>([])
@@ -42,7 +58,7 @@ export function TickerCarousel() {
   }
 
   if (isLoading) {
-    return <div>Loading tickers...</div>
+    return <TickerSkeleton />
   }
 
   return (

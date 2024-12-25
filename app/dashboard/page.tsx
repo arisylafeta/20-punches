@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { calculatePortfolioHistory } from '@/lib/db/trades'
 import { BarChartComponent } from "@/components/charts/bar-chart"
 import { PieChartComponent } from "@/components/charts/pie-chart"
@@ -13,6 +13,48 @@ import { NewsFeed } from "@/components/news-feed"
 import TradingViewWidget from "@/components/charts/chart-tradingview"
 import { createClient } from '@/utils/supabase/client'
 import { getSubscription } from '@/lib/db/users'
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent } from "@/components/ui/card"
+
+// Skeleton components for each chart type
+const ChartSkeleton = () => (
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6">
+      <Skeleton className="h-4 w-1/3 mb-4" />
+      <div className="aspect-[16/9] w-full">
+        <Skeleton responsive />
+      </div>
+    </div>
+  </div>
+)
+
+const PortfolioOverviewSkeleton = () => (
+  <div className="max-w-7xl mx-auto p-6 space-y-6">
+    {/* First row */}
+    <div className="flex gap-6">
+      <Skeleton className="h-[300px] w-1/3" />
+      <Skeleton className="h-[300px] w-2/3" />
+    </div>
+    {/* Second row */}
+    <div className="flex gap-6">
+      <Skeleton className="h-[300px] w-2/3" />
+      <Skeleton className="h-[300px] w-1/3" />
+    </div>
+  </div>
+)
+
+const NewsFeedSkeleton = () => (
+  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6">
+      <Skeleton className="h-4 w-1/3 mb-4" />
+      <div className="space-y-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+      </div>
+    </div>
+  </div>
+)
 
 export default function DashboardPage() {
   const [pieData, setPieData] = useState<PositionDataPoint[]>([])
@@ -81,11 +123,20 @@ export default function DashboardPage() {
   }, [lastUpdate])
 
   if (loading) {
-    return <div>Loading...</div>
+    return (
+      <div className="space-y-8 p-4">
+        <PortfolioOverviewSkeleton />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-3 space-y-4">
+            <NewsFeedSkeleton />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (error) {
-    return <div>{error}</div>
+    return <div className="p-4 text-red-500">{error}</div>
   }
 
   // Get tickers for TradingView widget
@@ -95,32 +146,42 @@ export default function DashboardPage() {
     <div className="space-y-8 p-4">
       <PortfolioOverviewComponent 
         topLeftComponent={
-          <PortfolioSummaryComponent
-            data={overviewData}
-            marketData={[]} // TODO: Add market data (e.g., S&P 500)
-            isPremium={isPremium}
-          />
+          <Suspense fallback={<ChartSkeleton />}>
+            <PortfolioSummaryComponent
+              data={overviewData}
+              marketData={[]}
+              isPremium={isPremium}
+            />
+          </Suspense>
         }
         topRightComponent={
-          <LineChartComponent />
+          <Suspense fallback={<ChartSkeleton />}>
+            <LineChartComponent />
+          </Suspense>
         }
         bottomLeftComponent={
-          <BarChartComponent />
+          <Suspense fallback={<ChartSkeleton />}>
+            <BarChartComponent />
+          </Suspense>
         }
         bottomRightComponent={
-          <PieChartComponent data={pieData} />
+          <Suspense fallback={<ChartSkeleton />}>
+            <PieChartComponent data={pieData} />
+          </Suspense>
         }
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-3 space-y-4">
-          <NewsFeed 
-            type="market"
-          />
-          <TradingViewWidget 
-            watchlist={tickers} 
-            height={700}
-          />
+          <Suspense fallback={<NewsFeedSkeleton />}>
+            <NewsFeed type="market" />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="w-full h-[700px]" responsive />}>
+            <TradingViewWidget 
+              watchlist={tickers} 
+              height={700}
+            />
+          </Suspense>
         </div>
       </div>
     </div>

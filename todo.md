@@ -1,6 +1,6 @@
-
-6. Add a front page.
-8. Deploy.  
-
-2. Synchronize the data between the charts and the chat. 
-3. Fix subscriptions not being webhooked
+1. Fix the main page
+2. Set up API to work trailing twelve months when user is premium.
+3. Fix the blank page and add skeletons.
+4. Add onboarding guide.
+5. Add 404 page
+6. Fix other errors that come up. 
