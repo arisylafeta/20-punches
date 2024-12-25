@@ -1,13 +1,18 @@
 import * as dotenv from 'dotenv';
 import { join } from 'path';
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
+import { ChatAnthropic } from "@langchain/anthropic";
 
 // Load environment variables
 dotenv.config({ path: join(__dirname, '../../.env') });
 
 // Validate required environment variables
 if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is required but not set');
+    console.warn('Warning: OPENAI_API_KEY is not set');
+}
+
+if (!process.env.ANTHROPIC_API_KEY) {
+    console.warn('Warning: ANTHROPIC_API_KEY is not set');
 }
 
 // Model configuration types
@@ -17,29 +22,70 @@ interface ModelConfig {
     streaming?: boolean;
 }
 
-type ChatModel = ChatOpenAI;
+type ChatModel = ChatOpenAI | ChatAnthropic;
 type EmbeddingsModel = OpenAIEmbeddings;
 
+export const MODEL_DETAILS = {
+    base: {
+        name: "Base",
+        id: "base",
+        premium: false,
+        modelName: "gpt-4o-mini"
+    },
+    gpt4: {
+        name: "GPT-4o",
+        id: "gpt4o",
+        premium: true,
+        modelName: "gpt-4o"
+    },
+    claude: {
+        name: "Claude 3.5 Sonnet",
+        id: "claude",
+        premium: true,
+        modelName: "claude-3-5-sonnet-20241022"
+    }
+} as const;
+
+export type ModelId = keyof typeof MODEL_DETAILS;
+
 // Model instances with different configurations
-export const MODELS = {
-    SMALL: (config?: ModelConfig): ChatModel => new ChatOpenAI({
-        modelName: "gpt-4o-mini",
+const MODEL_INSTANCES = {
+    base: (config?: ModelConfig): ChatModel => new ChatOpenAI({
+        modelName: MODEL_DETAILS.base.modelName,
         temperature: config?.temperature ?? 0,
         maxTokens: config?.maxTokens ?? 4000,
         streaming: config?.streaming ?? true,
         openAIApiKey: process.env.OPENAI_API_KEY,
     }),
-    EMBEDDINGS: (): EmbeddingsModel => new OpenAIEmbeddings({
+    gpt4: (config?: ModelConfig): ChatModel => new ChatOpenAI({
+        modelName: MODEL_DETAILS.gpt4.modelName,
+        temperature: config?.temperature ?? 0,
+        maxTokens: config?.maxTokens ?? 8000,
+        streaming: config?.streaming ?? true,
         openAIApiKey: process.env.OPENAI_API_KEY,
-    })
+    }),
+    claude: (config?: ModelConfig): ChatModel => new ChatAnthropic({
+        modelName: MODEL_DETAILS.claude.modelName,
+        temperature: config?.temperature ?? 0,
+        maxTokens: config?.maxTokens ?? 4000,
+        streaming: config?.streaming ?? true,
+        anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+    }),
 } as const;
 
-export type ModelKey = keyof typeof MODELS;
-
 // Type-safe model instance getter
-export function getModel<T extends ModelKey>(
-    type: T,
-    config?: T extends 'SMALL' ? ModelConfig : never
-): T extends 'SMALL' ? ChatModel : EmbeddingsModel {
-    return MODELS[type](config) as T extends 'SMALL' ? ChatModel : EmbeddingsModel;
+export function getModel(modelId: ModelId, config?: ModelConfig): ChatModel {
+    const modelInstance = MODEL_INSTANCES[modelId];
+    if (!modelInstance) {
+        console.warn(`Model ${modelId} not found, falling back to base model`);
+        return MODEL_INSTANCES.base(config);
+    }
+    return modelInstance(config);
+}
+
+// Separate function for embeddings model
+export function getEmbeddingsModel(): OpenAIEmbeddings {
+    return new OpenAIEmbeddings({
+        openAIApiKey: process.env.OPENAI_API_KEY,
+    });
 }

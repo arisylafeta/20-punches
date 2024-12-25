@@ -2,41 +2,12 @@ import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
 import { createClient } from "@/utils/supabase/server";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { RunnableSequence } from "@langchain/core/runnables";
+import { RunnableConfig, RunnableSequence } from "@langchain/core/runnables";
 import { formatDocs } from "./tools";
 import { State } from "@/utils/types";
 import { getModel } from "@/utils/models";
 import { AIMessage, MessageContent } from "@langchain/core/messages";
-
-// Initialize models
-const llm = getModel('SMALL');
-const deterministicLlm = getModel('SMALL', { temperature: 0 });
-const embeddings = getModel('EMBEDDINGS');
-
-// Create retriever with specific search parameters
-const retriever = (vectorStore: SupabaseVectorStore) => vectorStore.asRetriever({ k: 7 });
-
-// Define HyDE prompt template
-const hydeTemplate = `You are Warren Buffet. Answer this question with a 100 word passage using your principles: {question}
-Passage:`;
-
-const promptHyde = ChatPromptTemplate.fromTemplate<{
-    question: string;
-}>(hydeTemplate);
-
-// Create string output parser
-const strOutputParser = new StringOutputParser();
-
-// Generate hypothetical document
-const generateHydePassage = RunnableSequence.from([
-    {
-        question: (input: string) => ({ question: input })
-    },
-    promptHyde,
-    deterministicLlm,
-    (message) => message.content,
-    strOutputParser
-]);
+import { getEmbeddingsModel } from "@/utils/models";
 
 const summarizationTemplate = `
 Given the following information and the user's question, provide a comprehensive 200 word analysis that:
@@ -52,17 +23,46 @@ Retrieved Information:
 
 Analysis:`;
 
-function getMessageString(content: MessageContent): string {
-    return typeof content === 'string' ? content : content.map(c => c.type === 'text' ? c.text : '').join(' ');
-}
 
 // Function to retrieve and summarize documents
-export async function retrieveDocs(state: State): Promise<Pick<State, 'summarizedDocs'>> {
+export async function retrieveDocs(state: State, config?: RunnableConfig): Promise<Pick<State, 'summarizedDocs'>> {
     try {
         const lastMessage = state.messages[state.messages.length - 1];
         if (!lastMessage) {
             return { summarizedDocs: "" };
         }
+        const getMessageString = (content: MessageContent): string =>
+            typeof content === 'string' ? content : content.map(c => c.type === 'text' ? c.text : '').join(' ');
+        
+        // Initialize models
+        const modelName = config?.configurable?.model || 'base';
+        const llm = getModel(modelName);
+        const deterministicLlm = getModel(modelName, { temperature: 0 });
+        const embeddings = getEmbeddingsModel();
+        // Create retriever with specific search parameters
+        const retriever = (vectorStore: SupabaseVectorStore) => vectorStore.asRetriever({ k: 7 });
+
+        // Define HyDE prompt template
+        const hydeTemplate = `You are Warren Buffet. Answer this question with a 100 word passage using your principles: {question}
+        Passage:`;
+
+        const promptHyde = ChatPromptTemplate.fromTemplate<{
+            question: string;
+        }>(hydeTemplate);
+
+        // Create string output parser
+        const strOutputParser = new StringOutputParser();
+
+        // Generate hypothetical document
+        const generateHydePassage = RunnableSequence.from([
+            {
+                question: (input: string) => ({ question: input })
+            },
+            promptHyde,
+            deterministicLlm,
+            (message) => message.content,
+            strOutputParser
+        ]);
 
         // Initialize vector store with async client
         const vectorStore = new SupabaseVectorStore(

@@ -9,6 +9,7 @@ import { useScrollToBottom } from '@/components/use-scroll-to-bottom';
 import { Overview } from './overview';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { useModel } from '@/contexts/model-context';
 
 interface ChatProps {
   id: string;
@@ -18,6 +19,7 @@ interface ChatProps {
 export default function Chat({ id, initialMessages }: ChatProps) {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
+  const { selectedModel } = useModel();
   const {
     messages,
     setMessages,
@@ -30,7 +32,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     data: streamingData,
     error,
   } = useChat({
-    body: { id },
+    body: { id, modelId: selectedModel },
     initialMessages,
     onError: (error) => {
       if (error.message.includes('Daily message limit reached')) {

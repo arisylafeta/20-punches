@@ -5,12 +5,15 @@ import { BetterTooltip } from '@/components/ui/tooltip';
 import { PlusIcon } from './icons';
 import { usePathname, useRouter } from 'next/navigation';
 import { ChatHistory } from './chats/chat-history';
+import { ModelSelector } from './ModelSelector';
 import { generateUUID } from '@/lib/utils';
 import { SidebarToggle } from './sidebar-toggle';
+import { useModel } from '@/contexts/model-context';
 
 export function Header() {
   const pathname = usePathname();
-  const router = useRouter();  
+  const router = useRouter();
+  const { selectedModel, setSelectedModel } = useModel();
 
   const createNewChat = async () => {
     const chatId = generateUUID();
@@ -23,16 +26,20 @@ export function Header() {
       { pathname.startsWith('/chat/') && (
         <>
           <BetterTooltip content="New Chat">
-          <Button
-            variant="outline"
-            className="p-4 ml-auto"
-            onClick={createNewChat}
-          >
-            <PlusIcon />
-            <span>New Chat</span>
-          </Button>
-        </BetterTooltip>
-        <ChatHistory/>
+            <Button
+              variant="outline"
+              className="p-4 ml-auto"
+              onClick={createNewChat}
+            >
+              <PlusIcon />
+              <span>New Chat</span>
+            </Button>
+          </BetterTooltip>
+          <ModelSelector 
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+          />
+          <ChatHistory/>
         </>
       )}
       { pathname === '/' && (

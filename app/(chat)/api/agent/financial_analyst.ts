@@ -4,6 +4,7 @@ import { getModel } from "@/utils/models";
 import { State } from "@/utils/types";
 import { tools } from "./tools";
 import { formatFinancialHistory, parseFinancialHistory } from "@/utils/helpers";
+import { RunnableConfig } from "@langchain/core/runnables";
 
 // Create the prompt template for the financial analyst
 const ANALYST_TEMPLATE = `You are a quantitative financial analyst. Your job is to gather ONLY the relevant financial metrics based on the question asked and analyze what additional metrics might be needed based on historical context. Do not provide analysis, commentary, or explanations.
@@ -60,34 +61,12 @@ Begin gathering metrics:
 Question: {input}
 Tickers: {tickers}
 Thought:{agent_scratchpad}`;
-
-const prompt = ChatPromptTemplate.fromTemplate(ANALYST_TEMPLATE);
-
-// Create the agent with deterministic LLM
-const llm = getModel('SMALL', { temperature: 0 });
-
-/**
- * Creates an agent executor for financial analysis
- */
-async function createFinancialAnalysisExecutor() {
-    const agent = await createReactAgent({
-        llm,
-        tools,
-        prompt
-    });
-
-    return AgentExecutor.fromAgentAndTools({
-        agent,
-        tools
-    });
-}
-
 /**
  * Executes financial analysis based on the user's question and identified tickers
  * @param state The current conversation state
  * @returns New financial entries
  */
-export async function executeFinancialAnalysis(state: State): Promise<Pick<State, 'financialHistory'>> {
+export async function executeFinancialAnalysis(state: State, config?: RunnableConfig): Promise<Pick<State, 'financialHistory'>> {
     try {
         const lastMessage = state.messages[state.messages.length - 1];
         if (!lastMessage || !state.tickers || state.tickers.length === 0) {
@@ -96,7 +75,30 @@ export async function executeFinancialAnalysis(state: State): Promise<Pick<State
 
         // Get the latest group of tickers (last array in state.tickers)
         const latestTickers = state.tickers[state.tickers.length - 1];
-        
+
+
+        const prompt = ChatPromptTemplate.fromTemplate(ANALYST_TEMPLATE);
+
+        // Create the agent with deterministic LLM
+        const modelName = config?.configurable?.model || 'base';
+        const llm = getModel(modelName, { temperature: 0 });
+
+        /**
+         * Creates an agent executor for financial analysis
+         */
+        const createFinancialAnalysisExecutor = async () => {
+            const agent = await createReactAgent({
+                llm,
+                tools,
+                prompt
+            });
+
+            return AgentExecutor.fromAgentAndTools({
+                agent,
+                tools
+            });
+        };
+
         // Create the executor
         const executor = await createFinancialAnalysisExecutor();
 

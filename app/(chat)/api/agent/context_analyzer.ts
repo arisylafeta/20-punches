@@ -3,6 +3,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { getModel } from "@/utils/models";
 import { State } from "@/utils/types";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { RunnableConfig } from "@langchain/core/runnables";
 
 // Schema for analyzer's decisions
 const AnalyzerSchema = z.object({
@@ -51,12 +52,7 @@ Consider:
 - Simple follow-ups, clarifications, or general chat → conversational
 `;
 
-const prompt = ChatPromptTemplate.fromTemplate(template);
-
-const llm = getModel('SMALL', { temperature: 0 });
-const structuredLlm = llm.withStructuredOutput(AnalyzerSchema);
-
-export async function contextAnalyzer(state: State): Promise<Pick<State, 'tickers' | 'routingDecision'>> {
+export async function contextAnalyzer(state: State, config?: RunnableConfig): Promise<Pick<State, 'tickers' | 'routingDecision'>> {
     const messages = state.messages;
     const currentMessage = messages[messages.length - 1];
     const previousHuman = messages.slice(-3, -2).find(m => m instanceof HumanMessage);
@@ -65,6 +61,13 @@ export async function contextAnalyzer(state: State): Promise<Pick<State, 'ticker
     // Get last 5 tickers as a flat Set for deduplication
     const recentTickers = (state.tickers || []).slice(-5).flat();
     const allPreviousTickers = new Set(recentTickers);
+
+
+    const prompt = ChatPromptTemplate.fromTemplate(template);
+
+    const modelName =  config?.configurable?.model || 'base';
+    const llm = getModel( modelName, { temperature: 0 });
+    const structuredLlm = llm.withStructuredOutput(AnalyzerSchema);
 
     try {
         const result = await prompt.pipe(structuredLlm).invoke({

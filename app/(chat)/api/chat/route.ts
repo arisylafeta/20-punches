@@ -6,6 +6,7 @@ import { LangChainAdapter } from 'ai';
 import { getChatById, saveChat, updateChatTimestamp } from '@/lib/db/chats';
 import { generateSummaryFromUserMessage } from '../../actions';
 import { createClient } from '@/utils/supabase/server';
+import { ModelId } from '@/utils/models';
 
 export const maxDuration = 60;
 const FREE_DAILY_MESSAGE_LIMIT = 10;
@@ -50,11 +51,8 @@ async function checkAndIncrementMessageCount(supabase: any, userId: string): Pro
       console.error('Error updating message count:', updateError);
       return false;
     }
-
-    console.log('Successfully updated count to:', newCount);
     return true;
   } else {
-    console.log('No existing count found, creating new record');
     // If no count exists for today, create new record with count 1
     const { error: insertError } = await supabase
       .from('daily_message_counts')
@@ -64,8 +62,6 @@ async function checkAndIncrementMessageCount(supabase: any, userId: string): Pro
       console.error('Error inserting message count:', insertError);
       return false;
     }
-
-    console.log('Successfully created new count record with count: 1');
     return true;
   }
 }
@@ -74,7 +70,12 @@ export async function POST(request: Request) {
   const {
     id,
     messages,
-  }: { id: string; messages: Array<Message>; } = await request.json();
+    modelId = 'base' // Default to base model if not specified
+  }: { 
+    id: string; 
+    messages: Array<Message>;
+    modelId?: ModelId;
+  } = await request.json();
 
   const supabase = await createClient();
   const user = await getUser(supabase);
@@ -86,6 +87,20 @@ export async function POST(request: Request) {
   // Check if user is premium
   const subscription = await getSubscription(supabase);
   const isPremium = subscription?.prices?.products?.name?.toLowerCase().includes('premium') ?? false;
+
+  // If not premium and trying to use premium model, return error
+  if (!isPremium && modelId !== 'base') {
+    return new Response(
+      JSON.stringify({
+        error: 'Premium model not available',
+        message: 'Please upgrade to Premium to use advanced models!'
+      }),
+      { 
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
 
   // If not premium, check message count
   if (!isPremium) {
@@ -112,17 +127,20 @@ export async function POST(request: Request) {
   if (!chat) {
     const summary = await generateSummaryFromUserMessage({ message: input });
     saveChat(user.id, id, summary);
-  }else{
-    updateChatTimestamp(id, user.id );
+  } else {
+    updateChatTimestamp(id, user.id);
   }
 
   try {
+    
+    // Update buffetGraph to use the selected model
     const streamingEvents = await buffetGraph.streamEvents(
       message,
       {
         version: "v2" as const,
         configurable: {
           thread_id: id,
+          model: modelId // Pass the selected model to the graph
         }
       }
     );

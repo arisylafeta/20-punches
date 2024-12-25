@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { PortfolioProvider } from '@/contexts/portfolio-context';
+import { ModelProvider } from '@/contexts/model-context';
 import { createClient } from '@/utils/supabase/server';
 
 export default async function RootLayout({
@@ -33,12 +34,14 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <PortfolioProvider>
-              <div className="flex flex-col p-4 md:p-12 h-[100vh]">
-                {children}
-              </div>
-              <Toaster />
-            </PortfolioProvider>
+            <ModelProvider>
+              <PortfolioProvider>
+                <div className="flex flex-col p-4 md:p-12 h-[100vh]">
+                  {children}
+                </div>
+                <Toaster />
+              </PortfolioProvider>
+            </ModelProvider>
           </ThemeProvider>
         </body>
       </html>
@@ -56,18 +59,20 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <PortfolioProvider>
-            <SidebarProvider defaultOpen={defaultOpen}>
-              <AppSidebar />
-              <SidebarInset>
-                <Header />
-                <main className="flex-1">
-                  {children}
-                </main>
-              </SidebarInset>
-            </SidebarProvider>
-            <Toaster />
-          </PortfolioProvider>
+          <ModelProvider>
+            <PortfolioProvider>
+              <SidebarProvider defaultOpen={defaultOpen}>
+                <AppSidebar />
+                <SidebarInset>
+                  <Header />
+                  <main className="flex-1">
+                    {children}
+                  </main>
+                </SidebarInset>
+              </SidebarProvider>
+              <Toaster />
+            </PortfolioProvider>
+          </ModelProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { State } from "@/utils/types";
 import { getModel } from "@/utils/models";
-import { RunnableSequence } from "@langchain/core/runnables";
+import { RunnableConfig, RunnableSequence } from "@langchain/core/runnables";
 import { AIMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate} from "@langchain/core/prompts";
 import { formatFinancialHistory, formatMessageHistory } from "@/utils/helpers";
@@ -65,7 +65,7 @@ Provide a comprehensive response that incorporates both the financial analysis a
 // AGENT
 /////////////////////////////////////////////////////
 
-export const buffetAgent = async (state: State) => {
+export const buffetAgent = async (state: State, config?: RunnableConfig) => {
     const messages = state.messages;
     // Only use last 6 messages for the prompt context
     const recentMessages = messages.slice(Math.max(0, messages.length - 6));
@@ -75,9 +75,10 @@ export const buffetAgent = async (state: State) => {
     const summarizedDocs = state.summarizedDocs;
     const financialSummary = state.financialHistory || [];  // Use empty array as fallback
     const routingDecision = state.routingDecision;
+    const selectedModel = config?.configurable?.model || 'base';
 
-    // Get the model from utils
-    const llm = getModel('SMALL');
+    // Get the model from utils using the selected model
+    const llm = getModel(selectedModel);
     const strOutputParser = new StringOutputParser();
 
     // Create prompt templates

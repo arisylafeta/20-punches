@@ -1,6 +1,7 @@
 import { BaseMessage } from "@langchain/core/messages";
 import { Annotation } from "@langchain/langgraph";
 import { z } from "zod"
+import { ModelId } from "./models";
 
 // Interface for financial analysis entries
 export interface FinancialEntry {
@@ -15,6 +16,7 @@ export interface State {
     financialHistory?: FinancialEntry[];
     summarizedDocs?: string;
     routingDecision?: "both" | "quantitative" | "qualitative" | "conversational";
+    selectedModel?: ModelId;  // The currently selected model
 }
 
 // Define the graph state
@@ -45,6 +47,9 @@ export const StateAnnotation = Annotation.Root({
     }),
     routingDecision: Annotation<string>({
         reducer: (x: string, y: string) => y || x || ""  // Replace with latest
+    }),
+    selectedModel: Annotation<ModelId>({
+        reducer: (x: ModelId, y: ModelId) => y || x || "base"  // Replace with latest, default to base
     })
 });
 
