@@ -8,7 +8,7 @@ export async function generateSummaryFromUserMessage({
 }: {
   message: string;
 }) {
-  const model = getModel('SMALL');
+  const model = getModel('base');
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", `
     - you will generate a short title based on the first message a user begins a conversation with

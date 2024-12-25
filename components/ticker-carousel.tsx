@@ -66,7 +66,7 @@ export function TickerCarousel() {
       <NewPunchBox
         onAddPunch={handleAddTicker}
         width="284px"
-        height="72px"
+        height="120px"
         buttonClassName="flex-none w-[284px] mx-2 first:ml-0 last:mr-0 mb-3 mt-3"
       />
       {tickers.map((ticker) => (

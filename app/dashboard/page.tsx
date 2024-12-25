@@ -14,7 +14,7 @@ import TradingViewWidget from "@/components/charts/chart-tradingview"
 import { createClient } from '@/utils/supabase/client'
 import { getSubscription } from '@/lib/db/users'
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent } from "@/components/ui/card"
+import { Onboarding } from "@/components/onboarding"
 
 // Skeleton components for each chart type
 const ChartSkeleton = () => (
@@ -79,7 +79,9 @@ export default function DashboardPage() {
         const history = await calculatePortfolioHistory(undefined, new Date())
         
         if (!history || history.length === 0) {
-          setError('No portfolio data available')
+          setOverviewData([])
+          setPieData([])
+          setLoading(false)
           return
         }
 
@@ -137,6 +139,10 @@ export default function DashboardPage() {
 
   if (error) {
     return <div className="p-4 text-red-500">{error}</div>
+  }
+
+  if (overviewData.length === 0) {
+    return <Onboarding />
   }
 
   // Get tickers for TradingView widget
