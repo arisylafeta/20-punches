@@ -5,35 +5,59 @@ export async function createTrade(trade: TradeFormValues) {
   const supabase = createClient()
   console.log('Creating trade with values:', trade)
   
-  // Get the current user's ID
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  console.log('Auth response:', { user, userError })
-  
-  if (!user) throw new Error('Not authenticated')
+  try {
+    // Get the current user's ID
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    console.log('Auth response:', { user, userError })
+    
+    if (userError) {
+      console.error('Auth error:', userError)
+      throw userError
+    }
+    
+    if (!user) {
+      console.error('No user found')
+      throw new Error('Not authenticated')
+    }
 
-  const tradeData = {
-    user_id: user.id,
-    symbol: trade.symbol,
-    type: trade.type,
-    shares: trade.shares,
-    price_per_share: trade.pricePerShare,
-    transaction_date: trade.transactionDate.toISOString(),
-  }
-  console.log('Inserting trade data:', tradeData)
+    const tradeData = {
+      user_id: user.id,
+      symbol: trade.symbol,
+      type: trade.type,
+      shares: trade.shares,
+      price_per_share: trade.pricePerShare,
+      transaction_date: trade.transactionDate.toISOString(),
+    }
+    console.log('Inserting trade data:', tradeData)
 
-  const { data, error } = await supabase
-    .from('trades')
-    .insert([tradeData])
-    .select()
-    .single()
+    const { data, error } = await supabase
+      .from('trades')
+      .insert([tradeData])
+      .select()
+      .single()
 
-  if (error) {
-    console.error('Database error:', error)
+    if (error) {
+      console.error('Database error:', error)
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
+      throw error
+    }
+    
+    if (!data) {
+      console.error('No data returned from insert')
+      throw new Error('Trade creation failed - no data returned')
+    }
+    
+    console.log('Trade created successfully:', data)
+    return data
+  } catch (error) {
+    console.error('Unexpected error in createTrade:', error)
     throw error
   }
-  
-  console.log('Trade created successfully:', data)
-  return data
 }
 
 export async function getUserTrades() {

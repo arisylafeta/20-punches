@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -42,6 +42,7 @@ import { CalendarIcon } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { getUniqueTradeSymbols } from "@/lib/db/trades"
+import { Slider } from "@/components/ui/slider"
 
 const formSchema = z.object({
   symbol: z.string().min(1, "Symbol is required"),
@@ -81,6 +82,7 @@ export function NewPunchBox({
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
   const [error, setError] = useState<string | null>(null)
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number } | null>(null)
   
   const form = useForm<Omit<TradeFormValues, 'shares' | 'pricePerShare'> & {
     shares: string;
@@ -95,12 +97,52 @@ export function NewPunchBox({
     },
   })
 
+  const watchedSymbol = form.watch('symbol')
+  const watchedDate = form.watch('transactionDate')
+
+  useEffect(() => {
+    const validatePrice = async () => {
+      if (form.getValues('symbol') && form.getValues('transactionDate')) {
+        try {
+          const validateResponse = await fetch('/dashboard/api/validate-trade', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              symbol: form.getValues('symbol').toUpperCase(),
+              date: form.getValues('transactionDate').toISOString()
+            }),
+          })
+
+          const validation = await validateResponse.json()
+          if (validation.dayData) {
+            setPriceRange({
+              min: validation.dayData.low,
+              max: validation.dayData.high
+            })
+          } else {
+            setPriceRange(null)
+            toast({
+              title: "Price Validation Error",
+              description: validation.error || "Could not validate price for this date",
+              variant: "destructive"
+            })
+          }
+        } catch (error) {
+          setPriceRange(null)
+        }
+      }
+    }
+
+    validatePrice()
+  }, [form, watchedSymbol, watchedDate, toast])
+
   async function onSubmit(values: Omit<TradeFormValues, 'shares' | 'pricePerShare'> & {
     shares: string;
     pricePerShare: string;
   }) {
     try {
-      // For buy orders, check portfolio limit
       if (values.type === 'buy') {
         const currentCount = (await getUniqueTradeSymbols()).length
         const allowed = currentCount < 20
@@ -115,41 +157,6 @@ export function NewPunchBox({
         }
       }
 
-      // Validate the trade price first
-      const validateResponse = await fetch('/dashboard/api/validate-trade', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          symbol: values.symbol.toUpperCase(),
-          price: Number(values.pricePerShare),
-          date: values.transactionDate.toISOString()
-        }),
-      })
-
-      const validation = await validateResponse.json()
-      
-      if (!validation.valid) {
-        const { dayData, error } = validation
-        if (!dayData) {
-          toast({
-            title: "Trade Validation Error",
-            description: error || "Could not validate trade for this date",
-            variant: "destructive"
-          })
-          return
-        }
-        
-        toast({
-          title: "Invalid Trade Price",
-          description: `Price must be between $${dayData.low.toFixed(2)} and $${dayData.high.toFixed(2)} for this date.`,
-          variant: "destructive"
-        })
-        return
-      }
-
-      // If price is valid, proceed with trade creation
       const trade = {
         ...values,
         symbol: values.symbol.toUpperCase(),
@@ -158,6 +165,7 @@ export function NewPunchBox({
       }
 
       await onAddPunch(trade)
+      
       form.reset()
       setOpen(false)
       toast({
@@ -165,7 +173,6 @@ export function NewPunchBox({
         description: "Trade added successfully.",
       })
     } catch (error) {
-      console.error('Error submitting trade:', error)
       toast({
         title: "Something went wrong",
         description: error instanceof Error ? error.message : "Failed to submit trade. Please try again.",
@@ -295,34 +302,6 @@ export function NewPunchBox({
 
             <FormField
               control={form.control}
-              name="shares"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Number of Shares</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="any" placeholder="e.g., 100" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="pricePerShare"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price per Share</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="any" placeholder="e.g., 150.50" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="transactionDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
@@ -360,6 +339,50 @@ export function NewPunchBox({
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="shares"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Shares</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="any" placeholder="e.g., 100" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {priceRange ? (
+              <FormField
+                control={form.control}
+                name="pricePerShare"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price per Share (${priceRange.min.toFixed(2)} - ${priceRange.max.toFixed(2)})</FormLabel>
+                    <FormControl>
+                      <div className="pt-2">
+                        <Slider
+                          min={priceRange.min}
+                          max={priceRange.max}
+                          step={0.01}
+                          value={[parseFloat(field.value) || priceRange.min]}
+                          onValueChange={(value) => field.onChange(value[0].toString())}
+                        />
+                      </div>
+                    </FormControl>
+                    <div className="text-sm text-muted-foreground text-center mt-1">
+                      Selected Price: ${parseFloat(field.value || priceRange.min.toString()).toFixed(2)}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <div className="text-sm text-muted-foreground">
+                Enter a symbol and date to see price range
+              </div>
+            )}
             <Button type="submit" className="w-full">Add Trade</Button>
           </form>
         </Form>

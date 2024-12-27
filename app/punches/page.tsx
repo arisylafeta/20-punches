@@ -51,9 +51,17 @@ export default function PunchesPage() {
   }, [lastUpdate])
 
   const handleAddPunch = async (values: TradeFormValues) => {
-    const trade = await createTrade(values)
-    triggerRefresh() // This will cause all components using usePortfolio to update
-    return trade
+    console.log('handleAddPunch called with values:', values)
+    try {
+      const trade = await createTrade(values)
+      console.log('Trade created successfully:', trade)
+      triggerRefresh() // This will cause all components using usePortfolio to update
+      console.log('Portfolio refresh triggered')
+      return trade
+    } catch (error) {
+      console.error('Error in handleAddPunch:', error)
+      throw error
+    }
   };
 
   if (isLoading) {

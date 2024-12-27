@@ -44,7 +44,6 @@ export function ModelSelector({ selectedModel, onModelChange }: ModelSelectorPro
   }
 
   const handleModelChange = (modelId: ModelId) => {
-    console.log('ModelSelector: Changing model to:', modelId);
     onModelChange(modelId);
   };
 

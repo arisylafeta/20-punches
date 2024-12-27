@@ -9,6 +9,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { PortfolioProvider } from '@/contexts/portfolio-context';
 import { ModelProvider } from '@/contexts/model-context';
 import { createClient } from '@/utils/supabase/server';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Punches',
+  description: 'Think like Warren Buffett',
+  icons: {
+    icon: '/Alt 5 B_W.svg',
+    shortcut: '/Alt 5 B_W.svg',
+    apple: '/Alt 5 B_W.svg',
+  },
+}
 
 export default async function RootLayout({
   children,

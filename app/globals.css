@@ -87,6 +87,20 @@
   animation: gradient 8s linear infinite;
 }
 
+@keyframes shine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+.animate-shine {
+  animation: shine 3s linear infinite;
+  background-size: 200% auto;
+}
+
 @layer base {
   * {
     @apply border-border;

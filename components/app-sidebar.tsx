@@ -18,6 +18,7 @@ import {
 import { ModeToggle } from "./theme-provider"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 // Menu items.
@@ -70,7 +71,16 @@ export function AppSidebar() {
         <Sidebar variant="inset">
             <SidebarHeader className="m-2 pl-4">
                 <div className="flex justify-between items-center w-full">
-                    <p className="text-2xl font-bold pl-2">20Punches</p>
+                    <div className="flex items-center gap-2 pl-2">
+                        <Image 
+                            src="/Alt 5 B_W.svg" 
+                            alt="Logo" 
+                            width={32} 
+                            height={32} 
+                            className="dark:invert opacity-70" 
+                        />
+                        <p className="text-2xl font-bold">Punches</p>
+                    </div>
                     <ModeToggle />
                 </div>
             </SidebarHeader>

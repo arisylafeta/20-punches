@@ -28,11 +28,8 @@ export function ModelProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleModelChange = (model: ModelId) => {
-    console.log('ModelContext: Setting model to:', model);
     setSelectedModel(model);
   };
-
-  console.log('ModelContext: Current model:', selectedModel);
 
   return (
     <ModelContext.Provider value={{ selectedModel, setSelectedModel: handleModelChange, isPremium }}>
