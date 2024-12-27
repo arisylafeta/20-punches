@@ -62,16 +62,35 @@ export async function createTrade(trade: TradeFormValues) {
 
 export async function getUserTrades() {
   const supabase = createClient()
-  const { data, error } = await supabase
-    .from('trades')
-    .select('*')
-    .order('transaction_date', { ascending: false })
+  console.log('Fetching user trades...')
+  
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    console.log('Current user:', user?.id)
+    
+    if (userError) {
+      console.error('Auth error in getUserTrades:', userError)
+      throw userError
+    }
 
-  if (error) throw error
-  return data
+    const { data, error } = await supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', user?.id)
+      .order('transaction_date', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching trades:', error)
+      throw error
+    }
+
+    console.log('Fetched trades:', data?.length || 0, 'trades')
+    return data || []
+  } catch (error) {
+    console.error('Unexpected error in getUserTrades:', error)
+    throw error
+  }
 }
-
-
 
 export async function getTradeErrors() {
   const supabase = createClient()
@@ -329,7 +348,17 @@ function findSharesAtDate(
 
 //Get unique trade symbols 
 export async function getUniqueTradeSymbols() {
-  const trades = await getUserTrades()
-  const uniqueSymbols = Array.from(new Set(trades.map(trade => trade.symbol)))
-  return uniqueSymbols.sort()
+  try {
+    const trades = await getUserTrades()
+    
+    const uniqueSymbols = Array.from(new Set(trades.map(trade => trade.symbol)))
+    
+    const sortedSymbols = uniqueSymbols.sort()
+    
+    
+    return sortedSymbols
+  } catch (error) {
+    console.error('Error in getUniqueTradeSymbols:', error)
+    throw error
+  }
 }

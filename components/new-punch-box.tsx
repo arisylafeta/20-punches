@@ -97,12 +97,13 @@ export function NewPunchBox({
     },
   })
 
-  const watchedSymbol = form.watch('symbol')
   const watchedDate = form.watch('transactionDate')
 
   useEffect(() => {
     const validatePrice = async () => {
-      if (form.getValues('symbol') && form.getValues('transactionDate')) {
+      const currentSymbol = form.getValues('symbol')
+      // Only proceed if we have both symbol and date
+      if (currentSymbol && watchedDate) {
         try {
           const validateResponse = await fetch('/dashboard/api/validate-trade', {
             method: 'POST',
@@ -110,8 +111,8 @@ export function NewPunchBox({
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              symbol: form.getValues('symbol').toUpperCase(),
-              date: form.getValues('transactionDate').toISOString()
+              symbol: currentSymbol.toUpperCase(),
+              date: watchedDate.toISOString()
             }),
           })
 
@@ -136,7 +137,7 @@ export function NewPunchBox({
     }
 
     validatePrice()
-  }, [form, watchedSymbol, watchedDate, toast])
+  }, [form, watchedDate, toast])
 
   async function onSubmit(values: Omit<TradeFormValues, 'shares' | 'pricePerShare'> & {
     shares: string;

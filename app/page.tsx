@@ -1,9 +1,12 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { ChevronRight, BarChart3, MessageSquare, Target } from "lucide-react"
+import { ChevronRight, BarChart3, MessageSquare, Target, AlertCircle, DollarSign, Brain, TrendingUp, ChartBar, LineChart, Check } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { WarrenQuotesCarousel } from "@/components/warren-quotes-carousel"
 
 const features = [
   {
@@ -23,6 +26,94 @@ const features = [
   }
 ]
 
+const problemItems = [
+  {
+    icon: AlertCircle,
+    title: "Analysis Paralysis",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  },
+  {
+    icon: DollarSign,
+    title: "Fear of Loss",
+    description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+  },
+  {
+    icon: Brain,
+    title: "Information Overload",
+    description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+  }
+]
+
+const solutionItems = [
+  {
+    icon: TrendingUp,
+    title: "Focused Strategy",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
+  },
+  {
+    icon: ChartBar,
+    title: "Clear Analysis",
+    description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+  },
+  {
+    icon: LineChart,
+    title: "Smart Decisions",
+    description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla."
+  }
+]
+
+const pricingPlans = [
+  {
+    name: "Starter",
+    description: "Perfect for trying out Warren's wisdom",
+    price: "$0",
+    interval: "forever",
+    features: [
+      "5 investment positions",
+      "Basic AI analysis",
+      "Market data",
+      "Email support"
+    ]
+  },
+  {
+    name: "Pro",
+    description: "For serious value investors",
+    price: "$19",
+    interval: "per month",
+    features: [
+      "20 investment positions",
+      "Advanced AI insights",
+      "Real-time market data",
+      "Priority support",
+      "Portfolio analytics",
+      "Custom watchlists"
+    ]
+  }
+]
+
+const faqItems = [
+  {
+    question: "What is 20Punches?",
+    answer: "20Punches is an AI-powered investment platform that helps you invest like Warren Buffett. We analyze stocks using value investing principles and provide clear, actionable insights."
+  },
+  {
+    question: "How does the AI analysis work?",
+    answer: "Our AI analyzes company financials, market trends, and business fundamentals using Warren Buffett's investment principles. It provides insights in plain English, making complex investment decisions easier to understand."
+  },
+  {
+    question: "Is my investment data secure?",
+    answer: "Yes, we take security seriously. All data is encrypted, and we use industry-standard security practices to protect your information. We never share your data with third parties."
+  },
+  {
+    question: "Can I try it for free?",
+    answer: "Yes! Our Starter plan is completely free and includes basic features to help you get started with value investing. You can upgrade to Pro anytime for advanced features."
+  },
+  {
+    question: "What makes 20Punches different?",
+    answer: "Unlike other platforms, we focus specifically on value investing using Warren Buffett's principles. Our AI is trained on decades of investment wisdom and provides clear, actionable insights."
+  }
+]
+
 export default function Home() {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -30,11 +121,11 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
+          <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="space-y-4">
-                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none">
+              <div className="space-y-2 sm:space-y-4">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
                   <span 
                     className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine"
                     onMouseEnter={() => setIsHovered(true)}
@@ -43,13 +134,13 @@ export default function Home() {
                     {isHovered ? 'Invest' : 'Think'} like Warren Buffett
                   </span>
                 </h1>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                We turn financially anxious millennial investors into confident wealth builders.
+                <p className="mx-auto max-w-[700px] text-base sm:text-lg text-gray-500 dark:text-gray-400">
+                  We turn financially anxious millennial investors into confident wealth builders.
                 </p>
               </div>
-              <div className="space-x-4">
+              <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
                 <Link href="/login">
-                  <Button className="gap-2 mt-2">
+                  <Button className="w-full sm:w-auto gap-2">
                     Get Started
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -60,28 +151,147 @@ export default function Home() {
         </section>
 
         {/* Image of Product */}
-        {/* Features */}
-        {/* Problem section this is connected to the one below */}
-        {/* Solution section */}
-        {/* How Warren Works */}
-        {/* Warren Quotes (Carousel) */}
-        {/* Pricing */}
-        {/* Persuasion */}
-        {/* FAQ */}
+        Image here
 
         {/* Features Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
-          <div className="container px-4 md:px-6">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
               {features.map((feature, i) => (
-                <div key={i} className="flex flex-col items-center space-y-4 text-center">
-                  <div className="p-4 bg-white rounded-full shadow-sm dark:bg-gray-900">
-                    <feature.icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-xl font-bold">{feature.title}</h3>
-                  <p className="text-gray-500 dark:text-gray-400">{feature.description}</p>
-                </div>
+                <Card key={i} className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 hover:shadow-xl transition-all duration-200">
+                  <CardHeader>
+                    <div className="p-3 sm:p-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full w-fit mb-4">
+                      <feature.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm sm:text-base">{feature.description}</CardDescription>
+                  </CardContent>
+                </Card>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Problem and Solution section */}
+        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24 bg-gray-50 dark:bg-gray-900">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white">Why 20Punches?</h2>
+            <Tabs defaultValue="problem" className="w-full">
+              <TabsList className="grid w-full max-w-md mx-auto mb-8 grid-cols-2">
+                <TabsTrigger value="problem">🤔 Problem</TabsTrigger>
+                <TabsTrigger value="solution">✨ Solution</TabsTrigger>
+              </TabsList>
+              <TabsContent value="problem" className="space-y-4 sm:space-y-6">
+                {problemItems.map((item, i) => (
+                  <Card key={i} className="flex flex-col sm:flex-row overflow-hidden">
+                    <div className="flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-indigo-500 to-purple-500 sm:w-auto">
+                      <item.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                    </div>
+                    <div className="p-4 sm:p-6 flex-1">
+                      <CardTitle className="mb-2 text-lg sm:text-xl">{item.title}</CardTitle>
+                      <CardDescription className="text-sm sm:text-base">{item.description}</CardDescription>
+                    </div>
+                  </Card>
+                ))}
+              </TabsContent>
+              <TabsContent value="solution" className="space-y-4 sm:space-y-6">
+                {solutionItems.map((item, i) => (
+                  <Card key={i} className="flex flex-col sm:flex-row overflow-hidden">
+                    <div className="flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-green-500 to-teal-500 sm:w-auto">
+                      <item.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                    </div>
+                    <div className="p-4 sm:p-6 flex-1">
+                      <CardTitle className="mb-2 text-lg sm:text-xl">{item.title}</CardTitle>
+                      <CardDescription className="text-sm sm:text-base">{item.description}</CardDescription>
+                    </div>
+                  </Card>
+                ))}
+              </TabsContent>
+            </Tabs>
+          </div>
+        </section>
+
+        {/* How Warren Works */}
+        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
+          <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 dark:text-white">How BuffetAgent Works</h2>
+            Image of Warren
+          </div>
+        </section>
+
+        {/* Warren Quotes (Carousel) */}
+        <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16 bg-gray-50 dark:bg-gray-900">
+          <div className="container mx-auto px-2 sm:px-4 md:px-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10 dark:text-white">Warren&lsquo;s Wisdom</h2>
+            <WarrenQuotesCarousel />
+          </div>
+        </section>
+
+        {/* Pricing */}
+                {/* Pricing Section */}
+                <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16">
+          <div className="container mx-auto px-2 sm:px-4 md:px-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10 dark:text-white">Simple, Transparent Pricing</h2>
+            <p className="text-center text-gray-500 dark:text-gray-400 mb-8 sm:mb-12">Choose the plan that best fits your investment journey</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
+              {pricingPlans.map((plan) => (
+                <Card key={plan.name} className="relative flex flex-col w-full">
+                  <CardHeader>
+                    <CardTitle className="text-xl">{plan.name}</CardTitle>
+                    <CardDescription>{plan.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-1">
+                    <div className="mb-4">
+                      <span className="text-3xl font-bold">{plan.price}</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-2">{plan.interval}</span>
+                    </div>
+                    <ul className="space-y-2">
+                      {plan.features.map((feature) => (
+                        <li key={feature} className="flex items-center">
+                          <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                          <span className="text-sm text-gray-500 dark:text-gray-400">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <div className="p-6 pt-0">
+                    <Link href="/login">
+                      <Button className="w-full" variant={plan.name === "Pro" ? "default" : "outline"}>
+                        Get Started
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16 bg-gray-50 dark:bg-gray-900">
+          <div className="container mx-auto px-2 sm:px-4 md:px-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10 dark:text-white">Frequently Asked Questions</h2>
+            <div className="max-w-3xl mx-auto">
+              <div className="space-y-4">
+                {faqItems.map((item, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <details className="group">
+                      <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
+                        <h3 className="text-lg font-medium">{item.question}</h3>
+                        <div className="transform transition-transform duration-200 group-open:rotate-180">
+                          <ChevronRight className="h-5 w-5" />
+                        </div>
+                      </summary>
+                      <div className="p-4 pt-0">
+                        <p className="text-gray-500 dark:text-gray-400">{item.answer}</p>
+                      </div>
+                    </details>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         </section>

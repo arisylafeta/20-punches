@@ -73,35 +73,24 @@ export function calculateTreynorRatio(
  */
 export function calculateMetrics(data: ChartDataPoint[], marketData: ChartDataPoint[]) {
   // Log initial data length
-  console.log('Initial data length:', data.length);
   
   const dailyData = data.filter(point => point && typeof point.value === 'number' && point.value > 0);
-  console.log('Daily data length after filtering:', dailyData.length);
-  console.log('Sample daily data:', dailyData.slice(-5));
 
   const weeklyData = dailyData.slice(-7);
-  console.log('Weekly data length:', weeklyData.length);
-  console.log('Weekly data:', weeklyData);
+
 
   const threeMonthData = dailyData.slice(-90);
-  console.log('3M data length:', threeMonthData.length);
-
   const sixMonthData = dailyData.slice(-180);
-  console.log('6M data length:', sixMonthData.length);
 
   // Calculate and log volatilities
   const dailyVol = calculateVolatility(dailyData, 1);
   const weeklyVol = weeklyData.length >= 7 ? calculateVolatility(weeklyData, 7) : 0;
   
-  console.log('Daily volatility:', dailyVol);
-  console.log('Weekly volatility:', weeklyVol);
 
   // Calculate and log ratios
   const threeMonthSharpe = threeMonthData.length >= 90 ? calculateSharpeRatio(threeMonthData, 90) : 0;
   const sixMonthSharpe = sixMonthData.length >= 180 ? calculateSharpeRatio(sixMonthData, 180) : 0;
-  
-  console.log('3M Sharpe:', threeMonthSharpe);
-  console.log('6M Sharpe:', sixMonthSharpe);
+
 
   // Use mock values that look realistic
   return {
