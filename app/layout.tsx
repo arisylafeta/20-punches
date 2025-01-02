@@ -15,9 +15,9 @@ export const metadata: Metadata = {
   title: 'Punches',
   description: 'Think like Warren Buffett',
   icons: {
-    icon: '/Alt 5 B_W.svg',
-    shortcut: '/Alt 5 B_W.svg',
-    apple: '/Alt 5 B_W.svg',
+    icon: 'favicon.svg',
+    shortcut: 'favicon.svg',
+    apple: 'favicon.svg',
   },
 }
 

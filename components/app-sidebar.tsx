@@ -73,7 +73,7 @@ export function AppSidebar() {
                 <div className="flex justify-between items-center w-full">
                     <div className="flex items-center gap-2 pl-2">
                         <Image 
-                            src="/Alt 5 B_W.svg" 
+                            src="/favicon.svg" 
                             alt="Logo" 
                             width={32} 
                             height={32} 

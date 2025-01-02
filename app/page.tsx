@@ -1,12 +1,13 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { ChevronRight, BarChart3, MessageSquare, Target, AlertCircle, DollarSign, Brain, TrendingUp, ChartBar, LineChart, Check } from "lucide-react"
+import { ChevronRight, BarChart3, MessageSquare, Target, AlertCircle, DollarSign, Brain, TrendingUp, ChartBar, Search, Check } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WarrenQuotesCarousel } from "@/components/warren-quotes-carousel"
+import Image from "next/image"
 
 const features = [
   {
@@ -25,42 +26,40 @@ const features = [
     icon: Target
   }
 ]
-
 const problemItems = [
   {
     icon: AlertCircle,
-    title: "Analysis Paralysis",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    title: "Limited Time",
+    description: "You have a life outside of investing, but keeping up with market trends and news can be overwhelming. It's hard to find the time to properly analyze stocks and make informed decisions."
   },
   {
     icon: DollarSign,
     title: "Fear of Loss",
-    description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    description: "The fear of losing money can be paralyzing. It can make you hesitant to invest or make a move, even when it's the right decision. You want to avoid making a mistake that could cost you money."
   },
   {
     icon: Brain,
     title: "Information Overload",
-    description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+    description: "There is so much information available about the stock market, but it can be hard to sift through it all. You want to make informed decisions, but it's easy to get overwhelmed by all the data."
   }
 ]
 
 const solutionItems = [
   {
     icon: TrendingUp,
-    title: "Focused Strategy",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
+    title: "No Time? No Problem.",
+    description: "Our multi-agent system works 24/7 analyzing market data and news, doing the heavy lifting that institutional investors do. You'll get actionable insights that help you make informed decisions, even when you don't have the time."
   },
   {
     icon: ChartBar,
-    title: "Clear Analysis",
-    description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+    title: "Easy Backtesting",
+    description: "Backtesting is a powerful tool that helps you see how a strategy would have performed in the past. It can help you make more informed decisions, but it can be a tedious process. We make it easy, so you can focus on what matters most."
   },
   {
-    icon: LineChart,
-    title: "Smart Decisions",
-    description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla."
-  }
-]
+    icon: Search,
+    title: "Cut Through the Noise",
+    description: "Access real-time financial information, news, and market data. Learn from decades of investment wisdom, and get actionable insights that will help you make informed decisions."
+  }]
 
 const pricingPlans = [
   {
@@ -69,28 +68,27 @@ const pricingPlans = [
     price: "$0",
     interval: "forever",
     features: [
-      "5 investment positions",
-      "Basic AI analysis",
-      "Market data",
-      "Email support"
+      "Add and track your investments",
+      "Basic Portfolio Management",
+      "10 messages per day",
+      "Real time News",
+      "Advanced Charts"
     ]
   },
   {
     name: "Pro",
     description: "For serious value investors",
-    price: "$19",
+    price: "$4.99",
     interval: "per month",
     features: [
-      "20 investment positions",
-      "Advanced AI insights",
-      "Real-time market data",
-      "Priority support",
-      "Portfolio analytics",
-      "Custom watchlists"
+      "Everything in Hobby",
+      "Advanced Portfolio Management",
+      "Unlimited messages everyday",
+      "Access to GPT 4o, Claude 3.5",
+      "Real time financial metrics",
     ]
   }
 ]
-
 const faqItems = [
   {
     question: "What is 20Punches?",
@@ -119,6 +117,16 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Center Logo */}
+      {/* <header className="flex items-center justify-center py-4">
+        <Image
+          src="/favicon.svg"
+          alt="20Punches Logo"
+          width={50}
+          height={50}
+        />
+      </header> */}
+
       {/* Hero Section */}
       <main className="flex-1">
         <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
@@ -151,7 +159,7 @@ export default function Home() {
         </section>
 
         {/* Image of Product */}
-        Image here
+        Demo Here
 
         {/* Features Section */}
         <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
@@ -217,7 +225,7 @@ export default function Home() {
         <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 dark:text-white">How BuffetAgent Works</h2>
-            Image of Warren
+            <Image src="/agent-workflow.png" alt="Agent Work" width={1000} height={1000} className="w-full h-auto" />
           </div>
         </section>
 

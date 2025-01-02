@@ -184,7 +184,7 @@ export default function Pricing({ user, products, subscription }: Props) {
               "Everything in Hobby",
               "Advanced Portfolio Management",
               "Unlimited messages everyday",
-              "Access to GPT 4, Claude 3.5",
+              "Access to GPT 4o, Claude 3.5",
               "Real time financial metrics",
             ];
 

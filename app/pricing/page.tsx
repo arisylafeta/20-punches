@@ -10,8 +10,6 @@ import {
 export default async function PricingPage() {
   const supabase = await createClient();
   
-  console.log('Fetching pricing data...');
-  
   const [user, products, subscription] = await Promise.all([
     getUser(supabase),
     getProducts(supabase),
