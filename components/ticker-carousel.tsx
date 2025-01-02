@@ -37,7 +37,6 @@ export function TickerCarousel() {
     async function fetchSymbols() {
       try {
         const symbols = await getUniqueTradeSymbols()
-        console.log('Unique symbols from trades:', symbols)
         setTickers(symbols.map(symbol => ({ symbol })))
       } catch (error) {
         console.error('Error fetching symbols:', error)
@@ -46,12 +45,10 @@ export function TickerCarousel() {
       }
     }
 
-    console.log('Fetching symbols, lastUpdate:', lastUpdate)
     fetchSymbols()
   }, [lastUpdate])
 
   const handleAddTicker = async (values: TradeFormValues) => {
-    console.log('TickerCarousel received values:', values)
     const trade = await createTrade(values)
     triggerRefresh()
     return trade

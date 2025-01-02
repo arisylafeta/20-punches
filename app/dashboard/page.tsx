@@ -59,6 +59,7 @@ const NewsFeedSkeleton = () => (
 export default function DashboardPage() {
   const [pieData, setPieData] = useState<PositionDataPoint[]>([])
   const [overviewData, setOverviewData] = useState<ChartDataPoint[]>([])
+  const [ratioData, setRatioData] = useState<ChartDataPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isPremium, setIsPremium] = useState(false)
@@ -76,31 +77,36 @@ export default function DashboardPage() {
         const premium = subscription?.prices?.products?.name?.toLowerCase().includes('premium') ?? false
         setIsPremium(premium)
 
-        const history = await calculatePortfolioHistory(undefined, new Date())
+        // Fetch display data (1 month for charts)
+        const displayHistory = await calculatePortfolioHistory(undefined, new Date(), "1M")
         
-        if (!history || history.length === 0) {
+        // Fetch ratio data (1 year for calculations)
+        const ratioHistory = await calculatePortfolioHistory(undefined, new Date(), "1Y")
+        
+        if (!displayHistory || displayHistory.length === 0) {
           setOverviewData([])
           setPieData([])
+          setRatioData([])
           setLoading(false)
           return
         }
 
         // Prepare data for pie chart (latest day's position allocation)
-        const latestDay = history[history.length - 1]
+        const latestDay = displayHistory[displayHistory.length - 1]
         const pieData = Object.entries(latestDay.positions).map(([symbol, position]) => ({
           symbol,
           value: position.value
         }))
 
         // Prepare data for overview (total portfolio value over time)
-        const overviewData = history.map((day, index) => {
-          const previousDay = index > 0 ? history[index - 1] : null;
+        const overviewData = displayHistory.map((day, index) => {
+          const previousDay = index > 0 ? displayHistory[index - 1] : null;
           const deposit = previousDay 
             ? Object.entries(day.positions).reduce((sum, [symbol, position]) => {
                 const prevPosition = previousDay.positions[symbol];
-                if (!prevPosition) return sum + position.value; // New position, count as deposit
+                if (!prevPosition) return sum + position.value;
                 const shareChange = position.shares - prevPosition.shares;
-                return sum + (shareChange > 0 ? shareChange * position.avgPrice : 0); // Only count buys as deposits
+                return sum + (shareChange > 0 ? shareChange * position.avgPrice : 0);
               }, 0)
             : 0;
 
@@ -111,11 +117,18 @@ export default function DashboardPage() {
           };
         });
 
+        // Prepare data for ratio calculations
+        const ratioData = ratioHistory.map(day => ({
+          timestamp: day.timestamp,
+          value: day.totalValue
+        }));
+
         setPieData(pieData)
         setOverviewData(overviewData)
+        setRatioData(ratioData)
       } catch (err) {
-        console.error('Error fetching portfolio data:', err)
-        setError('Failed to load portfolio data')
+        console.error('Error fetching dashboard data:', err)
+        setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
         setLoading(false)
       }
@@ -155,7 +168,7 @@ export default function DashboardPage() {
           <Suspense fallback={<ChartSkeleton />}>
             <PortfolioSummaryComponent
               data={overviewData}
-              marketData={[]}
+              ratioData={ratioData}
               isPremium={isPremium}
             />
           </Suspense>

@@ -5,8 +5,8 @@ import { getURL } from '@/utils/helpers'
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  // if "next" is in param, use it as the redirect URL
-  const next = searchParams.get('next') ?? '/'
+  // Always redirect to dashboard after successful OAuth login
+  const next = '/dashboard'
 
   if (code) {
     const supabase = await createClient()

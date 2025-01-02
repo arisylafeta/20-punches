@@ -8,8 +8,6 @@ export async function createTrade(trade: TradeFormValues) {
   try {
     // Get the current user's ID
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    console.log('Auth response:', { user, userError })
-    
     if (userError) {
       console.error('Auth error:', userError)
       throw userError
@@ -28,7 +26,6 @@ export async function createTrade(trade: TradeFormValues) {
       price_per_share: trade.pricePerShare,
       transaction_date: trade.transactionDate.toISOString(),
     }
-    console.log('Inserting trade data:', tradeData)
 
     const { data, error } = await supabase
       .from('trades')
@@ -52,7 +49,6 @@ export async function createTrade(trade: TradeFormValues) {
       throw new Error('Trade creation failed - no data returned')
     }
     
-    console.log('Trade created successfully:', data)
     return data
   } catch (error) {
     console.error('Unexpected error in createTrade:', error)
@@ -62,11 +58,8 @@ export async function createTrade(trade: TradeFormValues) {
 
 export async function getUserTrades() {
   const supabase = createClient()
-  console.log('Fetching user trades...')
-  
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    console.log('Current user:', user?.id)
     
     if (userError) {
       console.error('Auth error in getUserTrades:', userError)
@@ -83,8 +76,6 @@ export async function getUserTrades() {
       console.error('Error fetching trades:', error)
       throw error
     }
-
-    console.log('Fetched trades:', data?.length || 0, 'trades')
     return data || []
   } catch (error) {
     console.error('Unexpected error in getUserTrades:', error)

@@ -21,11 +21,10 @@ export async function emailLogin(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/chat') // change this to dashboard once built.
+  redirect('/dashboard')
 }
 
 export async function signup(formData: FormData) {
-  console.log('Starting signup process...');
   const supabase = await createClient()
 
   // type-casting here for convenience

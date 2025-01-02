@@ -8,6 +8,7 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WarrenQuotesCarousel } from "@/components/warren-quotes-carousel"
 import Image from "next/image"
+import { AuthRedirect } from "@/components/auth-redirect"
 
 const features = [
   {
@@ -117,6 +118,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <AuthRedirect />
       {/* Center Logo */}
       {/* <header className="flex items-center justify-center py-4">
         <Image

@@ -7,20 +7,29 @@ import { calculateMetrics } from "@/utils/ratios"
 import { ChartDataPoint } from "@/utils/types"
 
 interface PortfolioSummaryProps {
-  data?: ChartDataPoint[]
+  data: ChartDataPoint[]
+  ratioData: ChartDataPoint[]
   marketData?: ChartDataPoint[]
   isPremium: boolean
 }
 
-export function PortfolioSummaryComponent({ data = [], marketData = [], isPremium }: PortfolioSummaryProps) {
+export function PortfolioSummaryComponent({ data, ratioData, marketData = [], isPremium }: PortfolioSummaryProps) {
   const currentDate = new Date().toLocaleDateString()
   const currentValue = data[data.length - 1]?.value || 0
   const previousValue = data.length > 1 ? data[data.length - 2]?.value : currentValue
   const dayChange = currentValue - previousValue
   const dayChangePercent = previousValue !== 0 ? (dayChange / previousValue) * 100 : 0
 
-  // Calculate all metrics using the ratios utility
-  const metrics = calculateMetrics(data, marketData)
+  // Calculate metrics using the full year of data for better statistical significance
+  const metrics = calculateMetrics(ratioData)
+
+  // Helper function to format Sharpe ratio
+  const formatSharpe = (value: string | number) => {
+    if (typeof value === 'number') {
+      return value.toFixed(1);
+    }
+    return value; // Return the string as is (e.g., "No data")
+  };
 
   return (
     <Card className="h-full">
@@ -60,7 +69,7 @@ export function PortfolioSummaryComponent({ data = [], marketData = [], isPremiu
 
           {/* Risk metrics */}
           {isPremium ? (
-            <div className="grid grid-cols-3 gap-6 flex-1 lg:mt-8 lg:w-11/12">
+            <div className="grid grid-cols-2 gap-6 flex-1 lg:mt-8 lg:w-11/12">
               {/* Volatility */}
               <div className="flex flex-col justify-between h-28">
                 <div className="flex items-center gap-2">
@@ -88,17 +97,17 @@ export function PortfolioSummaryComponent({ data = [], marketData = [], isPremiu
                 <div className="space-y-1.5">
                   <p className="text-sm flex justify-between">
                     <span className="text-muted-foreground">3M:</span>
-                    <span className="font-medium">{metrics.sharpeRatio.threeMonth.toFixed(1)}</span>
+                    <span className="font-medium">{formatSharpe(metrics.sharpeRatio.threeMonth)}</span>
                   </p>
                   <p className="text-sm flex justify-between">
                     <span className="text-muted-foreground">6M:</span>
-                    <span className="font-medium">{metrics.sharpeRatio.sixMonth.toFixed(1)}</span>
+                    <span className="font-medium">{formatSharpe(metrics.sharpeRatio.sixMonth)}</span>
                   </p>
                 </div>
               </div>
 
               {/* Treynor Ratio */}
-              <div className="flex flex-col justify-between h-28">
+              {/* <div className="flex flex-col justify-between h-28">
                 <div className="flex items-center gap-2">
                   <Sigma className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   <p className="text-base font-medium truncate">Treynor Ratio</p>
@@ -113,7 +122,7 @@ export function PortfolioSummaryComponent({ data = [], marketData = [], isPremiu
                     <span className="font-medium">{metrics.treynorRatio.sixMonth.toFixed(1)}</span>
                   </p>
                 </div>
-              </div>
+              </div> */}
             </div>
           ) : (
             <div className="flex items-center justify-center h-28 bg-muted/50 rounded-lg lg:mt-8 lg:w-11/12">

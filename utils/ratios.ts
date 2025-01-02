@@ -1,110 +1,137 @@
-import { ChartDataPoint } from "./types"
+
+import { ChartDataPoint } from "./types";
 
 /**
- * Calculates the volatility of returns over a given period.
- * This function attempts to adjust returns for net deposits/withdrawals.
- * Note: This is a simplified approach and not a true time-weighted return.
- * @param data Array of price data points
- * @param period Number of data points to consider for each return (1=daily, 7=weekly, etc.)
- * @returns Annualized volatility as a percentage
+ * Helper function: Calculate daily returns from consecutive ChartDataPoints
  */
-export function calculateVolatility(data: ChartDataPoint[], period: number = 1): number {
-  // Return realistic mock values for now
-  if (period === 1) {
-    // Daily volatility typically ranges from 0.5% to 2%
-    return 1.2;
-  } else if (period === 7) {
-    // Weekly volatility typically ranges from 1% to 3%
-    return 2.1;
+function calculateReturns(data: ChartDataPoint[]): number[] {
+  const returns: number[] = [];
+  for (let i = 1; i < data.length; i++) {
+    const currentValue = data[i].value;
+    const previousValue = data[i - 1].value;
+    
+    if (
+      typeof currentValue === 'number' && 
+      typeof previousValue === 'number' && 
+      previousValue !== 0
+    ) {
+      // Daily return = (current - previous) / previous
+      returns.push((currentValue - previousValue) / previousValue);
+    }
   }
-  return 1.5;
+  return returns;
 }
 
 /**
- * Calculates the Sharpe Ratio over a given period using geometric annualization of returns.
- * @param data Array of price data points
- * @param period Number of data points to consider (e.g., 90 for ~3 months)
- * @param riskFreeRate Annual risk-free rate (e.g., 0.04 for 4%)
- * @returns Sharpe Ratio
+ * Main function to calculate:
+ *  - Daily volatility (std dev)
+ *  - Weekly volatility (approx)
+ *  - 3-month Sharpe Ratio
+ *  - 6-month Sharpe Ratio
  */
-export function calculateSharpeRatio(data: ChartDataPoint[], period: number = 90, riskFreeRate: number = 0.04): number {
-  // Return realistic mock values
-  if (period === 90) {
-    // 3-month Sharpe typically ranges from 0.5 to 2.5
-    return 1.8;
-  } else if (period === 180) {
-    // 6-month Sharpe typically ranges from 0.8 to 3
-    return 2.2;
-  }
-  return 1.5;
-}
-
-/**
- * Calculates the Treynor Ratio over a given period.
- * Uses geometric annualization of returns and a simple beta estimation.
- * @param data Array of portfolio price data points
- * @param marketData Array of market benchmark price data points
- * @param period Number of data points to consider (e.g., 90 for ~3 months)
- * @param riskFreeRate Annual risk-free rate (e.g., 0.04 for 4%)
- * @returns Treynor Ratio
- */
-export function calculateTreynorRatio(
-  data: ChartDataPoint[],
-  marketData: ChartDataPoint[],
-  period: number = 90,
-  riskFreeRate: number = 0.04
-): number {
-  // Return realistic mock values based on period
-  if (period === 90) {
-    // 3-month Treynor typically ranges from 0.1 to 0.3
-    return 0.15;
-  } else if (period === 180) {
-    // 6-month Treynor typically ranges from 0.15 to 0.35
-    return 0.22;
-  }
-  return 0.18;
-}
-
-/**
- * Formats the calculated metrics into a consistent structure.
- * @param data Portfolio price data
- * @param marketData Market benchmark data (e.g., S&P 500)
- * @returns Object containing all calculated metrics
- */
-export function calculateMetrics(data: ChartDataPoint[], marketData: ChartDataPoint[]) {
-  // Log initial data length
+function calculateMetrics(data: ChartDataPoint[]) {
+  console.log('Starting metrics calculation');
+  console.log(`Raw data length: ${data.length}`);
   
-  const dailyData = data.filter(point => point && typeof point.value === 'number' && point.value > 0);
+  // 1) Filter out invalid data points
+  const dailyData = data.filter(
+    (point) => point && typeof point.value === 'number' && point.value > 0
+  );
+  console.log(`Filtered daily data length: ${dailyData.length}`);
 
-  const weeklyData = dailyData.slice(-7);
+  // 2) Calculate the series of daily returns
+  const returns = calculateReturns(dailyData);
+  if (returns.length === 0) {
+    return {
+      volatility: { daily: 0, weekly: 0 },
+      sharpeRatio: { threeMonth: 'No data', sixMonth: 'No data' }
+    };
+  }
 
+  // 3) Compute mean daily return
+  const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
 
-  const threeMonthData = dailyData.slice(-90);
-  const sixMonthData = dailyData.slice(-180);
+  // 4) Compute daily volatility (standard deviation)
+  const squaredDiffs = returns.map(r => Math.pow(r - meanReturn, 2));
+  const variance = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / (returns.length - 1);
+  const dailyVol = Math.sqrt(variance);
 
-  // Calculate and log volatilities
-  const dailyVol = calculateVolatility(dailyData, 1);
-  const weeklyVol = weeklyData.length >= 7 ? calculateVolatility(weeklyData, 7) : 0;
-  
+  // 5) Calculate a simple daily->weekly volatility for reference
+  const weeklyVol = dailyVol * Math.sqrt(5);
 
-  // Calculate and log ratios
-  const threeMonthSharpe = threeMonthData.length >= 90 ? calculateSharpeRatio(threeMonthData, 90) : 0;
-  const sixMonthSharpe = sixMonthData.length >= 180 ? calculateSharpeRatio(sixMonthData, 180) : 0;
+  // 6) Calculate Sharpe Ratios for 3M and 6M
+  //    Example risk-free rate = 4% (annual)
+  const ANNUAL_RISK_FREE_RATE = 0.04;
+  const data_size = dailyData.length;
+  const threeMonthSharpe = data_size > 63 ? calculateSharpeRatio(returns, ANNUAL_RISK_FREE_RATE, '3M') : 'No data';
+  const sixMonthSharpe = data_size > 126 ? calculateSharpeRatio(returns, ANNUAL_RISK_FREE_RATE, '6M') : 'No data';
 
-
-  // Use mock values that look realistic
+  // 7) Return final metrics
   return {
     volatility: {
-      daily: calculateVolatility(data, 1),   // ~1.2%
-      weekly: calculateVolatility(data, 7)    // ~2.1%
+      daily: dailyVol * 100,     // daily vol in percentage
+      weekly: weeklyVol * 100,   // weekly vol in percentage
     },
     sharpeRatio: {
-      threeMonth: calculateSharpeRatio(data, 90),   // ~1.8
-      sixMonth: calculateSharpeRatio(data, 180)     // ~2.2
-    },
-    treynorRatio: {
-      threeMonth: calculateTreynorRatio(data, marketData, 90),   // ~0.15
-      sixMonth: calculateTreynorRatio(data, marketData, 180)     // ~0.22
+      threeMonth: threeMonthSharpe,
+      sixMonth: sixMonthSharpe
     }
   };
 }
+
+
+type SharpeTimePeriod = '3M' | '6M';
+
+function calculateSharpeRatio(
+  allDailyReturns: number[],
+  annualRiskFreeRate: number,
+  timePeriod: SharpeTimePeriod
+): string | number {
+  let requiredDays = 0;
+
+  if (timePeriod === '3M') {
+    requiredDays = 63;  // ~3 months of trading days
+  } else {
+    requiredDays = 126; // ~6 months of trading days
+  }
+
+  // Check data length
+  if (allDailyReturns.length < requiredDays) {
+    return 'No data';
+  }
+
+  // Slice the last N days from the entire series
+  const slicedReturns = allDailyReturns.slice(allDailyReturns.length - requiredDays);
+
+  // Calculate daily mean for that sub-period
+  const meanDailyReturn = slicedReturns.reduce((sum, r) => sum + r, 0) / slicedReturns.length;
+
+  // Calculate daily volatility (std dev) for that sub-period
+  const squaredDiffs = slicedReturns.map(r => Math.pow(r - meanDailyReturn, 2));
+  const variance = squaredDiffs.reduce((sum, d) => sum + d, 0) / (slicedReturns.length - 1);
+  const dailyStd = Math.sqrt(variance);
+
+  // Annualize daily return: (1 + meanDailyReturn)^252 - 1
+  const annualizedReturn = Math.pow(1 + meanDailyReturn, 252) - 1;
+
+  // Annualize daily volatility: dailyStd * sqrt(252)
+  const annualizedVol = dailyStd * Math.sqrt(252);
+
+  // Compute Sharpe Ratio = (annualizedReturn - riskFreeRate) / annualizedVol
+  const excessReturn = annualizedReturn - annualRiskFreeRate;
+
+  if (annualizedVol === 0) {
+    return 0; // or "No data" if you'd prefer
+  }
+
+  return excessReturn / annualizedVol;
+}
+
+// --------------------------------------------------------------------
+// Exports
+// --------------------------------------------------------------------
+export {
+  calculateReturns,
+  calculateMetrics,
+  calculateSharpeRatio
+};
