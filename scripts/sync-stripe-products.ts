@@ -1,6 +1,7 @@
-import 'dotenv/config';
-import { stripe } from '@/utils/stripe/config';
-import { upsertProductRecord, upsertPriceRecord } from '@/utils/supabase/admin';
+require('dotenv').config({ path: '.env.local' });
+
+import { stripe } from '../utils/stripe/config';
+import { upsertProductRecord, upsertPriceRecord } from '../utils/supabase/admin';
 
 // Check required environment variables
 const requiredEnvVars = [

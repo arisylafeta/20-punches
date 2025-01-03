@@ -28,7 +28,7 @@ export function AuthRedirect() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [router])
+  }, [router, supabase])
 
   return null
 }
