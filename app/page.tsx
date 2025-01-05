@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WarrenQuotesCarousel } from "@/components/warren-quotes-carousel"
 import Image from "next/image"
 import { AuthRedirect } from "@/components/auth-redirect"
+import Typewriter from 'typewriter-effect';
 
 const features = [
   {
@@ -135,15 +136,20 @@ export default function Home() {
           <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2 sm:space-y-4">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
-                  <span 
-                    className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine"
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                  >
-                    {isHovered ? 'Invest' : 'Think'} like Warren Buffett
-                  </span>
-                </h1>
+                  <Typewriter
+                    options={{
+                      strings: ['<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett', '<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett'],
+                      autoStart: true,
+                      loop: true,
+                    }}
+                  />
+                  <style jsx global>{`
+                    .Typewriter {
+                      font-size: 2.5rem;
+                      font-weight: bold;
+                      line-height: 1.2;
+                    }
+                  `}</style>
                 <p className="mx-auto max-w-[700px] text-base sm:text-lg text-gray-500 dark:text-gray-400">
                   We turn financially anxious millennial investors into confident wealth builders.
                 </p>
@@ -240,12 +246,12 @@ export default function Home() {
         </section>
 
         {/* Pricing */}
-                {/* Pricing Section */}
-                <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16">
+        {/* Pricing Section */}
+        <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16">
           <div className="container mx-auto px-2 sm:px-4 md:px-6">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10 dark:text-white">Simple, Transparent Pricing</h2>
             <p className="text-center text-gray-500 dark:text-gray-400 mb-8 sm:mb-12">Choose the plan that best fits your investment journey</p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
               {pricingPlans.map((plan) => (
                 <Card key={plan.name} className="relative flex flex-col w-full">
