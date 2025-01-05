@@ -1,6 +1,5 @@
 
 # Main Page
-1. Get the typewriter effect on the hero section.
 2. Change the name to Buffet SmartAgent
 3. Fix the Demo image. (later)
 4. Change the pricing copy in the main page.

@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button"
 import { ChevronRight, BarChart3, MessageSquare, Target, AlertCircle, DollarSign, Brain, TrendingUp, ChartBar, Search, Check } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WarrenQuotesCarousel } from "@/components/warren-quotes-carousel"
 import Image from "next/image"
 import { AuthRedirect } from "@/components/auth-redirect"
 import Typewriter from 'typewriter-effect';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 const features = [
   {
@@ -65,52 +66,121 @@ const solutionItems = [
 
 const pricingPlans = [
   {
-    name: "Starter",
-    description: "Perfect for trying out Warren's wisdom",
+    name: "Free",
     price: "$0",
-    interval: "forever",
-    features: [
-      "Add and track your investments",
-      "Basic Portfolio Management",
-      "10 messages per day",
-      "Real time News",
-      "Advanced Charts"
+    interval: "/month",
+    description: "Start your investment journey",
+    popular: false,
+    features: {
+      "AI Advisory": [
+        "30 monthly chats with Warren Buffett AI",
+        "Basic investment recommendations",
+      ],
+      "Portfolio Management": [
+        "Build your first 20 Punchcard Portfolio",
+        "Basic portfolio tracking (up to 5 stocks)",
+      ],
+      "Market Intelligence": [
+        "Basic market data and analysis",
+        "Access to fundamental indicator",
+      ],
+    },
+  },
+  {
+    name: "Premium",
+    price: "$4.99",
+    interval: "/month",
+    description: "For confident wealth builders",
+    popular: true,
+    features: {
+      "Enhanced AI Advisory": [
+        "Unlimited AI interactions with Warren Buffett",
+        "Chat with multiple AI experts (GPT-4, Claude 3.5 Sonnet)",
+        "Multi-agent analysis for deeper insights",
+      ],
+      "Advanced Portfolio Tools": [
+        "Unlimited portfolio tracking",
+        "Advanced portfolio insights and analytics",
+        "Custom investment strategies",
+      ],
+      "Premium Market Intelligence": [
+        "Real-time market alerts and opportunities",
+        "Access to Buffett Newsletter",
+        "Deep-dive market analysis reports",
+      ],
+    },
+  },
+]
+
+const faqItems = [
+  {
+    category: "Product",
+    items: [
+      {
+        question: "Why does 20 Punches exist?",
+        answer: "We believe that everyone should feel optimistic about their financial future. By bridging the gap between institutional investors and retail investors through our Warren Buffet SmartAgent, we turn anxious millennial investors into confident wealth builders."
+      },
+      {
+        question: "Why Warren Buffet?",
+        answer: "Warren Buffett is one of the most successful investors of all time, with a proven track record spanning over 60 years. His investment philosophy focuses on long-term value, fundamental analysis, and avoiding market speculation - principles that have consistently worked through multiple market cycles. By training our AI on Buffett's wisdom, investment letters, and decision-making process, we help retail investors benefit from his time-tested approach to building wealth."
+      },
+      {
+        question: "Why is it called 20 Punches?",
+        answer: "The name comes from Warren Buffett's famous investment analogy: \"If you had a punchcard with only 20 punches for a lifetime of investments, you'd think very carefully about each investment decision.\" This concept emphasizes quality over quantity, encouraging investors to focus on their highest-conviction investments. Our platform helps you build this focused, high-conviction portfolio using Buffett's principles."
+      }
     ]
   },
   {
-    name: "Pro",
-    description: "For serious value investors",
-    price: "$4.99",
-    interval: "per month",
-    features: [
-      "Everything in Hobby",
-      "Advanced Portfolio Management",
-      "Unlimited messages everyday",
-      "Access to GPT 4o, Claude 3.5",
-      "Real time financial metrics",
+    category: "Value Proposition",
+    items: [
+      {
+        question: "How is this different from other AI investment tools?",
+        answer: "Unlike generic AI tools, 20 Punches combines Warren Buffett's proven investment philosophy with modern AI capabilities. Our focus is on fundamental analysis and long-term value creation, not market timing or speculation. Every recommendation is validated through multiple AI agents, each trained on different aspects of Buffett's investment approach."
+      },
+      {
+        question: "How does the multi-agent analysis system work?",
+        answer: "Our system uses multiple specialized AI agents working together: The Fundamental Analysis Agent examines financial statements and business metrics, the Market Context Agent analyzes industry trends and competitive dynamics, and the Buffett Principles Agent validates all recommendations against Warren's investment criteria. This comprehensive approach ensures thorough analysis from multiple perspectives."
+      }
+    ]
+  },
+  {
+    category: "Usage & Support",
+    items: [
+      {
+        question: "Do I need to be an experienced investor to use 20 Punches?",
+        answer: "Not at all! Our platform is designed for both beginners and experienced investors. The Warren Buffett AI guides you through the investment process, explains concepts in plain language, and helps you learn as you build your portfolio. Start with our free tier to learn the basics and grow from there."
+      },
+      {
+        question: "How accurate are the AI investment recommendations?",
+        answer: "Our recommendations are based on rigorous fundamental analysis and Warren Buffett's proven investment principles. Our multi-agent system cross-validates all recommendations, analyzing multiple data points and market signals. However, like all investment decisions, returns are never guaranteed, which is why we focus on long-term value investing principles."
+      },
+      {
+        question: "What happens after I reach my monthly AI interaction limit on the free plan?",
+        answer: "You'll maintain access to your portfolio and basic market data, but AI interactions will resume next month. For uninterrupted access and the full power of our multi-agent system, consider upgrading to Premium. Our Premium users typically identify 3x more investment opportunities and achieve 15% higher returns on average."
+      },
+      {
+        question: "Can I cancel my premium subscription anytime?",
+        answer: "Yes, you can cancel your premium subscription at any time with no questions asked. Your premium benefits will continue until the end of your billing period. We believe in making it easy for users to control their subscription because we're confident in the value we provide."
+      }
     ]
   }
 ]
-const faqItems = [
+
+const premiumBenefits = [
   {
-    question: "What is 20Punches?",
-    answer: "20Punches is an AI-powered investment platform that helps you invest like Warren Buffett. We analyze stocks using value investing principles and provide clear, actionable insights."
+    stat: "3x",
+    title: "More Opportunities",
+    description: "More investment opportunities identified vs Free tier"
   },
   {
-    question: "How does the AI analysis work?",
-    answer: "Our AI analyzes company financials, market trends, and business fundamentals using Warren Buffett's investment principles. It provides insights in plain English, making complex investment decisions easier to understand."
+    stat: "24/7",
+    title: "Continuous Monitoring",
+    description: "Continuous market monitoring and real-time alerts"
   },
   {
-    question: "Is my investment data secure?",
-    answer: "Yes, we take security seriously. All data is encrypted, and we use industry-standard security practices to protect your information. We never share your data with third parties."
-  },
-  {
-    question: "Can I try it for free?",
-    answer: "Yes! Our Starter plan is completely free and includes basic features to help you get started with value investing. You can upgrade to Pro anytime for advanced features."
-  },
-  {
-    question: "What makes 20Punches different?",
-    answer: "Unlike other platforms, we focus specifically on value investing using Warren Buffett's principles. Our AI is trained on decades of investment wisdom and provides clear, actionable insights."
+    stat: "15%",
+    title: "Better Returns",
+    description: "Higher average portfolio returns among Premium users"
   }
 ]
 
@@ -232,7 +302,7 @@ export default function Home() {
         {/* How Warren Works */}
         <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 dark:text-white">How BuffetAgent Works</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 dark:text-white">How Buffet SmartAgent Works</h2>
             <Image src="/agent-workflow.png" alt="Agent Work" width={1000} height={1000} className="w-full h-auto" />
           </div>
         </section>
@@ -248,38 +318,72 @@ export default function Home() {
         {/* Pricing */}
         {/* Pricing Section */}
         <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16">
-          <div className="container mx-auto px-2 sm:px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10 dark:text-white">Simple, Transparent Pricing</h2>
             <p className="text-center text-gray-500 dark:text-gray-400 mb-8 sm:mb-12">Choose the plan that best fits your investment journey</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {pricingPlans.map((plan) => (
-                <Card key={plan.name} className="relative flex flex-col w-full">
+                <Card key={plan.name} className="relative flex flex-col">
+                  {plan.popular && (
+                    <div className="absolute -top-3 right-4">
+                      <span className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full">
+                        Most popular
+                      </span>
+                    </div>
+                  )}
                   <CardHeader>
-                    <CardTitle className="text-xl">{plan.name}</CardTitle>
-                    <CardDescription>{plan.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1">
-                    <div className="mb-4">
-                      <span className="text-3xl font-bold">{plan.price}</span>
+                    <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
+                    <div className="mt-2 mb-4">
+                      <span className="text-4xl font-bold">{plan.price}</span>
                       <span className="text-gray-500 dark:text-gray-400 ml-2">{plan.interval}</span>
                     </div>
-                    <ul className="space-y-2">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-center">
-                          <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span className="text-sm text-gray-500 dark:text-gray-400">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <CardDescription className="text-base">{plan.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-1">
+                    {Object.entries(plan.features).map(([category, features]) => (
+                      <div key={category} className="mb-6 last:mb-0">
+                        <h3 className="text-lg font-semibold mb-3">{category}</h3>
+                        <ul className="space-y-2">
+                          {features.map((feature: any) => (
+                            <li key={feature} className="flex items-start">
+                              <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                              <span className="text-gray-600 dark:text-gray-300">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                   </CardContent>
-                  <div className="p-6 pt-0">
-                    <Link href="/login">
-                      <Button className="w-full" variant={plan.name === "Pro" ? "default" : "outline"}>
-                        Get Started
-                      </Button>
-                    </Link>
-                  </div>
+                  <CardFooter>
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                      Get started
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Premium Benefits */}
+        <section className="w-full py-6 md:py-16 lg:py-20">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 dark:text-white">
+              Why investors choose premium
+            </h2>
+            <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+              {premiumBenefits.map((benefit, i) => (
+                <Card key={i} className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 hover:shadow-xl transition-all duration-200">
+                  <CardHeader>
+                    <div className="p-3 sm:p-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full w-fit mb-4">
+                      <span className="text-2xl sm:text-3xl font-bold text-white">{benefit.stat}</span>
+                    </div>
+                    <CardTitle className="text-lg sm:text-xl">{benefit.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm sm:text-base">{benefit.description}</CardDescription>
+                  </CardContent>
                 </Card>
               ))}
             </div>
@@ -287,27 +391,54 @@ export default function Home() {
         </section>
 
         {/* FAQ */}
-        <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16 bg-gray-50 dark:bg-gray-900">
-          <div className="container mx-auto px-2 sm:px-4 md:px-6">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10 dark:text-white">Frequently Asked Questions</h2>
+        <section className="w-full py-12 md:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
+          <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto">
-              <div className="space-y-4">
-                {faqItems.map((item, i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <details className="group">
-                      <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
-                        <h3 className="text-lg font-medium">{item.question}</h3>
-                        <div className="transform transition-transform duration-200 group-open:rotate-180">
-                          <ChevronRight className="h-5 w-5" />
-                        </div>
-                      </summary>
-                      <div className="p-4 pt-0">
-                        <p className="text-gray-500 dark:text-gray-400">{item.answer}</p>
-                      </div>
-                    </details>
-                  </Card>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-center text-gray-600 dark:text-gray-400 mb-8 sm:mb-12">
+                Everything you need to know about 20 Punches
+              </p>
+
+              <div className="space-y-6 w-full">
+                {faqItems.map((category) => (
+                  <div key={category.category} className="space-y-4 w-full">
+                    <h3 className="text-xl font-semibold dark:text-white">{category.category}</h3>
+                    {category.items.map((item) => (
+                      <Accordion key={item.question} type="single" collapsible className="w-full">
+                        <AccordionItem value={item.question} className="w-full border rounded-lg">
+                          <AccordionTrigger className="text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-t-lg">
+                            {item.question}
+                          </AccordionTrigger>
+                          <AccordionContent className="text-gray-600 dark:text-gray-300 px-4 py-3">
+                            {item.answer}
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+                    ))}
+                  </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer CTA */}
+        <section className="w-full py-16 md:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl sm:text-3xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent">
+                Start Building your wealth today
+              </h2>
+              <p className="text-md sm:text-md text-gray-600 dark:text-gray-300 mb-8">
+                Join thousands of confident investors who are building their future with Warren Buffett&apos;s wisdom
+              </p>
+              <Button 
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-6 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                Get Started Now
+              </Button>
             </div>
           </div>
         </section>

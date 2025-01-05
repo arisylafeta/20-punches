@@ -41,40 +41,46 @@ const quotes: WarrenQuote[] = [
 export function WarrenQuotesCarousel() {
   return (
     <div className="relative w-full">
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-1 sm:-ml-2 md:-ml-4">
-          {quotes.map((quote, i) => (
-            <CarouselItem key={i} className="pl-1 sm:pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-              <div className="h-full">
+      <div className="mx-auto max-w-[1200px]">
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-1 sm:-ml-2 md:-ml-4">
+            {quotes.map((quote, i) => (
+              <CarouselItem key={i} className="pl-1 sm:pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
                 <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white h-full">
-                  <div className="p-3 sm:p-4 md:p-6">
-                    <div className="flex flex-col h-full justify-between gap-3 sm:gap-4">
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        <Quote className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 opacity-50 flex-shrink-0" />
-                        <p className="text-sm sm:text-base md:text-lg font-medium italic leading-relaxed">{quote.quote}</p>
+                  <div className="p-3 sm:p-4 md:p-6 h-full">
+                    <div className="flex flex-col h-full">
+                      <div className="flex-1">
+                        <div className="flex items-start gap-2 sm:gap-3">
+                          <Quote className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 opacity-50 flex-shrink-0" />
+                          <p className="text-sm sm:text-base md:text-lg font-medium italic leading-relaxed">{quote.quote}</p>
+                        </div>
                       </div>
-                      <div className="pt-3 sm:pt-4 border-t border-white/20">
-                        <p className="text-xs sm:text-sm font-light mb-1">Lesson:</p>
+                      <div className="pt-3 sm:pt-4 border-t border-white/20 mt-4">
+                        <p className="text-xs sm:text-sm font-bold mb-1">Lesson:</p>
                         <p className="text-sm sm:text-base">{quote.lesson}</p>
                       </div>
                     </div>
                   </div>
                 </Card>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <div className="hidden sm:block">
-          <CarouselPrevious className="-left-3 sm:left-0 md:left-2" />
-          <CarouselNext className="-right-3 sm:right-0 md:right-2" />
-        </div>
-      </Carousel>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <div className="hidden sm:block">
+            <CarouselPrevious className="absolute -left-12 top-1/2 transform -translate-y-1/2" />
+            <CarouselNext className="absolute -right-12 top-1/2 transform -translate-y-1/2" />
+          </div>
+          <div className="sm:hidden">
+            <CarouselPrevious className="absolute -left-4 top-1/2 transform -translate-y-1/2" />
+            <CarouselNext className="absolute -right-4 top-1/2 transform -translate-y-1/2" />
+          </div>
+        </Carousel>
+      </div>
     </div>
   )
 }
