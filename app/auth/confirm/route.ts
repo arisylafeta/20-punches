@@ -1,8 +1,8 @@
 import { type EmailOtpType, AuthError } from '@supabase/supabase-js'
 import { type NextRequest } from 'next/server'
-
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { getMarketNews, getCompanyNews } from '@/utils/finhub'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -18,8 +18,23 @@ export async function GET(request: NextRequest) {
       token_hash,
     })
     if (!error) {
-      // redirect user to specified redirect URL or root of app
-      redirect(next)
+      try {
+        // Fetch initial market and company news data
+        const marketNews = await getMarketNews()
+        const defaultStocks = ['AAPL', 'GOOGL', 'MSFT'] // Example default stocks
+        const companyNewsPromises = defaultStocks.map(ticker => getCompanyNews(ticker))
+        const companyNews = await Promise.all(companyNewsPromises)
+
+        // Store the news data in your database or state management system here
+        // This is just an example - implement according to your needs
+        
+        // redirect user to specified redirect URL or root of app
+        redirect(next)
+      } catch (error) {
+        console.error('Error fetching initial news data:', error)
+        // Continue with redirect even if news fetch fails
+        redirect(next)
+      }
     }
   }
 

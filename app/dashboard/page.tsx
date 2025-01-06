@@ -162,7 +162,7 @@ export default function DashboardPage() {
   const tickers = pieData.map(item => item.symbol)
 
   return (
-    <div className="space-y-8 p-4">
+    <>
       <PortfolioOverviewComponent 
         topLeftComponent={
           <Suspense fallback={<ChartSkeleton />}>
@@ -188,10 +188,11 @@ export default function DashboardPage() {
             <PieChartComponent data={pieData} />
           </Suspense>
         }
+        isPremium={isPremium}
       />
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-3 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3">
+        <div className="lg:col-span-3 space-y-8 p-4">
           <Suspense fallback={<NewsFeedSkeleton />}>
             <NewsFeed type="market" />
           </Suspense>
@@ -203,6 +204,6 @@ export default function DashboardPage() {
           </Suspense>
         </div>
       </div>
-    </div>
+    </>
   )
 }

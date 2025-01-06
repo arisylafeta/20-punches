@@ -1,29 +1,5 @@
 import { NextResponse } from 'next/server'
-const finnhub = require('finnhub');
-
-// Configure Finnhub client with timeout
-const apiClient = new finnhub.ApiClient();
-apiClient.timeout = 10000; // 10 seconds timeout
-const api_key = apiClient.authentications['api_key'];
-api_key.apiKey = process.env.FINHUB_API_KEY
-const finnhubClient = new finnhub.DefaultApi(apiClient)
-
-interface FinnhubError {
-  status: number;
-  message: string;
-}
-
-interface CompanyNews {
-  category: string;
-  datetime: number;
-  headline: string;
-  id: number;
-  image: string;
-  related: string;
-  source: string;
-  summary: string;
-  url: string;
-}
+import { getMarketNews, getCompanyNews, paginateNews } from '@/utils/finhub'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -36,47 +12,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    let newsData: CompanyNews[]
+    const newsData = type === 'market' 
+      ? await getMarketNews()
+      : await getCompanyNews(tickers!)
 
-    if (type === 'market') {
-      newsData = await new Promise<CompanyNews[]>((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-          reject(new Error('API request timed out'))
-        }, 10000)
-
-        finnhubClient.marketNews("general", {}, (error: FinnhubError | null, data: CompanyNews[], response: any) => {
-          clearTimeout(timeoutId)
-          if (error) reject(error)
-          else resolve(data)
-        })
-      })
-    } else {
-      const endDate = new Date()
-      const startDate = new Date()
-      startDate.setDate(endDate.getDate() - 30)
-
-      const from = startDate.toISOString().split('T')[0]
-      const to = endDate.toISOString().split('T')[0]
-
-      newsData = await new Promise<CompanyNews[]>((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-          reject(new Error('API request timed out'))
-        }, 10000)
-
-        finnhubClient.companyNews(tickers, from, to, (error: FinnhubError | null, data: CompanyNews[], response: any) => {
-          clearTimeout(timeoutId)
-          if (error) reject(error)
-          else resolve(data)
-        })
-      })
-    }
-
-    const pageSize = 5
-    const start = (page - 1) * pageSize
-    const paginatedNews = Array.isArray(newsData) 
-      ? newsData.slice(start, start + pageSize)
-      : []
-
+    const paginatedNews = paginateNews(newsData, page)
     return NextResponse.json(paginatedNews)
   } catch (error) {
     console.error('Error fetching news:', error)

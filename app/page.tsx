@@ -202,20 +202,20 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="flex-1">
-        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
+        <section className="w-full py-12 md:py-16">
           <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2 sm:space-y-4">
                   <Typewriter
                     options={{
-                      strings: ['<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett', '<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett'],
+                      strings: ['<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett.', '<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett.'],
                       autoStart: true,
                       loop: true,
                     }}
                   />
                   <style jsx global>{`
                     .Typewriter {
-                      font-size: 2.5rem;
+                      font-size: 3.5rem;
                       font-weight: bold;
                       line-height: 1.2;
                     }
@@ -240,7 +240,7 @@ export default function Home() {
         Demo Here
 
         {/* Features Section */}
-        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
+        <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
               {features.map((feature, i) => (
@@ -261,7 +261,7 @@ export default function Home() {
         </section>
 
         {/* Problem and Solution section */}
-        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24 bg-gray-50 dark:bg-gray-900">
+        <section className="w-full py-12 md:py-16 bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white">Why 20Punches?</h2>
             <Tabs defaultValue="problem" className="w-full">
@@ -300,27 +300,27 @@ export default function Home() {
         </section>
 
         {/* How Warren Works */}
-        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
+        <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 dark:text-white">How Buffet SmartAgent Works</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 dark:text-white">How Buffet SmartAgent Works</h2>
             <Image src="/agent-workflow.png" alt="Agent Work" width={1000} height={1000} className="w-full h-auto" />
           </div>
         </section>
 
         {/* Warren Quotes (Carousel) */}
-        <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16 bg-gray-50 dark:bg-gray-900">
-          <div className="container mx-auto px-2 sm:px-4 md:px-6">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10 dark:text-white">Warren&lsquo;s Wisdom</h2>
+        <section className="w-full py-12 md:py-16 bg-gray-50 dark:bg-gray-900">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 dark:text-white">Warren&apos;s Wisdom</h2>
             <WarrenQuotesCarousel />
           </div>
         </section>
 
         {/* Pricing */}
         {/* Pricing Section */}
-        <section className="w-full py-6 sm:py-8 md:py-12 lg:py-16">
+        <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10 dark:text-white">Simple, Transparent Pricing</h2>
-            <p className="text-center text-gray-500 dark:text-gray-400 mb-8 sm:mb-12">Choose the plan that best fits your investment journey</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">Simple, Transparent Pricing</h2>
+            <p className="text-center text-gray-500 dark:text-gray-400 mb-8">Choose the plan that best fits your investment journey</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {pricingPlans.map((plan) => (
@@ -367,9 +367,9 @@ export default function Home() {
         </section>
 
         {/* Premium Benefits */}
-        <section className="w-full py-6 md:py-16 lg:py-20">
+        <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 dark:text-white">
               Why investors choose premium
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
@@ -391,13 +391,13 @@ export default function Home() {
         </section>
 
         {/* FAQ */}
-        <section className="w-full py-12 md:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
+        <section className="w-full py-12 md:py-16 bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">
                 Frequently Asked Questions
               </h2>
-              <p className="text-center text-gray-600 dark:text-gray-400 mb-8 sm:mb-12">
+              <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
                 Everything you need to know about 20 Punches
               </p>
 
@@ -425,13 +425,13 @@ export default function Home() {
         </section>
 
         {/* Footer CTA */}
-        <section className="w-full py-16 md:py-24">
+        <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-3xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent">
                 Start Building your wealth today
               </h2>
-              <p className="text-md sm:text-md text-gray-600 dark:text-gray-300 mb-8">
+              <p className="text-md text-gray-600 dark:text-gray-300 mb-8">
                 Join thousands of confident investors who are building their future with Warren Buffett&apos;s wisdom
               </p>
               <Button 

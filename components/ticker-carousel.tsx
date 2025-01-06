@@ -59,7 +59,7 @@ export function TickerCarousel() {
   }
 
   return (
-    <div className="flex overflow-x-auto scrollbar-hide">
+    <div className="flex overflow-x-auto scrollbar-hide p-4">
       <NewPunchBox
         onAddPunch={handleAddTicker}
         width="284px"

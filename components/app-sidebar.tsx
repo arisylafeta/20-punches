@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils"
 // Menu items.
 const upper_items = [
     {
-        title: "Dashboard",
+        title: "Portfolio",
         url: "/dashboard",
         icon: ChartLine,
     },
@@ -39,7 +39,7 @@ const upper_items = [
     //     icon: Newspaper,
     // },
     {
-        title: "BuffetBot",
+        title: "Buffet SmartAgent",
         url: "/chat",
         icon: BotMessageSquare,
     },
@@ -52,7 +52,7 @@ const upper_items = [
 
 const lower_items = [
     {
-        title: "Pricing",
+        title: "Upgrade",
         url: "/pricing",
         icon: CircleDollarSign,
     },
