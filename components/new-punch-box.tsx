@@ -70,6 +70,13 @@ interface NewPunchBoxProps {
   height?: string
   className?: string
   buttonClassName?: string
+  initialValues?: {
+    symbol?: string
+    type?: 'buy' | 'sell'
+    shares?: number
+    pricePerShare?: number
+    transactionDate?: Date
+  }
 }
 
 export function NewPunchBox({ 
@@ -77,7 +84,8 @@ export function NewPunchBox({
   width = "284px",
   height = "72px",
   className,
-  buttonClassName
+  buttonClassName,
+  initialValues = {}
 }: NewPunchBoxProps) {
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
@@ -90,10 +98,11 @@ export function NewPunchBox({
   }>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      symbol: "",
-      shares: "",
-      pricePerShare: "",
-      transactionDate: new Date(),
+      symbol: initialValues.symbol || "",
+      type: initialValues.type || undefined,
+      shares: initialValues.shares?.toString() || "",
+      pricePerShare: initialValues.pricePerShare?.toString() || "",
+      transactionDate: initialValues.transactionDate || new Date(),
     },
   })
 
@@ -199,9 +208,11 @@ export function NewPunchBox({
                 className="flex items-center justify-center" 
                 style={{ width, height }}
               >
-                <div className="flex flex-col items-center gap-2">
-                  <Plus className="w-8 h-8 text-muted-foreground" />
-                  <span className="text-lg text-muted-foreground">Add Punch</span>
+                <div className="flex items-center gap-2">
+                  {!initialValues?.type && <Plus className="h-5 w-5" />}
+                  <span className={cn("text-sm font-medium", className)}>
+                    {initialValues?.type === 'buy' ? 'Buy' : initialValues?.type === 'sell' ? 'Sell' : 'New Trade'}
+                  </span>
                 </div>
               </div>
             </div>

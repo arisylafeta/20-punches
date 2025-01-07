@@ -39,7 +39,7 @@ const upper_items = [
     //     icon: Newspaper,
     // },
     {
-        title: "Buffet SmartAgent",
+        title: "SmartAgent",
         url: "/chat",
         icon: BotMessageSquare,
     },

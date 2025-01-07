@@ -1,20 +1,21 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { getChatHistory } from '@/lib/db/chats';
 import { generateUUID } from '@/lib/utils';
+import { getLastChatId, setLastChatId } from '@/lib/cookies';
 
 export default async function ChatPage() {
-  const chatHistory = await getChatHistory(1);
+  // Try to get the last chat ID from cookie
+  const lastChatId = await getLastChatId();
   
-  // Immediately redirect to latest chat if exists
-  if (chatHistory?.[0]?.conversation_id) {
-    redirect(`/chat/${chatHistory[0].conversation_id}`);
+  if (lastChatId) {
+    // If cookie exists, refresh its expiry and use it
+    await setLastChatId(lastChatId);
+    redirect(`/chat/${lastChatId}`);
   }
   
-  const id = generateUUID();
-  // Otherwise create new chat
-  redirect(`/chat/${id}`);
+  // Create new chat if no cookie or expired
+  const newChatId = generateUUID();
+  await setLastChatId(newChatId);
+  redirect(`/chat/${newChatId}`);
 }
-
-//Possible Improvement: If we create new chats on every sidebar click. We remove this page completely.

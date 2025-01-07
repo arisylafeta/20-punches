@@ -171,21 +171,26 @@ export default function Pricing({ user, products, subscription }: Props) {
 
             const isHobby = product.name?.toLowerCase().includes('hobby');
             const planDescription = isHobby
-              ? "Perfect for beginners. Track your trades, analyze your performance, and learn from your history."
-              : "For serious traders. Advanced analytics, unlimited trade history, priority support, and exclusive features.";
+              ? "Start your investment journey"
+              : "For confident wealth builders";
 
             const features = isHobby ? [
-              "Add and track your investments",
-              "Basic Portfolio Management",
-              "10 messages per day",
-              "Real time News",
-              "Advanced Charts"
+              "30 monthly chats with Warren Buffett AI",
+              "Basic investment recommendations",
+              "Build your first 20 Punchcard Portfolio",
+              "Basic portfolio tracking (up to 5 stocks)",
+              "Basic market data and analysis",
+              "Access to fundamental indicator",
             ] : [
-              "Everything in Hobby",
-              "Advanced Portfolio Management",
-              "Unlimited messages everyday",
-              "Access to GPT 4o, Claude 3.5",
-              "Real time financial metrics",
+              "Unlimited AI interactions with Warren Buffett",
+              "Chat with multiple AI experts (GPT-4, Claude 3.5 Sonnet)",
+              "Multi-agent analysis for deeper insights",
+              "Unlimited portfolio tracking",
+              "Advanced portfolio insights and analytics",
+              "Custom investment strategies",
+              "Real-time market alerts and opportunities",
+              "Access to Buffett Newsletter",
+              "Deep-dive market analysis reports",
             ];
 
             return (

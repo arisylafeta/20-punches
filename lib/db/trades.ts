@@ -353,3 +353,96 @@ export async function getUniqueTradeSymbols() {
     throw error
   }
 }
+
+export async function getPosition(symbol: string): Promise<{ shares: number; value: number; currentPrice: number }> {
+  console.log('getPosition called for symbol:', symbol);
+  const supabase = createClient();
+  
+  // Get the current user's ID
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) {
+    console.error('Auth error in getPosition:', userError);
+    throw userError;
+  }
+  if (!user) {
+    console.error('No user found in getPosition');
+    throw new Error('Not authenticated');
+  }
+
+  console.log('Fetching trades for user:', user.id);
+  // Get all trades for this symbol
+  const { data: trades, error } = await supabase
+    .from('trades')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('symbol', symbol);
+
+  if (error) {
+    console.error('Database error in getPosition:', error);
+    throw error;
+  }
+  
+  console.log('Trades found:', trades);
+  if (!trades) return { shares: 0, value: 0, currentPrice: 0 };
+
+  // Calculate net position
+  const netShares = trades.reduce((total, trade) => {
+    return total + (trade.type === 'buy' ? trade.shares : -trade.shares);
+  }, 0);
+
+  console.log('Calculated net shares:', netShares);
+  // If no shares held, return early
+  if (netShares === 0) return { shares: 0, value: 0, currentPrice: 0 };
+
+  // Get current price using today's date only
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Start of today
+
+  console.log('Fetching price data for dates:', {
+    start: today.toISOString(),
+    end: new Date().toISOString()
+  });
+
+  const response = await fetch('/dashboard/api/yfinance', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      symbols: [symbol],
+      startDate: today.toISOString(),
+      endDate: new Date().toISOString(), // Current time
+    }),
+  });
+
+  if (!response.ok) {
+    console.error('Failed to fetch price data:', await response.text());
+    throw new Error('Failed to fetch current price data');
+  }
+
+  const { data: results } = await response.json();
+  console.log('Price data received:', JSON.stringify(results, null, 2));
+  
+  // Get the latest price from the data for this symbol
+  const symbolData = results[symbol];
+  if (!symbolData || !symbolData.data || symbolData.data.length === 0) {
+    console.error('No price data available for symbol:', symbol);
+    throw new Error('No price data available');
+  }
+
+  if (symbolData.error) {
+    console.error('Error in price data:', symbolData.error);
+    throw new Error(`Price data error: ${symbolData.error}`);
+  }
+  
+  const latestPrice = symbolData.data[symbolData.data.length - 1].close;
+  console.log('Latest price:', latestPrice);
+
+  const position = {
+    shares: netShares,
+    value: netShares * latestPrice,
+    currentPrice: latestPrice
+  };
+  console.log('Returning position:', position);
+  return position;
+}
