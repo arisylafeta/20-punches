@@ -1,21 +1,17 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { generateUUID } from '@/lib/utils';
-import { getLastChatId, setLastChatId } from '@/lib/cookies';
+import { headers } from 'next/headers';
 
 export default async function ChatPage() {
-  // Try to get the last chat ID from cookie
-  const lastChatId = await getLastChatId();
+  const headersList = headers();
+  const host = headersList.get('host');
+  const proto = process.env.NODE_ENV === 'production' ? 'https' : 'http';
   
-  if (lastChatId) {
-    // If cookie exists, refresh its expiry and use it
-    await setLastChatId(lastChatId);
-    redirect(`/chat/${lastChatId}`);
-  }
-  
-  // Create new chat if no cookie or expired
-  const newChatId = generateUUID();
-  await setLastChatId(newChatId);
-  redirect(`/chat/${newChatId}`);
+  const response = await fetch(`${proto}://${host}/api/chat-session`, { 
+    method: 'GET',
+    cache: 'no-store'
+  });
+  const { chatId } = await response.json();
+  redirect(`/chat/${chatId}`);
 }
