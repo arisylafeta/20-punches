@@ -356,7 +356,10 @@ export default function Home() {
                     ))}
                   </CardContent>
                   <CardFooter>
-                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                    <Button
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={() => window.location.href = '/login'}
+                    >
                       Get started
                     </Button>
                   </CardFooter>
