@@ -18,33 +18,43 @@ import { Onboarding } from "@/components/onboarding"
 
 // Skeleton components for each chart type
 const ChartSkeleton = () => (
-  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-    <div className="p-6">
+  <div className="w-full rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="p-6 h-full">
       <Skeleton className="h-4 w-1/3 mb-4" />
-      <div className="aspect-[16/9] w-full">
-        <Skeleton responsive />
+      <div className="aspect-[16/9] w-full h-full">
+        <Skeleton className="h-full w-full" />
       </div>
     </div>
   </div>
 )
 
 const PortfolioOverviewSkeleton = () => (
-  <div className="max-w-7xl mx-auto p-6 space-y-6">
-    {/* First row */}
-    <div className="flex gap-6">
-      <Skeleton className="h-[300px] w-1/3" />
-      <Skeleton className="h-[300px] w-2/3" />
-    </div>
-    {/* Second row */}
-    <div className="flex gap-6">
-      <Skeleton className="h-[300px] w-2/3" />
-      <Skeleton className="h-[300px] w-1/3" />
+  <div className="w-full bg-background">
+    <div className="p-4 space-y-6">
+      {/* First row */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="w-full lg:w-1/3">
+          <Skeleton className="h-[300px] w-full" />
+        </div>
+        <div className="w-full lg:w-2/3">
+          <Skeleton className="h-[300px] w-full" />
+        </div>
+      </div>
+      {/* Second row */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="w-full lg:w-2/3">
+          <Skeleton className="h-[300px] w-full" />
+        </div>
+        <div className="w-full lg:w-1/3">
+          <Skeleton className="h-[300px] w-full" />
+        </div>
+      </div>
     </div>
   </div>
 )
 
 const NewsFeedSkeleton = () => (
-  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+  <div className="w-full rounded-lg border bg-card text-card-foreground shadow-sm">
     <div className="p-6">
       <Skeleton className="h-4 w-1/3 mb-4" />
       <div className="space-y-4">
@@ -162,41 +172,53 @@ export default function DashboardPage() {
   const tickers = pieData.map(item => item.symbol)
 
   return (
-    <>
-      <PortfolioOverviewComponent 
-        topLeftComponent={
-          <Suspense fallback={<ChartSkeleton />}>
-            <PortfolioSummaryComponent
-              data={overviewData}
-              ratioData={ratioData}
-              isPremium={isPremium}
-            />
-          </Suspense>
-        }
-        topRightComponent={
-          <Suspense fallback={<ChartSkeleton />}>
-            <LineChartComponent />
-          </Suspense>
-        }
-        bottomLeftComponent={
-          <Suspense fallback={<ChartSkeleton />}>
-            <BarChartComponent />
-          </Suspense>
-        }
-        bottomRightComponent={
-          <Suspense fallback={<ChartSkeleton />}>
-            <PieChartComponent data={pieData} />
-          </Suspense>
-        }
-        isPremium={isPremium}
-      />
+    <div className="space-y-8 p-4">
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">Portfolio</h2>
+        <PortfolioOverviewComponent 
+          topLeftComponent={
+            <Suspense fallback={<ChartSkeleton />}>
+              <PortfolioSummaryComponent
+                data={overviewData}
+                ratioData={ratioData}
+                isPremium={isPremium}
+              />
+            </Suspense>
+          }
+          topRightComponent={
+            <Suspense fallback={<ChartSkeleton />}>
+              <LineChartComponent />
+            </Suspense>
+          }
+          bottomLeftComponent={
+            <Suspense fallback={<ChartSkeleton />}>
+              <BarChartComponent />
+            </Suspense>
+          }
+          bottomRightComponent={
+            <Suspense fallback={<ChartSkeleton />}>
+              <PieChartComponent data={pieData} />
+            </Suspense>
+          }
+          isPremium={isPremium}
+        />
+      </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3">
-        <div className="lg:col-span-3 space-y-8 p-4">
-          <Suspense fallback={<NewsFeedSkeleton />}>
-            <NewsFeed type="market" />
-          </Suspense>
-          <Suspense fallback={<Skeleton className="w-full h-[700px]" responsive />}>
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">News</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-3">
+            <Suspense fallback={<NewsFeedSkeleton />}>
+              <NewsFeed type="market" />
+            </Suspense>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">Charts</h2>
+        <div className="grid grid-cols-1 gap-4">
+          <Suspense fallback={<Skeleton className="w-full h-[700px]" />}>
             <TradingViewWidget 
               watchlist={tickers} 
               height={700}
@@ -204,6 +226,6 @@ export default function DashboardPage() {
           </Suspense>
         </div>
       </div>
-    </>
+    </div>
   )
 }

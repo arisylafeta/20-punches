@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { ReactNode } from "react"
+import Link from "next/link"
 
 interface ChartWrapperProps {
   children: ReactNode;
@@ -10,14 +11,20 @@ interface ChartWrapperProps {
 
 function PremiumChartWrapper({ children, message = "Upgrade to Premium to access advanced portfolio analytics" }: ChartWrapperProps) {
   return (
-    <div className="relative">
-      {children}
-      <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] flex items-center justify-center rounded-lg">
-        <p className="text-muted-foreground text-center px-4">
-          {message}
-        </p>
+    <Card className="relative h-full">
+      <CardContent className="p-0 opacity-10 h-full">
+        {children}
+      </CardContent>
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60">
+        <p className="text-muted-foreground mb-4 text-center px-4">{message}</p>
+        <Link 
+          href="/pricing" 
+          className="text-primary hover:underline"
+        >
+          Upgrade to Premium →
+        </Link>
       </div>
-    </div>
+    </Card>
   )
 }
 

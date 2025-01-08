@@ -1,16 +1,10 @@
-import * as dotenv from 'dotenv';
-import { join } from 'path';
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
-
-// Load environment variables
-dotenv.config({ path: join(__dirname, '../../.env') });
 
 // Validate required environment variables
 if (!process.env.OPENAI_API_KEY) {
     console.warn('Warning: OPENAI_API_KEY is not set');
 }
-
 if (!process.env.ANTHROPIC_API_KEY) {
     console.warn('Warning: ANTHROPIC_API_KEY is not set');
 }
