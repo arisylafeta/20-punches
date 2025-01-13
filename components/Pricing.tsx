@@ -9,6 +9,7 @@ import { User } from '@supabase/supabase-js';
 import cn from 'classnames';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useToast } from "@/hooks/use-toast";
 
 type Subscription = Tables<'subscriptions'>;
 type Product = Tables<'products'>;
@@ -40,6 +41,7 @@ export default function Pricing({ user, products, subscription }: Props) {
     )
   );
   const router = useRouter();
+  const { toast } = useToast();
   const [billingInterval, setBillingInterval] =
     useState<BillingInterval>('month');
   const [priceIdLoading, setPriceIdLoading] = useState<string>();
@@ -75,7 +77,22 @@ export default function Pricing({ user, products, subscription }: Props) {
     }
 
     const stripe = await getStripe();
-    stripe?.redirectToCheckout({ sessionId });
+    try {
+      await stripe?.redirectToCheckout({ sessionId });
+      toast({
+        title: "🎉 Welcome to Premium!",
+        description: "Your subscription has been activated successfully. Enjoy all the premium features!",
+        duration: 5000
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Subscription Error",
+        description: "There was an error processing your subscription. Please try again.",
+        variant: "destructive",
+        duration: 5000
+      });
+    }
     setPriceIdLoading(undefined);
   };
 

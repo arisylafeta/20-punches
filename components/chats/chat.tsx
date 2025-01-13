@@ -10,6 +10,7 @@ import { Overview } from './overview';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useModel } from '@/contexts/model-context';
+import { useMessageCount } from "@/contexts/message-count-context";
 
 interface ChatProps {
   id: string;
@@ -20,6 +21,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
   const { selectedModel } = useModel();
+  const { refreshCount } = useMessageCount();
   const {
     messages,
     setMessages,
@@ -52,12 +54,32 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           variant: "destructive",
         });
       } else {
+        // Check if it's a rate limit error
+        if (error instanceof Error && 'message' in error) {
+          try {
+            const errorData = JSON.parse(error.message);
+            if (errorData.error === 'Monthly limit reached') {
+              toast({
+                title: "Monthly Limit Reached",
+                description: errorData.message,
+                variant: "destructive",
+              });
+              return;
+            }
+          } catch (e) {
+            // If parsing fails, fall back to default error
+          }
+        }
+        
         toast({
           title: "Error",
           description: "An error occurred while sending your message. Please try again.",
           variant: "destructive",
         });
       }
+    },
+    onFinish: () => {
+      refreshCount();
     },
   });
 

@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { PortfolioProvider } from '@/contexts/portfolio-context';
 import { ModelProvider } from '@/contexts/model-context';
+import { MessageCountProvider } from "@/contexts/message-count-context";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -26,16 +27,17 @@ export default async function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="system"
           enableSystem
-          disableTransitionOnChange
         >
           <ModelProvider>
             <PortfolioProvider>
-              <div className="flex min-h-screen flex-col">
-                {children}
-              </div>
-              <Toaster />
+              <MessageCountProvider>
+                <div className="flex min-h-screen flex-col">
+                  {children}
+                </div>
+                <Toaster />
+              </MessageCountProvider>
             </PortfolioProvider>
           </ModelProvider>
         </ThemeProvider>

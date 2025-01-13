@@ -199,6 +199,26 @@ export default function Home() {
           height={50}
         />
       </header> */}
+      <header className="flex sticky top-0 bg-background p-4 items-center px-2 md:px-2 gap-2 border-b border-gray-200 dark:border-white/20 z-50">
+        <div className="flex-1 flex items-center gap-2 pl-4">
+          <Image
+            src="/favicon.svg"
+            alt="Logo"
+            width={32}
+            height={32}
+            className="dark:invert opacity-70"
+          />
+          <p className="text-2xl font-bold">Punches</p>
+        </div>
+        <div className="flex items-center pr-4">
+          <Link href="/login">
+            <Button className="w-full sm:w-auto gap-2">
+              Get Started
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </header>
 
       {/* Hero Section */}
       <main className="flex-1">
@@ -206,14 +226,14 @@ export default function Home() {
           <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2 sm:space-y-4">
-                  <Typewriter
-                    options={{
-                      strings: ['<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett.', '<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett.'],
-                      autoStart: true,
-                      loop: true,
-                    }}
-                  />
-                  <style jsx global>{`
+                <Typewriter
+                  options={{
+                    strings: ['<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett.', '<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett.'],
+                    autoStart: true,
+                    loop: true,
+                  }}
+                />
+                <style jsx global>{`
                     .Typewriter {
                       font-size: 3.5rem;
                       font-weight: bold;
@@ -437,7 +457,7 @@ export default function Home() {
               <p className="text-md text-gray-600 dark:text-gray-300 mb-8">
                 Join thousands of confident investors who are building their future with Warren Buffett&apos;s wisdom
               </p>
-              <Button 
+              <Button
                 className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-6 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 Get Started Now

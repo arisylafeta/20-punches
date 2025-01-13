@@ -44,8 +44,8 @@ export function PortfolioOverviewComponent({
   isPremium = false,
 }: PortfolioOverviewProps) {
   return (
-    <Card className="bg-background border-none">
-      <CardContent className="p-4 space-y-6">
+    <Card className="bg-background border-none w-full">
+      <CardContent className="space-y-6 w-full p-0">
         {/* First row */}
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="w-full lg:w-1/3">

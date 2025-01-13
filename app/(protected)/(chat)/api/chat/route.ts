@@ -9,61 +9,67 @@ import { createClient } from '@/utils/supabase/server';
 import { ModelId } from '@/utils/models';
 
 export const maxDuration = 60;
-const FREE_DAILY_MESSAGE_LIMIT = 10;
+const FREE_MONTHLY_MESSAGE_LIMIT = 30;
 
-async function checkAndIncrementMessageCount(supabase: any, userId: string): Promise<boolean> {
-  const today = new Date().toISOString().split('T')[0];
+export async function checkAndIncrementMessageCount(
+  supabase: any, 
+  userId: string,
+): Promise<{ success: boolean; count: number }> {
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   
-  console.log('Checking message count for date:', today);
-  
-  // First check if there's an existing count for today
-  const { data: existing, error: fetchError } = await supabase
-    .from('daily_message_counts')
-    .select('count')
+  // First, delete old records
+  const { error: deleteError } = await supabase
+    .from('monthly_message_counts')
+    .delete()
     .eq('user_id', userId)
-    .eq('date', today)
-    .single();
+    .lt('created_at', thirtyDaysAgo.toISOString());
 
-  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "not found" error
-    console.error('Error fetching message count:', fetchError);
-    return false;
+  if (deleteError) {
+    console.error('Error deleting old records:', deleteError);
+    // Continue execution as this is not critical
   }
 
-  console.log('Existing count record:', existing);
+  // Get count of messages in the last 30 days
+  const { count: monthlyCount, error: countError } = await supabase
+    .from('monthly_message_counts')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', thirtyDaysAgo.toISOString());
 
-  if (existing) {
-    // If count exists, increment it
-    const newCount = existing.count + 1;
-    console.log('Incrementing count from', existing.count, 'to', newCount);
-    
-    if (newCount > FREE_DAILY_MESSAGE_LIMIT) {
-      console.log('Message limit exceeded:', newCount, '>', FREE_DAILY_MESSAGE_LIMIT);
-      return false;
-    }
-
-    const { error: updateError } = await supabase
-      .from('daily_message_counts')
-      .update({ count: newCount })
-      .eq('user_id', userId)
-      .eq('date', today);
-
-    if (updateError) {
-      console.error('Error updating message count:', updateError);
-      return false;
-    }
-    return true;
-  } else {
-    // If no count exists for today, create new record with count 1
-    const { error: insertError } = await supabase
-      .from('daily_message_counts')
-      .insert({ user_id: userId, date: today, count: 1 });
-
-    if (insertError) {
-      console.error('Error inserting message count:', insertError);
-      return false;
-    }
-    return true;
+  if (countError) {
+    console.error('Error fetching monthly count:', countError);
+    return { success: false, count: 0 };
   }
+
+  const currentCount = monthlyCount || 0;
+  
+  // Check if adding a new message would exceed the limit
+  if (currentCount >= FREE_MONTHLY_MESSAGE_LIMIT) {
+    return { 
+      success: false, 
+      count: currentCount 
+    };
+  }
+
+  // Only insert if we're under the limit
+  const { error: insertError } = await supabase
+    .from('monthly_message_counts')
+    .insert({ 
+      user_id: userId,
+      created_at: now.toISOString(),
+    });
+
+  if (insertError) {
+    console.error('Error inserting message:', insertError);
+    return { success: false, count: currentCount };
+  }
+
+  return { 
+    success: true, 
+    count: currentCount + 1
+  };
 }
 
 export async function POST(request: Request) {
@@ -104,12 +110,12 @@ export async function POST(request: Request) {
 
   // If not premium, check message count
   if (!isPremium) {
-    const canSendMessage = await checkAndIncrementMessageCount(supabase, user.id);
-    if (!canSendMessage) {
+    const { success, count } = await checkAndIncrementMessageCount(supabase, user.id);
+    if (!success) {
       return new Response(
         JSON.stringify({
-          error: 'Daily message limit reached',
-          message: 'You have reached your daily limit of 10 messages. Upgrade to Premium for unlimited messages!'
+          error: 'Monthly limit reached',
+          message: `You've reached your monthly limit of ${FREE_MONTHLY_MESSAGE_LIMIT} messages. You've sent ${count} messages this month. Upgrade to Premium for unlimited messages!`
         }),
         { 
           status: 429,

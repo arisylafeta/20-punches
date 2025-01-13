@@ -30,7 +30,7 @@ const ChartSkeleton = () => (
 
 const PortfolioOverviewSkeleton = () => (
   <div className="w-full bg-background">
-    <div className="p-4 space-y-6">
+    <div className="space-y-6">
       {/* First row */}
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-1/3">
@@ -149,10 +149,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8 p-4">
+      <div className="w-full space-y-8 p-4">
         <PortfolioOverviewSkeleton />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-3 space-y-4">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="w-full lg:col-span-3 space-y-4">
             <NewsFeedSkeleton />
           </div>
         </div>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
   const tickers = pieData.map(item => item.symbol)
 
   return (
-    <div className="space-y-8 p-4">
+    <div className="w-full space-y-8 p-4">
       <div>
         <h2 className="text-2xl font-semibold mb-4">Portfolio</h2>
         <PortfolioOverviewComponent 
