@@ -3,7 +3,6 @@ import { TradeFormValues } from '@/utils/types'
 
 export async function createTrade(trade: TradeFormValues) {
   const supabase = createClient()
-  console.log('Creating trade with values:', trade)
   
   try {
     // Get the current user's ID
@@ -243,6 +242,7 @@ export async function calculatePortfolioHistory(
   const firstTradeDate = new Date(portfolioTimeSeries[0].timestamp)
   effectiveStartDate = new Date(Math.max(firstTradeDate.getTime(), effectiveStartDate.getTime()))
 
+
   // Fetch historical data through the API route
   const response = await fetch('/dashboard/api/yfinance-historical', {
     method: 'POST',
@@ -262,8 +262,38 @@ export async function calculatePortfolioHistory(
 
   const { data: historicalDataBySymbol } = await response.json() as { data: HistoricalDataResponse }
 
-  // Get all unique dates from historical data
+  // Get real-time quotes for today's prices
+  const todayStr = new Date().toISOString().split('T')[0]
+  let latestQuotes: Record<string, number> = {}
+  
+  // Fetch latest quotes if we have any dates from today
+  if (portfolioTimeSeries.some(t => new Date(t.timestamp).toISOString().split('T')[0] === todayStr)) {
+    const quoteResponse = await fetch('/dashboard/api/finnhub-latest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ symbols })
+    })
+    
+    if (quoteResponse.ok) {
+      const { data } = await quoteResponse.json()
+      // Create a map of symbol to current price
+      Object.entries(data).forEach(([symbol, quote]: [string, any]) => {
+        latestQuotes[symbol] = quote.c // current price
+      })
+    }
+  }
+
+  // Get all unique dates from historical data and trades
   const allDates = new Set<string>()
+  
+  // Add dates from trades
+  portfolioTimeSeries.forEach(timepoint => {
+    allDates.add(new Date(timepoint.timestamp).toISOString().split('T')[0])
+  })
+  
+  // Add dates from historical data
   Object.values(historicalDataBySymbol).forEach(symbolData => {
     if (!symbolData?.data) return
     symbolData.data.forEach((d: YFinanceHistoricalData) => {
@@ -275,7 +305,7 @@ export async function calculatePortfolioHistory(
   const sortedDates = Array.from(allDates).sort()
 
   // For each date, calculate portfolio value
-  return sortedDates.map(date => {
+  const result = sortedDates.map(date => {
     const positions: PortfolioValueTimepoint['positions'] = {}
     let totalValue = 0
 
@@ -288,15 +318,22 @@ export async function calculatePortfolioHistory(
 
       // Find price data for this date
       const historicalData = historicalDataBySymbol[symbol]?.data
-      if (!historicalData || historicalData.length === 0) return
+      let currentPrice: number | undefined
 
-      const priceData = historicalData.find((d: YFinanceHistoricalData) => 
-        new Date(d.date).toISOString().split('T')[0] === date
-      )
+      // If it's today, use real-time quote
+      if (date === todayStr && latestQuotes[symbol]) {
+        currentPrice = latestQuotes[symbol]
+      } else if (historicalData?.length > 0) {
+        const priceData = historicalData.find((d: YFinanceHistoricalData) => 
+          new Date(d.date).toISOString().split('T')[0] === date
+        )
+        currentPrice = priceData?.close
+      }
 
-      if (!priceData) return
+      if (!currentPrice) {
+        return
+      }
 
-      const currentPrice = priceData.close
       const value = shares * currentPrice
       const profitLoss = value - (shares * avgPrice)
       const profitLossPct = shares > 0 ? ((currentPrice - avgPrice) / avgPrice) * 100 : 0
@@ -320,6 +357,17 @@ export async function calculatePortfolioHistory(
     }
     return data
   })
+
+  // Log the final output
+  console.log('Portfolio History Output:', {
+    totalDates: sortedDates.length,
+    firstDate: sortedDates[0],
+    lastDate: sortedDates[sortedDates.length - 1],
+    sampleData: result, // Show first 3 days of data
+    totalDataPoints: result.length
+  })
+
+  return result
 }
 
 // Helper function to find shares held at a specific date
@@ -328,13 +376,18 @@ function findSharesAtDate(
   targetDate: string, 
   symbol: string
 ): PortfolioTimepoint | undefined {
-  // Convert all dates to YYYY-MM-DD format for comparison
-  const target = new Date(targetDate)
+  // Convert dates to YYYY-MM-DD format for comparison
+  const targetDateStr = new Date(targetDate).toISOString().split('T')[0]
   
   // Find the last timepoint before or equal to the target date
-  return timeSeries
-    .filter(tp => new Date(tp.timestamp) <= target)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
+  const relevantTimepoints = timeSeries
+    .filter(tp => {
+      const tpDateStr = new Date(tp.timestamp).toISOString().split('T')[0]
+      return tpDateStr <= targetDateStr
+    })
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+
+  return relevantTimepoints[0]
 }
 
 //Get unique trade symbols 
@@ -355,7 +408,6 @@ export async function getUniqueTradeSymbols() {
 }
 
 export async function getPosition(symbol: string): Promise<{ shares: number; value: number; currentPrice: number }> {
-  console.log('getPosition called for symbol:', symbol);
   const supabase = createClient();
   
   // Get the current user's ID
@@ -369,7 +421,6 @@ export async function getPosition(symbol: string): Promise<{ shares: number; val
     throw new Error('Not authenticated');
   }
 
-  console.log('Fetching trades for user:', user.id);
   // Get all trades for this symbol
   const { data: trades, error } = await supabase
     .from('trades')
@@ -382,7 +433,6 @@ export async function getPosition(symbol: string): Promise<{ shares: number; val
     throw error;
   }
   
-  console.log('Trades found:', trades);
   if (!trades) return { shares: 0, value: 0, currentPrice: 0 };
 
   // Calculate net position
@@ -390,11 +440,10 @@ export async function getPosition(symbol: string): Promise<{ shares: number; val
     return total + (trade.type === 'buy' ? trade.shares : -trade.shares);
   }, 0);
 
-  console.log('Calculated net shares:', netShares);
   // If no shares held, return early
   if (netShares === 0) return { shares: 0, value: 0, currentPrice: 0 };
 
-  console.log('Fetching latest price data');
+  // Fetch latest price data
   const response = await fetch('/dashboard/api/finnhub-latest', {
     method: 'POST',
     headers: {
@@ -411,7 +460,6 @@ export async function getPosition(symbol: string): Promise<{ shares: number; val
   }
 
   const { data: results } = await response.json();
-  console.log('Price data received:', JSON.stringify(results, null, 2));
   
   // Get the latest price from the data for this symbol
   const symbolData = results[symbol];
@@ -426,13 +474,11 @@ export async function getPosition(symbol: string): Promise<{ shares: number; val
   }
   
   const latestPrice = symbolData.data.price;
-  console.log('Latest price:', latestPrice);
 
   const position = {
     shares: netShares,
     value: netShares * latestPrice,
     currentPrice: latestPrice
   };
-  console.log('Returning position:', position);
   return position;
 }
