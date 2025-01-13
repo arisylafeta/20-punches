@@ -1,8 +1,6 @@
 import { getUser } from '@/lib/db/users';
 import { createClient } from '@/utils/supabase/server';
 
-export const FREE_MONTHLY_MESSAGE_LIMIT = 2; // Keep in sync with chat route
-
 export async function GET() {
   const supabase = await createClient();
   const user = await getUser(supabase);

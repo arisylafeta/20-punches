@@ -22,7 +22,7 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
 import { useState } from "react"
-import { useMessageCount } from "@/contexts/message-count-context";
+import { useMessageCount, FREE_MONTHLY_MESSAGE_LIMIT } from "@/contexts/message-count-context";
 
 // Menu items.
 const upper_items = [
@@ -73,7 +73,6 @@ export function AppSidebar({ className }: SidebarProps) {
     const router = useRouter()
     const { messageCount } = useMessageCount();
     const [isPremium, setIsPremium] = useState(false);
-    const FREE_MONTHLY_MESSAGE_LIMIT = 30
 
     return (
         <Sidebar variant="inset" className={cn("pb-12", className)}>
