@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import { toast } from "@/hooks/use-toast"
 
 interface PositionControlProps {
   symbol: string
@@ -28,6 +29,69 @@ export function PositionControl({ symbol, className }: PositionControlProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [price, setPrice] = useState<string>("")
   const [shares, setShares] = useState<string>("1")
+
+  // Fetch historical price when date changes
+  useEffect(() => {
+    const fetchHistoricalPrice = async () => {
+      // If selected date is in the future, show warning and use current price
+      const now = new Date()
+      if (selectedDate > now) {
+        console.log('Selected date is in the future, using current price');
+        toast({
+          title: "Invalid Date",
+          description: "Cannot select a future date. Using current price instead.",
+          variant: "destructive",
+        })
+        return;
+      }
+
+      try {
+        // Set the time to noon to avoid timezone issues
+        const dateToFetch = new Date(selectedDate)
+        dateToFetch.setHours(12, 0, 0, 0)
+
+        const response = await fetch('/dashboard/api/yfinance-historical', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            symbols: [symbol],
+            startDate: dateToFetch.toISOString(),
+            endDate: dateToFetch.toISOString(),
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch historical price');
+        }
+
+        const { data } = await response.json();
+        const symbolData = data[symbol];
+        
+        if (symbolData.error) {
+          console.error('Error fetching historical price:', symbolData.error);
+          return;
+        }
+
+        if (symbolData.data && symbolData.data.length > 0) {
+          // Get the first (and should be only) price for that day
+          const historicalPrice = symbolData.data[0].close;
+          if (historicalPrice) {
+            setPrice(historicalPrice.toFixed(2));
+          } else {
+            console.warn('No closing price available for the selected date');
+          }
+        } else {
+          console.warn('No historical price data available for the selected date');
+        }
+      } catch (error) {
+        console.error('Error fetching historical price:', error);
+      }
+    };
+
+    fetchHistoricalPrice();
+  }, [selectedDate, symbol]);
 
   useEffect(() => {
     const loadPosition = async () => {

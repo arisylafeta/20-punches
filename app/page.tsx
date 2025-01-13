@@ -228,7 +228,7 @@ export default function Home() {
               <div className="space-y-2 sm:space-y-4">
                 <Typewriter
                   options={{
-                    strings: ['<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett.', '<span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett.'],
+                    strings: ['<span class="bg-gradient-to-r from-[#BAFF29] via-[#BAFF29] to-[#BAFF29] dark:from-[#BAFF29] dark:via-[#BAFF29] dark:to-[#BAFF29] bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett.', '<span class="bg-gradient-to-r from-[#BAFF29] via-[#BAFF29] to-[#BAFF29] dark:from-[#BAFF29] dark:via-[#BAFF29] dark:to-[#BAFF29] bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett.'],
                     autoStart: true,
                     loop: true,
                   }}
@@ -266,8 +266,8 @@ export default function Home() {
               {features.map((feature, i) => (
                 <Card key={i} className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 hover:shadow-xl transition-all duration-200">
                   <CardHeader>
-                    <div className="p-3 sm:p-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full w-fit mb-4">
-                      <feature.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    <div className="p-3 sm:p-4 bg-[#BAFF29] rounded-full w-fit mb-4">
+                      <feature.icon className="h-5 w-5 sm:h-6 sm:w-6 text-black" />
                     </div>
                     <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
                   </CardHeader>
@@ -292,8 +292,8 @@ export default function Home() {
               <TabsContent value="problem" className="space-y-4 sm:space-y-6">
                 {problemItems.map((item, i) => (
                   <Card key={i} className="flex flex-col sm:flex-row overflow-hidden">
-                    <div className="flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-indigo-500 to-purple-500 sm:w-auto">
-                      <item.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                    <div className="flex items-center justify-center p-4 sm:p-6 bg-[#BAFF29] sm:w-auto">
+                      <item.icon className="h-6 w-6 sm:h-8 sm:w-8 text-black" />
                     </div>
                     <div className="p-4 sm:p-6 flex-1">
                       <CardTitle className="mb-2 text-lg sm:text-xl">{item.title}</CardTitle>
@@ -305,7 +305,7 @@ export default function Home() {
               <TabsContent value="solution" className="space-y-4 sm:space-y-6">
                 {solutionItems.map((item, i) => (
                   <Card key={i} className="flex flex-col sm:flex-row overflow-hidden">
-                    <div className="flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-green-500 to-teal-500 sm:w-auto">
+                    <div className="flex items-center justify-center p-4 sm:p-6 bg-[#34C759] sm:w-auto">
                       <item.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </div>
                     <div className="p-4 sm:p-6 flex-1">
@@ -347,7 +347,7 @@ export default function Home() {
                 <Card key={plan.name} className="relative flex flex-col">
                   {plan.popular && (
                     <div className="absolute -top-3 right-4">
-                      <span className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full">
+                      <span className="px-3 py-1 text-xs font-semibold text-black bg-[#BAFF29] rounded-full">
                         Most popular
                       </span>
                     </div>
@@ -377,7 +377,7 @@ export default function Home() {
                   </CardContent>
                   <CardFooter>
                     <Button
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      className="w-full bg-[#BAFF29] hover:bg-[#a5e625] text-black"
                       onClick={() => window.location.href = '/login'}
                     >
                       Get started
@@ -399,8 +399,8 @@ export default function Home() {
               {premiumBenefits.map((benefit, i) => (
                 <Card key={i} className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 hover:shadow-xl transition-all duration-200">
                   <CardHeader>
-                    <div className="p-3 sm:p-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full w-fit mb-4">
-                      <span className="text-2xl sm:text-3xl font-bold text-white">{benefit.stat}</span>
+                    <div className="p-3 sm:p-4 bg-[#BAFF29] rounded-full w-fit mb-4">
+                      <span className="text-2xl sm:text-3xl font-bold text-black">{benefit.stat}</span>
                     </div>
                     <CardTitle className="text-lg sm:text-xl">{benefit.title}</CardTitle>
                   </CardHeader>
@@ -458,7 +458,7 @@ export default function Home() {
                 Join thousands of confident investors who are building their future with Warren Buffett&apos;s wisdom
               </p>
               <Button
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-6 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-[#BAFF29] hover:bg-[#a5e625] text-black px-8 py-6 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 Get Started Now
               </Button>

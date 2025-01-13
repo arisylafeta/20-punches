@@ -24,6 +24,25 @@ export interface CompanyNews {
   url: string;
 }
 
+export interface Quote {
+  price: number;
+  time: Date;
+}
+
+export interface QuoteResponse {
+  data: Quote | null;
+  error: string | null;
+}
+
+interface FinnhubQuote {
+  c: number;    // Current price
+  h: number;    // High price of the day
+  l: number;    // Low price of the day
+  o: number;    // Open price of the day
+  pc: number;   // Previous close price
+  t: number;    // Timestamp
+}
+
 export async function getMarketNews(): Promise<CompanyNews[]> {
   return new Promise<CompanyNews[]>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
@@ -62,4 +81,32 @@ export async function getCompanyNews(tickers: string, days: number = 30): Promis
 export function paginateNews(newsData: CompanyNews[], page: number, pageSize: number = 5): CompanyNews[] {
   const start = (page - 1) * pageSize
   return Array.isArray(newsData) ? newsData.slice(start, start + pageSize) : []
+}
+
+export async function getQuotes(symbols: string[]): Promise<Record<string, QuoteResponse>> {
+  const results = await Promise.all(
+    symbols.map(async (symbol) => {
+      return new Promise<[string, QuoteResponse]>((resolve) => {
+        finnhubClient.quote(symbol, (error: any, data: FinnhubQuote) => {
+          if (error) {
+            console.error(`Error fetching quote for ${symbol}:`, error)
+            resolve([symbol, {
+              data: null,
+              error: error.message || 'Failed to fetch quote'
+            }])
+          } else {
+            resolve([symbol, {
+              data: {
+                price: data.c,
+                time: new Date(data.t * 1000)
+              },
+              error: null
+            }])
+          }
+        })
+      })
+    })
+  )
+
+  return Object.fromEntries(results)
 }

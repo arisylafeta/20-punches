@@ -244,7 +244,7 @@ export async function calculatePortfolioHistory(
   effectiveStartDate = new Date(Math.max(firstTradeDate.getTime(), effectiveStartDate.getTime()))
 
   // Fetch historical data through the API route
-  const response = await fetch('/dashboard/api/yfinance', {
+  const response = await fetch('/dashboard/api/yfinance-historical', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -394,24 +394,14 @@ export async function getPosition(symbol: string): Promise<{ shares: number; val
   // If no shares held, return early
   if (netShares === 0) return { shares: 0, value: 0, currentPrice: 0 };
 
-  // Get current price using today's date only
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Start of today
-
-  console.log('Fetching price data for dates:', {
-    start: today.toISOString(),
-    end: new Date().toISOString()
-  });
-
-  const response = await fetch('/dashboard/api/yfinance', {
+  console.log('Fetching latest price data');
+  const response = await fetch('/dashboard/api/finnhub-latest', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      symbols: [symbol],
-      startDate: today.toISOString(),
-      endDate: new Date().toISOString(), // Current time
+      symbols: [symbol]
     }),
   });
 
@@ -425,7 +415,7 @@ export async function getPosition(symbol: string): Promise<{ shares: number; val
   
   // Get the latest price from the data for this symbol
   const symbolData = results[symbol];
-  if (!symbolData || !symbolData.data || symbolData.data.length === 0) {
+  if (!symbolData || !symbolData.data) {
     console.error('No price data available for symbol:', symbol);
     throw new Error('No price data available');
   }
@@ -435,7 +425,7 @@ export async function getPosition(symbol: string): Promise<{ shares: number; val
     throw new Error(`Price data error: ${symbolData.error}`);
   }
   
-  const latestPrice = symbolData.data[symbolData.data.length - 1].close;
+  const latestPrice = symbolData.data.price;
   console.log('Latest price:', latestPrice);
 
   const position = {

@@ -52,7 +52,7 @@ export function WarrenQuotesCarousel() {
           <CarouselContent className="-ml-1 sm:-ml-2 md:-ml-4">
             {quotes.map((quote, i) => (
               <CarouselItem key={i} className="pl-1 sm:pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-                <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white h-full">
+                <Card className="bg-[#BAFF29] text-black h-full">
                   <div className="p-3 sm:p-4 md:p-6 h-full">
                     <div className="flex flex-col h-full">
                       <div className="flex-1">
@@ -61,7 +61,7 @@ export function WarrenQuotesCarousel() {
                           <p className="text-sm sm:text-base md:text-lg font-medium italic leading-relaxed">{quote.quote}</p>
                         </div>
                       </div>
-                      <div className="pt-3 sm:pt-4 border-t border-white/20 mt-4">
+                      <div className="pt-3 sm:pt-4 border-t border-black/20 mt-4">
                         <p className="text-xs sm:text-sm font-bold mb-1">Lesson:</p>
                         <p className="text-sm sm:text-base">{quote.lesson}</p>
                       </div>

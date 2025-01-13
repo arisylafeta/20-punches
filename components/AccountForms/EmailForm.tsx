@@ -2,14 +2,48 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { getStatusRedirect } from '@/utils/helpers';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { toast } from "@/hooks/use-toast"
 
 export default function EmailForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile) {
+            setEmail(profile.email || '');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile. Please refresh the page.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,24 +56,22 @@ export default function EmailForm() {
         body: JSON.stringify({ email })
       });
 
-      if (!response.ok) throw Error('Failed to update email');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update email');
+      }
 
-      router.push(
-        getStatusRedirect(
-          '/settings',
-          'Success',
-          'Your email has been updated.'
-        )
-      );
+      toast({
+        title: "Success",
+        description: "Your email has been updated. Please check your inbox for verification.",
+      });
     } catch (error) {
       console.error(error);
-      router.push(
-        getStatusRedirect(
-          '/settings',
-          'Error',
-          'Unable to update email. Please try again later.'
-        )
-      );
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update email",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -49,32 +81,27 @@ export default function EmailForm() {
     <Card>
       <CardHeader>
         <CardTitle>Email</CardTitle>
-        <CardDescription>
-          Change your email address
-        </CardDescription>
+        <CardDescription>Please enter your email address.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter your new email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                required
-              />
-            </div>
+          <div className="grid gap-1">
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting || isLoading}
+              className="w-full p-3 rounded-md border"
+            />
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            disabled={isSubmitting || isLoading}
+          >
             {isSubmitting ? 'Updating...' : 'Update Email'}
           </Button>
         </CardFooter>
