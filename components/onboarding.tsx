@@ -10,7 +10,7 @@ export function Onboarding() {
           Welcome to 20 Punches
         </h1>
         <p className="text-xl text-muted-foreground max-w-[600px] mx-auto leading-relaxed">
-          Your journey to better investing starts here. Add your first trade above or chat with Warren to get started.
+W
         </p>
       </div>
     </div>

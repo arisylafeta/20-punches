@@ -11,24 +11,26 @@ import Image from "next/image"
 import { AuthRedirect } from "@/components/auth-redirect"
 import Typewriter from 'typewriter-effect';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { VideoAsset } from "@/components/ui/video";
+import { GlowBorder } from "@/components/ui/glow-border";
 
-const features = [
-  {
-    title: "Track Your Trades",
-    description: "Keep track of up to 20 positions in your portfolio with real-time data and beautiful charts.",
-    icon: BarChart3
-  },
-  {
-    title: "AI-Powered Insights",
-    description: "Get personalized trading advice from Warren, your AI investment assistant.",
-    icon: MessageSquare
-  },
-  {
-    title: "Focus on Quality",
-    description: "Follow Warren Buffett's principle of concentrated investing with our 20-punch card system.",
-    icon: Target
-  }
-]
+// const features = [
+//   {
+//     title: "Track Your Trades",
+//     description: "Keep track of up to 20 positions in your portfolio with real-time data and beautiful charts.",
+//     icon: BarChart3
+//   },
+//   {
+//     title: "AI-Powered Insights",
+//     description: "Get personalized trading advice from Warren, your AI investment assistant.",
+//     icon: MessageSquare
+//   },
+//   {
+//     title: "Focus on Quality",
+//     description: "Follow Warren Buffett's principle of concentrated investing with our 20-punch card system.",
+//     icon: Target
+//   }
+// ]
 const problemItems = [
   {
     icon: AlertCircle,
@@ -67,7 +69,7 @@ const solutionItems = [
 const pricingPlans = [
   {
     name: "Free",
-    price: "$0",
+    price: "£0",
     interval: "/month",
     description: "Start your investment journey",
     popular: false,
@@ -88,7 +90,7 @@ const pricingPlans = [
   },
   {
     name: "Premium",
-    price: "$4.99",
+    price: "£3.99",
     interval: "/month",
     description: "For confident wealth builders",
     popular: true,
@@ -190,25 +192,16 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <AuthRedirect />
-      {/* Center Logo */}
-      {/* <header className="flex items-center justify-center py-4">
-        <Image
-          src="/favicon.svg"
-          alt="20Punches Logo"
-          width={50}
-          height={50}
-        />
-      </header> */}
+
       <header className="flex sticky top-0 bg-background p-4 items-center px-2 md:px-2 gap-2 border-b border-gray-200 dark:border-white/20 z-50">
         <div className="flex-1 flex items-center gap-2 pl-4">
           <Image
             src="/favicon.svg"
             alt="Logo"
-            width={32}
-            height={32}
-            className="dark:invert opacity-70"
+            width={45}
+            height={45}
+            className=""
           />
-          <p className="text-2xl font-bold">Punches</p>
         </div>
         <div className="flex items-center pr-4">
           <Link href="/login">
@@ -224,7 +217,7 @@ export default function Home() {
       <main className="flex-1">
         <section className="w-full py-12 md:py-16">
           <div className="container px-4 md:px-6 mx-auto">
-            <div className="flex flex-col items-center space-y-4 text-center">
+            <div className="flex flex-col items-center space-y-4 gap-6 text-center">
               <div className="space-y-2 sm:space-y-4">
                 <Typewriter
                   options={{
@@ -244,10 +237,19 @@ export default function Home() {
                   We turn financially anxious millennial investors into confident wealth builders.
                 </p>
               </div>
+                      {/* Demo 1 of Product */}
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+          <GlowBorder>
+            <VideoAsset 
+              fileName="demo-1.mp4"
+              className="w-full rounded-lg shadow-lg bg-background"
+            />
+          </GlowBorder>
+        </div>
               <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
                 <Link href="/login">
-                  <Button className="w-full sm:w-auto gap-2">
-                    Get Started
+                  <Button className="bg-[#BAFF29] text-black w-full sm:w-auto gap-2">
+                    Find Your Punches
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -256,11 +258,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Image of Product */}
-        Demo Here
-
         {/* Features Section */}
-        <section className="w-full py-12 md:py-16">
+        {/* <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
               {features.map((feature, i) => (
@@ -278,7 +277,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Problem and Solution section */}
         <section className="w-full py-12 md:py-16 bg-gray-50 dark:bg-gray-900">
@@ -319,11 +318,28 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Demo 2 of Product */}
+        <section className="container mx-auto px-4 md:px-6 space-y-6 max-w-6xl my-12">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-6 dark:text-white">
+            What We Offer
+          </h2>
+          <GlowBorder>
+            <VideoAsset 
+              fileName="demo-2.mp4"
+              className="w-full rounded-lg shadow-lg bg-background"
+            />
+          </GlowBorder>
+        </section>
+
         {/* How Warren Works */}
         <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 dark:text-white">How Buffet SmartAgent Works</h2>
-            <Image src="/agent-workflow.png" alt="Agent Work" width={1000} height={1000} className="w-full h-auto" />
+            <VideoAsset 
+              fileName="buffetbot.mp4"
+              className="w-full rounded-lg shadow-lg"
+              asGif={true}
+            />
           </div>
         </section>
 
@@ -393,7 +409,7 @@ export default function Home() {
         <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 dark:text-white">
-              Why investors choose premium
+              Why Investors Choose Premium
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
               {premiumBenefits.map((benefit, i) => (
@@ -451,7 +467,7 @@ export default function Home() {
         <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300 bg-clip-text text-transparent">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 dark:text-white">
                 Start Building your wealth today
               </h2>
               <p className="text-md text-gray-600 dark:text-gray-300 mb-8">

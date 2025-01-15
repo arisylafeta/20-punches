@@ -29,9 +29,9 @@ import { getSubscription } from "@/lib/db/users"
 // Menu items.
 const upper_items = [
     {
-        title: "Portfolio",
-        url: "/dashboard",
-        icon: ChartLine,
+        title: "SmartAgent",
+        url: "/chat",
+        icon: BotMessageSquare,
     },
     {
         title: "Punches",
@@ -44,9 +44,9 @@ const upper_items = [
     //     icon: Newspaper,
     // },
     {
-        title: "SmartAgent",
-        url: "/chat",
-        icon: BotMessageSquare,
+        title: "Portfolio",
+        url: "/dashboard",
+        icon: ChartLine,
     },
     // {
     //     title: "Buffet Nuggets",
@@ -94,11 +94,11 @@ export function AppSidebar({ className }: SidebarProps) {
                         <Image 
                             src="/favicon.svg" 
                             alt="Logo" 
-                            width={32} 
-                            height={32} 
-                            className="dark:invert opacity-70" 
+                            width={45} 
+                            height={45} 
+                            className="" 
                         />
-                        <p className="text-2xl font-bold">Punches</p>
+
                     </div>
                     <ModeToggle />
                 </div>
@@ -157,16 +157,16 @@ export function AppSidebar({ className }: SidebarProps) {
                 <SidebarSeparator />
                 {isPremium ? (
                     <div className="px-6 py-2">
-                        <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-amber-100/10 to-amber-200/10 border border-amber-200/20">
+                        <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-[#BAFF29]/10 to-[#BAFF29]/10 border border-[#BAFF29]/20">
                             <svg
-                                className="w-5 h-5 text-amber-400"
+                                className="w-5 h-5 text-[#BAFF29]"
                                 viewBox="0 0 24 24"
                                 fill="currentColor"
                             >
                                 <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                             </svg>
                             <div>
-                                <div className="font-medium text-amber-500">Premium User</div>
+                                <div className="font-medium text-[#BAFF29]">Premium User</div>
                                 <div className="text-xs text-muted-foreground">Unlimited messages</div>
                             </div>
                         </div>
