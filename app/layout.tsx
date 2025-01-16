@@ -5,6 +5,7 @@ import { PortfolioProvider } from '@/contexts/portfolio-context';
 import { ModelProvider } from '@/contexts/model-context';
 import { MessageCountProvider } from "@/contexts/message-count-context";
 import { Metadata } from 'next';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export const metadata: Metadata = {
   title: 'Punches',
@@ -23,6 +24,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID as string} />
       <head />
       <body className="min-h-screen bg-background font-sans antialiased">
         <ThemeProvider

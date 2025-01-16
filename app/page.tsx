@@ -190,7 +190,7 @@ export default function Home() {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen dark">
       <AuthRedirect />
 
       <header className="flex sticky top-0 bg-background p-4 items-center px-2 md:px-2 gap-2 border-b border-gray-200 dark:border-white/20 z-50">
@@ -221,7 +221,7 @@ export default function Home() {
               <div className="space-y-2 sm:space-y-4">
                 <Typewriter
                   options={{
-                    strings: ['<span class="bg-gradient-to-r from-[#BAFF29] via-[#BAFF29] to-[#BAFF29] dark:from-[#BAFF29] dark:via-[#BAFF29] dark:to-[#BAFF29] bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett.', '<span class="bg-gradient-to-r from-[#BAFF29] via-[#BAFF29] to-[#BAFF29] dark:from-[#BAFF29] dark:via-[#BAFF29] dark:to-[#BAFF29] bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett.'],
+                    strings: ['<span class="bg-gradient-to-r from-[#BAFF29] via-[#BAFF29] to-[#BAFF29] dark:from-[#BAFF29] dark:via-[#BAFF29] dark:to-[#BAFF29] bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shine">Think</span> like Warren Buffett', '<span class="bg-gradient-to-r from-[#BAFF29] via-[#BAFF29] to-[#BAFF29] dark:from-[#BAFF29] dark:via-[#BAFF29] dark:to-[#BAFF29] bg-clip-text text-transparent hover:cursor-pointer relative overflow-hidden animate-shin">Invest</span> like Warren Buffett.'],
                     autoStart: true,
                     loop: true,
                   }}
@@ -379,7 +379,7 @@ export default function Home() {
                   <CardContent className="flex-1">
                     {Object.entries(plan.features).map(([category, features]) => (
                       <div key={category} className="mb-6 last:mb-0">
-                        <h3 className="text-lg font-semibold mb-3">{category}</h3>
+                        <h3 className="text-lg font-semibold dark:text-white">{category}</h3>
                         <ul className="space-y-2">
                           {features.map((feature: any) => (
                             <li key={feature} className="flex items-start">
