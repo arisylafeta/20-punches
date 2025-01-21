@@ -7,7 +7,7 @@ import { getChatById, saveChat, updateChatTimestamp } from '@/lib/db/chats';
 import { generateSummaryFromUserMessage } from '../../actions';
 import { createClient } from '@/utils/supabase/server';
 import { ModelId } from '@/utils/models';
-import { checkAndIncrementMessageCount, FREE_MONTHLY_MESSAGE_LIMIT } from '@/contexts/message-count-context';
+import { checkAndIncrementMessageCount, FREE_MONTHLY_MESSAGE_LIMIT } from '@/lib/db/message-count';
 
 export const maxDuration = 60;
 
