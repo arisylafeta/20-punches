@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { FREE_MONTHLY_MESSAGE_LIMIT } from '@/lib/db/message-count';
 
+export { FREE_MONTHLY_MESSAGE_LIMIT };
+
 type MessageCountContextType = {
   messageCount: number | null;
   refreshCount: () => Promise<void>;
