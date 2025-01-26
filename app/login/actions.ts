@@ -5,7 +5,12 @@ import { redirect } from 'next/navigation'
 import { getURL } from '@/utils/helpers'
 import { createClient } from '@/utils/supabase/server'
 
-export async function emailLogin(formData: FormData) {
+type ActionResult = 
+  | { error: string; success?: never }
+  | { error?: never; success: string }
+  | undefined;
+
+export async function emailLogin(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient()
 
   // TODO: add validation with zod
@@ -17,14 +22,14 @@ export async function emailLogin(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    redirect('/login?message=Could not authenticate user')
+    return { error: 'Could not authenticate user' }
   }
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
 }
 
-export async function signup(formData: FormData) {
+export async function signup(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient()
 
   // type-casting here for convenience
@@ -38,29 +43,28 @@ export async function signup(formData: FormData) {
 
   if (error) {
     console.error('Signup error:', error);
-    return redirect(`/login?message=${encodeURIComponent(error.message)}`)
+    return { error: error.message }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/login?message=Check your email for the confirmation link')
+  return { success: 'Check your email for the confirmation link' }
 }
 
-export async function signOut(){
+export async function signOut(): Promise<ActionResult> {
     const supabase = await createClient()
     const { error } = await supabase.auth.signOut()
     
     if (error) {
         console.error('Error signing out:', error)
-        return redirect('/login?message=' + encodeURIComponent(error.message))
+        return { error: error.message }
     }
 
     revalidatePath('/', 'layout')
     return redirect('/login')
 }
 
-export async function oAuthSignIn(provider: Provider) {
+export async function oAuthSignIn(provider: Provider): Promise<ActionResult | Response> {
     if (!provider) {
-        return redirect('/login?message=No provider selected')
+        return { error: 'No provider selected' }
     }
 
     const supabase = await createClient();
@@ -73,7 +77,7 @@ export async function oAuthSignIn(provider: Provider) {
     })
 
     if (error) {
-        redirect('/login?message=Could not authenticate user')
+        return { error: 'Could not authenticate user' }
     }
 
     return redirect(data.url)
