@@ -20,6 +20,7 @@
     "@langchain/langgraph": "^0.2.23",
     "@langchain/langgraph-checkpoint-postgres": "^0.0.2",
     "@langchain/openai": "^0.3.11",
+    "@microsoft/clarity": "^1.0.0",
     "@next/bundle-analyzer": "^13.4.19",
     "@next/third-parties": "^15.1.4",
     "@radix-ui/react-accordion": "^1.2.2",
